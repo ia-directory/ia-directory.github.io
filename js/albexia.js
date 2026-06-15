@@ -1,14 +1,15 @@
 /* ═══════════════════════════════════════════════════════
-   Albexia — Script Unique Global (Firebase + UI Engine)
-   Fusion complète de app.js et albexia.js (Édition Firebase)
-   Usage : <script src="js/albexia.js"></script> sur toutes les pages
+   Albexia — Script Unique Global (Firebase + UI Engine Master)
+   Version Finale Unifiée : Gère Auth, Firestore, Navigation,
+   Outils, Blog, Galerie (avec Lightbox Multimédia complet) et Profil.
+   Usage : <script src="js/albexia.js"></script> sur toutes les pages.
    ═══════════════════════════════════════════════════════ */
 
 (async function () {
   'use strict';
 
   /* ════════════════════════════════════════
-     1. CHARGEMENT ASYNCHRONE DE FIREBASE (CDN)
+     1. CHARGEMENT ASYNCHRONE DE FIREBASE (CDN COMPAT)
   ════════════════════════════════════════ */
   function loadScript(src) {
     return new Promise((resolve, reject) => {
@@ -60,12 +61,10 @@
   const state = {
     user: null,
     favorites: new Set(),
-    // Données brutes
     tools: [],
     blog: [],
     gallery: [],
     toolsMap: {},
-    // Paramètres UI partagés (issus de ton app.js)
     langue: detecterLangue(),
     activeToolCat: 'Tous',
     activeBlogCat: 'Tous',
@@ -76,37 +75,41 @@
     blogPerPage: 6,
     searchQuery: '',
     searchBlogQuery: '',
-    searchGalleryQuery: ''
+    searchGalleryQuery: '',
+    // État Lightbox pour la galerie
+    lightboxFilteredItems: [],
+    lightboxIndex: 0,
+    zoomLevel: 100
   };
 
-  // Identification de l'environnement de la page active
+  // Identification des conteneurs cibles de page
   const IS_PROFILE = document.getElementById('profile-main') !== null;
   const IS_AUTH    = document.getElementById('btn-login')    !== null;
-  const IS_INDEX   = !IS_PROFILE && !IS_AUTH;
+  const IS_INDEX   = document.getElementById('page-tools')   !== null || document.getElementById('tools-grid') !== null;
 
   /* ════════════════════════════════════════
-     4. UTILS & DICTIONNAIRE (TRADUCTION ACCUEIL)
+     4. DICTIONNAIRE DE TRADUCTION UI
   ════════════════════════════════════════ */
   const DICT = {
     fr: {
       searchPlaceholder: "Rechercher une IA...", searchBlog: "Rechercher un article...", searchGallery: "Rechercher une invite...",
       catTous: "Tous", submitBtn: "Soumettre", loading: "Chargement...", noResult: "Aucun résultat trouvé.",
       addFavToast: "❤️ Ajouté aux favoris !", removeFavToast: "Retiré des favoris", loginRequired: "Connectez-vous pour sauvegarder des favoris",
-      visiteTracked: "Visite enregistrée", collectionRequired: "Connectez-vous pour gérer vos collections",
+      collectionRequired: "Connectez-vous pour gérer vos collections",
       emptyFav: "Aucun favori pour l'instant.<br><a href='index.html'>Découvrir des outils →</a>"
     },
     en: {
       searchPlaceholder: "Search an AI...", searchBlog: "Search an article...", searchGallery: "Search a prompt...",
       catTous: "All", submitBtn: "Submit", loading: "Loading...", noResult: "No results found.",
       addFavToast: "❤️ Added to favorites!", removeFavToast: "Removed from favorites", loginRequired: "Log in to save favorites",
-      visiteTracked: "Visit tracked", collectionRequired: "Log in to manage your collections",
+      collectionRequired: "Log in to manage your collections",
       emptyFav: "No favorites yet.<br><a href='index.html'>Discover tools →</a>"
     },
     es: {
       searchPlaceholder: "Buscar una IA...", searchBlog: "Buscar un artículo...", searchGallery: "Buscar un prompt...",
       catTous: "Todos", submitBtn: "Enviar", loading: "Cargando...", noResult: "No se encontraron resultados.",
       addFavToast: "❤️ ¡Añadido a favoritos!", removeFavToast: "Eliminado de favoritos", loginRequired: "Inicie sesión para guardar favoritos",
-      visiteTracked: "Visita registrada", collectionRequired: "Inicie sesión para gestionar colecciones",
+      collectionRequired: "Inicie sesión para gestionar colecciones",
       emptyFav: "Ningún favorito por el momento.<br><a href='index.html'>Descubrir herramientas →</a>"
     }
   };
@@ -129,7 +132,7 @@
   }
 
   /* ════════════════════════════════════════
-     5. CORE ACTIONS FIREBASE (Favoris, Historique, Collections)
+     5. INTERACTION FIRESTORE (Favoris, Historique, Collections)
   ════════════════════════════════════════ */
   window.toggleFavoriteFirebase = async function(toolId, event) {
     if (event) event.stopPropagation();
@@ -161,6 +164,7 @@
     }
 
     updateFavNavCount();
+    // Met à jour l'icône de la carte en temps réel si on est sur la liste des outils
     if (IS_INDEX && typeof window.renderTools === 'function') window.renderTools();
   };
 
@@ -176,10 +180,7 @@
   window.toggleToolInCollection = async function(collectionId, toolId, event) {
     if (event) event.stopPropagation();
     const id = String(toolId);
-    if (!state.user) {
-      showToast(DICT[state.langue].collectionRequired);
-      return;
-    }
+    if (!state.user) { showToast(DICT[state.langue].collectionRequired); return; }
 
     const docRef = db.collection('collections').doc(collectionId);
     try {
@@ -202,11 +203,11 @@
 
   function updateFavNavCount() {
     const badge = document.getElementById('fav-nav-count');
-    if (badge) badge.textContent = state.favorites.size || '';
+    if (badge) badge.textContent = state.favorites.size || '0';
   }
 
   /* ════════════════════════════════════════
-     6. DESIGN COMPOSANT : NAVBAR AVATAR
+     6. DESIGN COMPOSANT : NAVBAR MENU AVATAR
   ════════════════════════════════════════ */
   function initNav(user, profile) {
     const slot = document.querySelector('.nav-profile-slot');
@@ -235,12 +236,17 @@
 
     const btn  = document.getElementById('nav-avatar-btn');
     const menu = document.getElementById('nav-avatar-menu');
-    btn.addEventListener('click', e => { e.stopPropagation(); menu.classList.toggle('open'); });
-    document.addEventListener('click', () => menu.classList.remove('open'));
-    document.getElementById('nav-logout-btn').addEventListener('click', async () => {
-      await auth.signOut();
-      window.location.href = 'index.html';
-    });
+    if (btn && menu) {
+      btn.addEventListener('click', e => { e.stopPropagation(); menu.classList.toggle('open'); });
+      document.addEventListener('click', () => menu.classList.remove('open'));
+    }
+    const logoutBtn = document.getElementById('nav-logout-btn');
+    if (logoutBtn) {
+      logoutBtn.addEventListener('click', async () => {
+        await auth.signOut();
+        window.location.href = 'index.html';
+      });
+    }
   }
 
   async function ensureProfile(user) {
@@ -254,7 +260,7 @@
   }
 
   /* ════════════════════════════════════════
-     7. MODULE DE LANGUE & TRADUCTION UI (Ancien app.js)
+     7. MODULE DE LANGUE & TRADUCTION UI
   ════════════════════════════════════════ */
   window.changerLangue = function(code) {
     if (!LANGUES_SUPPORTEES.includes(code)) return;
@@ -270,7 +276,6 @@
       btn.classList.toggle('active', btn.dataset.lang === code);
     });
 
-    // Mettre à jour les placeholders de recherche d'accueil
     const inputTool = document.getElementById('search-input');
     if (inputTool) inputTool.placeholder = DICT[code].searchPlaceholder;
     const inputBlog = document.getElementById('blog-search-input');
@@ -300,7 +305,7 @@
   }
 
   /* ════════════════════════════════════════
-     8. CHARGEMENT INITIAL DES COMPOSANTS BRUTS JSON
+     8. CHARGEMENT CENTRAL DES SOURCES JSON (Tools, Blog, Galerie)
   ════════════════════════════════════════ */
   async function loadDataAndRender() {
     try {
@@ -314,7 +319,6 @@
       state.blog = resBlog;
       state.gallery = resGallery;
 
-      // Indexation Map rapide
       state.toolsMap = {};
       state.tools.forEach(t => {
         state.toolsMap[String(t.id)] = t;
@@ -328,18 +332,19 @@
         renderGallery();
         checkUrlParams();
       }
-    } catch (e) { console.error("Erreur JSON sources:", e); }
+    } catch (e) { console.error("Erreur chargement des fichiers JSON:", e); }
   }
 
   /* ════════════════════════════════════════
-     9. LOGIQUE ET CONTRÔLEUR DE L'INDEX (Ancien app.js)
+     9. MOTEUR D'AFFICHAGE DE L'INDEX (Outils, Blog, Galerie)
   ════════════════════════════════════════ */
   function buildCategoriesHTML() {
     const build = (items, containerId, activeCat, clickFnName) => {
       const container = document.getElementById(containerId);
       if (!container) return;
       const cats = new Set(items.map(i => i.category).filter(Boolean));
-      let html = `<button class="cat-btn ${activeCat === 'Tous' ? 'active' : ''}" onclick="${clickFnName}('Tous')">${state.langue === 'en' ? 'All' : (state.langue === 'es' ? 'Todos' : 'Tous')}</button>`;
+      const textTous = state.langue === 'en' ? 'All' : (state.langue === 'es' ? 'Todos' : 'Tous');
+      let html = `<button class="cat-btn ${activeCat === 'Tous' ? 'active' : ''}" onclick="${clickFnName}('Tous')">${textTous}</button>`;
       cats.forEach(c => {
         html += `<button class="cat-btn ${activeCat === c ? 'active' : ''}" onclick="${clickFnName}('${c}')">${c}</button>`;
       });
@@ -434,28 +439,35 @@
     const grid = document.getElementById('gallery-grid');
     if (!grid) return;
 
-    let filtered = state.gallery.filter(g => {
+    state.lightboxFilteredItems = state.gallery.filter(g => {
       const matchCat = state.activeGalleryCat === 'Tous' || g.category === state.activeGalleryCat;
       const matchSrc = !state.searchGalleryQuery || g.prompt.toLowerCase().includes(state.searchGalleryQuery) || g.tool.toLowerCase().includes(state.searchGalleryQuery);
       return matchCat && matchSrc;
     });
 
-    if (!filtered.length) {
+    if (!state.lightboxFilteredItems.length) {
       grid.innerHTML = `<p class="no-results">${DICT[state.langue].noResult}</p>`;
       return;
     }
 
-    grid.innerHTML = filtered.map(g => `
-      <div class="gallery-card">
-        <img src="${g.image}" alt="Prompt Art" class="gallery-img" loading="lazy">
-        <div class="gallery-overlay">
-          <p class="gallery-prompt">"${g.prompt}"</p>
-          <div class="gallery-meta">
-            <span class="gallery-tool">🛠️ ${g.tool}</span>
-            <button class="btn-copy-prompt" onclick="navigator.clipboard.writeText(\`${g.prompt.replace(/"/g, '\\"')}\`); showToast('Prompt copié !');">📋</button>
+    grid.innerHTML = state.lightboxFilteredItems.map((g, index) => {
+      let mediaIcon = '🖼️';
+      if (g.type === 'video') mediaIcon = '🎥';
+      if (g.type === 'audio') mediaIcon = '🎵';
+
+      return `
+        <div class="gallery-card" onclick="window.openLightbox(${index})">
+          <img src="${g.type === 'audio' ? (g.art || 'img/audio-placeholder.jpg') : g.image}" alt="Prompt Art" class="gallery-img" loading="lazy">
+          <div class="gallery-overlay">
+            <span class="gallery-media-badge">${mediaIcon}</span>
+            <p class="gallery-prompt">"${g.prompt}"</p>
+            <div class="gallery-meta">
+              <span class="gallery-tool">🛠️ ${g.tool}</span>
+              <button class="btn-copy-prompt" onclick="event.stopPropagation(); navigator.clipboard.writeText(\`${g.prompt.replace(/"/g, '\\"')}\`); showToast('Prompt copié !');">📋</button>
+            </div>
           </div>
-        </div>
-      </div>`).join('');
+        </div>`;
+    }).join('');
   }
 
   function renderPagination(containerId, total, current, changeFnName) {
@@ -474,21 +486,22 @@
   window.changeToolsPage = function(p) { state.toolsPage = p; window.renderTools(); document.getElementById('tools-main-section')?.scrollIntoView({ behavior: 'smooth' }); };
   window.changeBlogPage  = function(p) { state.blogPage = p; renderBlog(); document.getElementById('blog-main-section')?.scrollIntoView({ behavior: 'smooth' }); };
 
-  // Moteur de recherche direct
   function initSearchInputs() {
     document.getElementById('search-input')?.addEventListener('input', function() { state.searchQuery = this.value.toLowerCase().trim(); state.toolsPage = 1; window.renderTools(); });
     document.getElementById('blog-search-input')?.addEventListener('input', function() { state.searchBlogQuery = this.value.toLowerCase().trim(); state.blogPage = 1; renderBlog(); });
     document.getElementById('gallery-search-input')?.addEventListener('input', function() { state.searchGalleryQuery = this.value.toLowerCase().trim(); renderGallery(); });
   }
 
-  // Navigation par Onglets Principaux (app.js)
+  /* ════════════════════════════════════════
+     10. GESTION DES ONGLETS DE NAVIGATION PRINCIPAUX
+  ════════════════════════════════════════ */
   window.showPage = function(pageId) {
     document.querySelectorAll('.main-page-section').forEach(s => s.classList.remove('active'));
     document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
 
     const sect = document.getElementById('page-' + pageId);
     const link = document.querySelector(`.nav-link[data-page="${pageId}"]`);
-    if (sect) sect.add ? sect.add('active') : sect.classList.add('active');
+    if (sect) sect.classList.add('active');
     if (link) link.classList.add('active');
 
     window.location.hash = pageId;
@@ -500,11 +513,138 @@
       l.addEventListener('click', (e) => { e.preventDefault(); window.showPage(l.dataset.page); });
     });
     const hash = window.location.hash.replace('#', '');
-    if (['tools', 'blog', 'gallery'].includes(hash)) window.showPage(hash);
+    if (['tools', 'blog', 'gallery'].includes(hash)) {
+      window.showPage(hash);
+    } else {
+      window.showPage('tools'); // Page par défaut
+    }
   }
 
   /* ════════════════════════════════════════
-     10. POPUP SPOTLIGHT & SOUMISSION D'OUTIL (Ancien app.js)
+     11. VISIONNEUSE (LIGHTBOX) MULTIMÉDIA DE LA GALERIE
+  ════════════════════════════════════════ */
+  window.openLightbox = function(index) {
+    const item = state.lightboxFilteredItems[index];
+    if (!item) return;
+
+    state.lightboxIndex = index;
+    state.zoomLevel = 100;
+
+    const lb = document.getElementById('lightbox');
+    const lbImg = document.getElementById('lb-img');
+    const lbVideo = document.getElementById('lb-video');
+    const lbAudioWrap = document.getElementById('lb-audio-wrap');
+    const lbAudio = document.getElementById('lb-audio');
+    const lbAudioArt = document.getElementById('lb-audio-art');
+    const lbAudioTitle = document.getElementById('lb-audio-title');
+
+    if (!lb) return;
+
+    // Réinitialisation des médias
+    lbImg.style.display = 'none';
+    lbVideo.style.display = 'none';
+    lbAudioWrap.style.display = 'none';
+    lbVideo.pause(); lbVideo.src = '';
+    lbAudio.pause(); lbAudio.src = '';
+
+    // Configuration selon le type de média
+    if (item.type === 'video') {
+      lbVideo.src = item.video;
+      lbVideo.style.display = 'block';
+    } else if (item.type === 'audio') {
+      lbAudio.src = item.audio;
+      if (lbAudioArt) lbAudioArt.style.backgroundImage = `url('${item.art || 'img/audio-placeholder.jpg'}')`;
+      if (lbAudioTitle) lbAudioTitle.textContent = item.prompt;
+      lbAudioWrap.style.display = 'flex';
+    } else {
+      lbImg.src = item.image;
+      lbImg.style.display = 'block';
+      lbImg.style.transform = `scale(1) translate(0px, 0px)`;
+    }
+
+    setEl('lb-title', `"${item.prompt}"`);
+    setEl('lb-tool', `🛠️ Généré avec ${item.tool} (${item.category || ''})`);
+    updateZoomDisplay();
+
+    lb.classList.add('active');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeLightbox = function() {
+    const lb = document.getElementById('lightbox');
+    if (!lb) return;
+    lb.classList.remove('active');
+    document.getElementById('lb-video')?.pause();
+    document.getElementById('lb-audio')?.pause();
+    document.body.style.overflow = '';
+  };
+
+  window.lightboxPrev = function() {
+    if (state.lightboxFilteredItems.length <= 1) return;
+    let idx = state.lightboxIndex - 1;
+    if (idx < 0) idx = state.lightboxFilteredItems.length - 1;
+    window.openLightbox(idx);
+  };
+
+  window.lightboxNext = function() {
+    if (state.lightboxFilteredItems.length <= 1) return;
+    let idx = state.lightboxIndex + 1;
+    if (idx >= state.lightboxFilteredItems.length) idx = 0;
+    window.openLightbox(idx);
+  };
+
+  function updateZoomDisplay() {
+    const el = document.getElementById('lb-zoom-level');
+    if (el) el.textContent = `${state.zoomLevel}%`;
+  }
+
+  window.lightboxZoomIn = function() {
+    if (state.zoomLevel >= 300) return;
+    state.zoomLevel += 25;
+    document.getElementById('lb-img').style.transform = `scale(${state.zoomLevel / 100})`;
+    updateZoomDisplay();
+  };
+
+  window.lightboxZoomOut = function() {
+    if (state.zoomLevel <= 50) return;
+    state.zoomLevel -= 25;
+    document.getElementById('lb-img').style.transform = `scale(${state.zoomLevel / 100})`;
+    updateZoomDisplay();
+  };
+
+  window.lightboxZoomReset = function() {
+    state.zoomLevel = 100;
+    document.getElementById('lb-img').style.transform = `scale(1)`;
+    updateZoomDisplay();
+  };
+
+  function initLightboxEvents() {
+    document.getElementById('lightbox-close')?.addEventListener('click', window.closeLightbox);
+    document.getElementById('lb-prev')?.addEventListener('click', window.lightboxPrev);
+    document.getElementById('lb-next')?.addEventListener('click', window.lightboxNext);
+    document.getElementById('lb-zoom-in')?.addEventListener('click', window.lightboxZoomIn);
+    document.getElementById('lb-zoom-out')?.addEventListener('click', window.lightboxZoomOut);
+    document.getElementById('lb-zoom-reset')?.addEventListener('click', window.lightboxZoomReset);
+
+    // Fermeture en cliquant en dehors du conteneur média
+    document.getElementById('lightbox')?.addEventListener('click', function(e) {
+      if (e.target === this || e.target.id === 'lb-media-wrap') {
+        window.closeLightbox();
+      }
+    });
+
+    // Contrôles au clavier
+    document.addEventListener('keydown', (e) => {
+      const lb = document.getElementById('lightbox');
+      if (!lb || !lb.classList.contains('active')) return;
+      if (e.key === 'Escape') window.closeLightbox();
+      if (e.key === 'ArrowLeft') window.lightboxPrev();
+      if (e.key === 'ArrowRight') window.lightboxNext();
+    });
+  }
+
+  /* ════════════════════════════════════════
+     12. POPUP SPOTLIGHT & FORMULAIRE DE SOUMISSION D'OUTIL
   ════════════════════════════════════════ */
   function checkUrlParams() {
     const params = new URLSearchParams(window.location.search);
@@ -555,7 +695,6 @@
     window.history.replaceState({}, '', url.toString());
   };
 
-  // Soumission d'outils (Sauvegardé directement dans Firestore)
   window.submitToolForm = async function(e) {
     if (e) e.preventDefault();
     const name = document.getElementById('submit-name')?.value.trim();
@@ -579,7 +718,7 @@
   document.getElementById('suggest-tool-form')?.addEventListener('submit', window.submitToolForm);
 
   /* ════════════════════════════════════════
-     11. LOGIQUE ET CONTRÔLEUR DE LA PAGE PROFIL (Ancien albexia.js)
+     13. LOGIQUE ET CONTRÔLEUR DE LA PAGE PROFIL
   ════════════════════════════════════════ */
   async function initProfile(user, profile) {
     const username = profile?.username || user.email?.split('@')[0] || '—';
@@ -591,7 +730,6 @@
     setVal('settings-username',       username);
     setVal('settings-email',          profile?.email || user.email || '');
 
-    /* ── Charger & Render Favoris Profil ── */
     const loadAndRenderFavs = async () => {
       const snap = await db.collection('favorites').where('user_id', '==', user.uid).get();
       const listData = snap.docs.map(d => d.data());
@@ -629,7 +767,6 @@
       loadAndRenderFavs();
     };
 
-    /* ── Charger & Render Collections ── */
     const loadAndRenderCollections = async () => {
       const snap = await db.collection('collections').where('user_id', '==', user.uid).orderBy('created_at', 'desc').get();
       const listData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -666,7 +803,6 @@
       loadAndRenderCollections();
     };
 
-    /* ── Charger & Render Historique ── */
     const loadAndRenderHistory = async () => {
       const snap = await db.collection('history').where('user_id', '==', user.uid).orderBy('visited_at', 'desc').limit(50).get();
       const listData = snap.docs.map(d => d.data());
@@ -693,7 +829,6 @@
       loadAndRenderHistory();
     };
 
-    /* ── Charger & Render Notifications ── */
     const loadAndRenderNotifications = async () => {
       const snap = await db.collection('notifications').where('user_id', '==', user.uid).orderBy('created_at', 'desc').limit(20).get();
       const listData = snap.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -716,7 +851,6 @@
       loadAndRenderNotifications();
     };
 
-    /* ── Paramètres Compte & Paramètres de sécurité ── */
     window.saveSettings = async function() {
       const newUsername = document.getElementById('settings-username')?.value.trim();
       if (!newUsername) return;
@@ -740,7 +874,6 @@
       window.location.href = 'index.html';
     };
 
-    /* ── Contrôleur de l'onglet actif Profil ── */
     window.switchTab = function(tab) {
       document.querySelectorAll('.profile-tab').forEach(t => t.classList.remove('active'));
       document.querySelectorAll('.profile-section').forEach(s => s.classList.remove('active'));
@@ -759,7 +892,6 @@
       tab.addEventListener('click', () => window.switchTab(tab.dataset.tab));
     });
 
-    // Chargement initial des compteurs du tableau de bord
     await Promise.all([loadAndRenderFavs(), loadAndRenderCollections(), loadAndRenderHistory(), loadAndRenderNotifications()]);
 
     const hash = window.location.hash.replace('#', '');
@@ -767,7 +899,7 @@
   }
 
   /* ════════════════════════════════════════
-     12. LOGIQUE ET CONTRÔLEUR DE LA PAGE AUTH (Ancien albexia.js)
+     14. LOGIQUE ET CONTRÔLEUR DE LA PAGE AUTH
   ════════════════════════════════════════ */
   function initAuth(user) {
     if (user) { window.location.href = 'profile.html'; return; }
@@ -800,7 +932,6 @@
       return map[code] || 'Une erreur est survenue. Réessayez.';
     }
 
-    // Gestion des onglets Login / Sign up
     const tabs = document.querySelectorAll('.auth-tab');
     tabs.forEach(tab => {
       tab.addEventListener('click', () => {
@@ -833,7 +964,6 @@
       });
     });
 
-    // Force du mot de passe
     document.getElementById('signup-password')?.addEventListener('input', function () {
       const val = this.value;
       const el  = document.getElementById('pw-strength');
@@ -846,7 +976,6 @@
       el.innerHTML = val ? `<div class="pw-bar"><div class="pw-fill" style="width:${s*25}%;background:${colors[s]}"></div></div><span style="color:${colors[s]}">${labels[s]}</span>` : '';
     });
 
-    // Boutons de requêtes d'authentification
     document.getElementById('btn-login')?.addEventListener('click', async () => {
       const email    = document.getElementById('login-email').value.trim();
       const password = document.getElementById('login-password').value;
@@ -875,7 +1004,7 @@
             username: username, email, createdAt: firebase.firestore.FieldValue.serverTimestamp()
           }, { merge: true });
         }
-        showMessage('Compte créé ! Vous allez être redirigé…', 'success');
+        showMessage('Compte créé ! Redirection…', 'success');
         setTimeout(() => window.location.href = 'profile.html', 1500);
       } catch (err) { showMessage(translateError(err.code)); }
       finally { setLoading(btn, false); }
@@ -898,29 +1027,29 @@
       setLoading(btn, true); hideMessage();
       try {
         await auth.sendPasswordResetEmail(email);
-        showMessage('Email envoyé ! Vérifiez votre boîte.', 'success');
+        showMessage('Email de réinitialisation envoyé !', 'success');
       } catch (err) { showMessage(translateError(err.code)); }
       finally { setLoading(btn, false); }
     });
   }
 
   /* ════════════════════════════════════════
-     13. LIFECYCLE INITIALIZATION PRINCIPALE
+     15. INITIALIZATION GENERALE DU CYCLE DE VIE (Lifecycle)
   ════════════════════════════════════════ */
   initLangButtons();
   if (IS_INDEX) {
     initSearchInputs();
     initNavLinks();
+    initLightboxEvents();
   }
 
-  // Écouteur d'authentification centralisé asynchrone
+  // Écouteur d'authentification réactif centralisé
   auth.onAuthStateChanged(async (user) => {
     state.user = user;
     let profileData = null;
 
     if (user) {
       profileData = await ensureProfile(user);
-      // Récupérer la liste des favoris en tâche de fond pour l'UI
       try {
         const favSnap = await db.collection('favorites').where('user_id', '==', user.uid).get();
         state.favorites = new Set(favSnap.docs.map(d => String(d.data().tool_id)));
@@ -929,20 +1058,24 @@
       state.favorites.clear();
     }
 
-    // Render de l'avatar Header Global
+    // Chargement de l'avatar Header commun
     initNav(user, profileData);
     updateFavNavCount();
 
-    // Lancement asynchrone des données
+    // Téléchargement des JSON et Rendu UI (Outils, Blog, Galerie)
     await loadDataAndRender();
 
-    // Dispatcher les vues par page
+    // Routage vers l'initialisation spécifique de la page Profil ou Auth
     if (IS_PROFILE) {
-      document.getElementById('profile-loading') && (document.getElementById('profile-loading').style.display = 'none');
+      const loadingEl = document.getElementById('profile-loading');
+      if (loadingEl) loadingEl.style.display = 'none';
+      
       if (!user) {
-        document.getElementById('profile-unauth') && (document.getElementById('profile-unauth').style.display = 'flex');
+        const unauthEl = document.getElementById('profile-unauth');
+        if (unauthEl) unauthEl.style.display = 'flex';
       } else {
-        document.getElementById('profile-main') && (document.getElementById('profile-main').style.display = 'flex');
+        const mainEl = document.getElementById('profile-main');
+        if (mainEl) mainEl.style.display = 'flex';
         await initProfile(user, profileData);
       }
     }
