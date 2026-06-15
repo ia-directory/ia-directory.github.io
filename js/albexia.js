@@ -560,9 +560,10 @@
     db.collection('favorites').where('user_id', '==', user.uid).get()
       .then(snap => {
         const ids = snap.docs.map(d => String(d.data().tool_id));
-        if (window._appState) {
-          window._appState.favorites = new Set(ids);
-          if (typeof window._renderTools === 'function') window._renderTools();
+        if (window.state) {
+          window.state.favorites = new Set(ids);
+          if (typeof window.renderTools    === 'function') window.renderTools();
+          if (typeof window.updateFavCount === 'function') window.updateFavCount();
         }
       });
   }
@@ -589,7 +590,7 @@
       const batch = db.batch();
       snap.docs.forEach(d => batch.delete(d.ref));
       await batch.commit();
-      if (window._appState) window._appState.favorites.delete(id);
+      if (window.state) window.state.favorites.delete(id);
       if (typeof window.showToast === 'function') window.showToast('Retiré des favoris');
     } else {
       await db.collection('favorites').add({
@@ -597,12 +598,12 @@
         tool_id: id,
         added_at: firebase.firestore.FieldValue.serverTimestamp()
       });
-      if (window._appState) window._appState.favorites.add(id);
+      if (window.state) window.state.favorites.add(id);
       if (typeof window.showToast === 'function') window.showToast('♥ Ajouté aux favoris !');
     }
 
-    if (typeof window.updateFavCount    === 'function') window.updateFavCount();
-    if (typeof window._renderTools      === 'function') window._renderTools();
+    if (typeof window.updateFavCount === 'function') window.updateFavCount();
+    if (typeof window.renderTools    === 'function') window.renderTools();
   };
 
   /* ════════════════════════════════════════
@@ -649,8 +650,8 @@
   if (IS_INDEX) initIndexFavorites(user);
 
   /* Compatibilité avec app.js (remplace window._sbUser) */
-  window._sbUser   = user;   /* alias pour ne pas casser app.js existant */
-  window._fbUser   = user;
+  window._sbUser = user;
+  window._fbUser = user;
 
   /* Émettre un événement pour app.js */
   window.dispatchEvent(new CustomEvent('albexia:ready', { detail: { user, db } }));

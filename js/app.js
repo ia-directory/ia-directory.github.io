@@ -57,6 +57,9 @@ const state = {
   itemsPerPage: 20,
 };
 
+/* ── Exposition pour albexia.js ── */
+window.state = state;
+
 // ─── COLOR PALETTES ──────────────────────
 const catColors = {
   Texte:        { bg: 'rgba(108,99,255,0.18)'  },
@@ -1153,6 +1156,10 @@ window.closeSpotlight = closeSpotlight;
     });
   }
 })();
+
+/* ── Exposition des fonctions pour albexia.js ── */
+window.renderTools     = renderTools;
+window.updateFavCount  = updateFavCount;
 
 window.onerror = function(msg, src, line) {
   document.body.innerHTML = '<div style="color:red;padding:20px;font-size:14px">' +
