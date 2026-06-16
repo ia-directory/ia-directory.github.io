@@ -840,12 +840,12 @@
 ══════════════════════════════════════════════ -->
 <script type="module">
   import { loginWithGoogle, loginWithEmail, registerWithEmail, logout, watchAuthState }
-    from './auth.js';
+    from './js/auth.js';
   import {
     getCollections, createCollection, renameCollection, deleteCollection,
     getQuizHistory, deleteQuizSession,
     getUserProfile, updateDisplayName, updateLangue, updateNewsletter
-  } from './firestore.js';
+  } from './js/firestore.js';
 
   // ─── STATE ────────────────────────────────────
   let currentUser    = null;
