@@ -6,7 +6,7 @@
 import {
   db, doc, setDoc, getDoc, updateDoc,
   collection, addDoc, getDocs, deleteDoc, query, orderBy
-} from 'js/firebase-config.js';
+} from './firebase-config.js';
 
 // ══════════════════════════════════════
 // COLLECTIONS D'OUTILS
@@ -91,7 +91,7 @@ export async function saveQuizSession(uid, answers, results) {
       emoji:    t.emoji    || '🤖',
       favicon:  t.favicon  || '',
       category: t.category || '',
-      price:    tool.price    || 'free',
+      price:    t.price    || 'free',
       url:      t.url      || '',
       page:     t.page     || '',
     })),
