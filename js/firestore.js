@@ -140,3 +140,9 @@ export async function updateNewsletter(uid, newsletterOk) {
   const ref = doc(db, 'users', uid);
   await updateDoc(ref, { newsletterOk });
 }
+
+// Mettre à jour la photo de profil (base64 compressée)
+export async function updatePhotoBase64(uid, photoBase64) {
+  const ref = doc(db, 'users', uid);
+  await updateDoc(ref, { photoBase64 });
+}
