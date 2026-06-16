@@ -1,11 +1,12 @@
 /* ═══════════════════════════════════════
-   AnnuaireIA — app.js
+   Albexia — app.js
    Fonctionnalités : navigation, JSON,
-   favoris (localStorage), soumission d'outil
+   collections Firebase, soumission d'outil
    ═══════════════════════════════════════ */
 
 'use strict';
 
+// LS_KEY favoris supprimé → remplacé par Firebase collections
 const LS_LANG_KEY = 'albexia_langue';
 
 // ─── LANGUE ──────────────────────────────
@@ -50,15 +51,12 @@ const state = {
   activeBlogCat:    'Tous',
   activeGalleryCat: 'Tous',
   searchQuery: '',
-  favorites: new Set(), /* Géré par Firebase via albexia.js */
+  // favorites supprimé → Firebase collections (collections-picker.js)
   toolsPage:   1,
   blogPage:    1,
   galleryPage: 1,
   itemsPerPage: 20,
 };
-
-/* ── Exposition pour albexia.js ── */
-window.state = state;
 
 // ─── COLOR PALETTES ──────────────────────
 const catColors = {
@@ -90,35 +88,10 @@ const galleryColors = {
 };
 
 // ═══════════════════════════════════════
-// FAVORIS — Firebase
+// FAVORIS → SUPPRIMÉ
+// Remplacé par Firebase Collections
+// Voir : collections-picker.js + profil.html
 // ═══════════════════════════════════════
-
-async function loadFavoritesFromSupabase() {
-  /* Alias maintenu pour compatibilité — utilise Firebase via albexia.js */
-  if (!window._fbUser || !window._firebase?.db) return;
-  try {
-    const snap = await window._firebase.db.collection('favorites')
-      .where('user_id', '==', window._fbUser.uid).get();
-    state.favorites = new Set(snap.docs.map(d => String(d.data().tool_id)));
-    updateFavCount();
-    renderTools();
-  } catch (e) { console.warn('loadFavorites:', e); }
-}
-
-async function toggleFavorite(toolId, event) {
-  /* Délègue à toggleFavoriteFirebase défini dans albexia.js */
-  if (typeof window.toggleFavoriteFirebase === 'function') {
-    await window.toggleFavoriteFirebase(toolId, event);
-    updateFavCount();
-    renderTools();
-  }
-}
-
-function updateFavCount() {
-  const count = state.favorites.size;
-  const badge = document.getElementById('nav-fav-count');
-  if (badge) badge.textContent = count > 0 ? count : '';
-}
 
 // ═══════════════════════════════════════
 // TOAST
@@ -233,142 +206,6 @@ async function loadJSON(path) {
   return res.json();
 }
 
-// ═══════════════════════════════════════
-// CLIC CARTE — Historique + Navigation
-// ═══════════════════════════════════════
-
-async function handleCardClick(toolId, page, url, event) {
-  /* Ignore si clic sur bouton ❤️ ou 📁 */
-  if (event.target.closest('.fav-btn') || event.target.closest('.col-btn')) return;
-
-  /* Enregistrer dans l'historique Firebase si connecté */
-  if (typeof window.trackToolVisit === 'function') {
-    window.trackToolVisit(toolId);
-  }
-
-  /* Naviguer */
-  if (page) window.location.href = page;
-  else if (url) window.open(url, '_blank');
-}
-
-window.handleCardClick = handleCardClick;
-
-// ═══════════════════════════════════════
-// COLLECTIONS — Menu depuis les cartes
-// ═══════════════════════════════════════
-
-async function openCollectionMenu(toolId, toolName, event) {
-  event.stopPropagation();
-
-  /* Pas connecté → rediriger vers auth */
-  if (!window._fbUser) {
-    showToast('Connectez-vous pour créer des collections');
-    setTimeout(() => window.location.href = 'auth.html', 1500);
-    return;
-  }
-
-  /* Supprimer menu existant */
-  const old = document.getElementById('col-menu-popup');
-  if (old) { old.remove(); return; }
-
-  /* Charger les collections depuis Firebase */
-  let collections = [];
-  try {
-    if (window._firebase?.db) {
-      const snap = await window._firebase.db.collection('collections')
-        .where('user_id', '==', window._fbUser.uid)
-        .orderBy('created_at', 'desc').get();
-      collections = snap.docs.map(d => ({ id: d.id, ...d.data() }));
-    }
-  } catch {}
-
-  /* Construire le menu */
-  const menu = document.createElement('div');
-  menu.id = 'col-menu-popup';
-  menu.className = 'col-menu-popup';
-
-  const listHTML = collections.length
-    ? collections.map(c => `
-        <button class="col-menu-item" data-col-id="${c.id}" data-tool-id="${toolId}">
-          📁 ${c.name}
-        </button>`).join('')
-    : `<div class="col-menu-empty">Aucune collection</div>`;
-
-  menu.innerHTML = `
-    <div class="col-menu-header">Ajouter "${toolName}"</div>
-    <div class="col-menu-list">${listHTML}</div>
-    <div class="col-menu-divider"></div>
-    <div class="col-menu-new">
-      <input type="text" id="col-menu-input" placeholder="Nouvelle collection…" maxlength="40" />
-      <button id="col-menu-create">+</button>
-    </div>`;
-
-  /* Positionner près du bouton */
-  const btn   = event.currentTarget;
-  const rect  = btn.getBoundingClientRect();
-  menu.style.top  = (rect.bottom + window.scrollY + 6) + 'px';
-  menu.style.left = Math.min(rect.left, window.innerWidth - 220) + 'px';
-
-  document.body.appendChild(menu);
-
-  /* Clic sur une collection existante */
-  menu.querySelectorAll('.col-menu-item').forEach(item => {
-    item.addEventListener('click', async () => {
-      try {
-        const colRef = window._firebase.db.collection('collections').doc(item.dataset.colId);
-        await colRef.update({ tool_ids: firebase.firestore.FieldValue.arrayUnion(item.dataset.toolId) });
-        showToast('✓ Ajouté à la collection');
-      } catch { showToast('Déjà dans cette collection'); }
-      menu.remove();
-    });
-  });
-
-  /* Créer nouvelle collection et ajouter */
-  document.getElementById('col-menu-create').addEventListener('click', async () => {
-    const name = document.getElementById('col-menu-input').value.trim();
-    if (!name) return;
-    try {
-      await window._firebase.db.collection('collections').add({
-        user_id: window._fbUser.uid,
-        name,
-        tool_ids: [String(toolId)],
-        created_at: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      showToast(`✓ Collection "${name}" créée`);
-    } catch { showToast('Erreur création collection'); }
-    menu.remove();
-  });
-
-  /* Entrée clavier */
-  document.getElementById('col-menu-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') document.getElementById('col-menu-create').click();
-  });
-
-  /* Fermer en cliquant ailleurs */
-  setTimeout(() => {
-    document.addEventListener('click', () => menu.remove(), { once: true });
-  }, 50);
-}
-
-window.openCollectionMenu = openCollectionMenu;
-
-// ═══════════════════════════════════════
-// INIT SUPABASE USER
-// ═══════════════════════════════════════
-
-/* Écoute l'événement émis par albexia.js (Firebase) */
-window.addEventListener('albexia:ready', async (e) => {
-  window._fbUser = e.detail.user || null;
-  window._sbUser = window._fbUser;
-  if (window._fbUser) {
-    await loadFavoritesFromSupabase();
-  } else {
-    state.favorites = new Set();
-    updateFavCount();
-    renderTools();
-  }
-});
-
 async function loadAllData() {
   try {
     const [tools, blog, gallery] = await Promise.all([
@@ -382,10 +219,7 @@ async function loadAllData() {
     renderTools();
     renderBlog();
     renderGallery();
-    updateFavCount();
-    checkToolsParam();
-    /* Si l'user est déjà connu au moment du chargement, charger ses favoris */
-    if (window._sbUser) await loadFavoritesFromSupabase();
+    checkToolsParam(); // ← Spotlight notification
   } catch (err) {
     console.error('Erreur chargement données:', err);
     showError('tools-grid',   'Impossible de charger les outils.');
@@ -405,14 +239,13 @@ function filtrerParLangue(items) {
 // ═══════════════════════════════════════
 
 function showPage(pageId) {
-  if (!pageId) return; /* Guard: évite crash si pageId undefined */
   document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
   document.querySelectorAll('.nav-link').forEach(b => b.classList.remove('active'));
   document.getElementById(pageId).classList.add('active');
   const btn = document.querySelector(`.nav-link[data-page="${pageId}"]`);
   if (btn) btn.classList.add('active');
   window.scrollTo({ top: 0, behavior: 'smooth' });
-  if (pageId === 'favorites') { window.location.href = 'profile.html#favorites'; return; }
+  if (pageId === 'profile') window.location.href = 'profil.html';
 }
 
 // ═══════════════════════════════════════
@@ -448,9 +281,8 @@ function showEmpty(containerId, msg = 'Aucun résultat trouvé.') {
 
 function buildToolCard(t) {
   const priceLabel = { free: 'Gratuit', freemium: 'Freemium', paid: 'Payant' };
-  const col   = catColors[t.category] || { bg: 'rgba(255,255,255,0.08)' };
-  const isFav = state.favorites.has(String(t.id));
-  const plan  = t.plan || (t.page ? 'gratuit' : null);
+  const col  = catColors[t.category] || { bg: 'rgba(255,255,255,0.08)' };
+  const plan = t.plan || (t.page ? 'gratuit' : null);
 
   const iconHtml = t.favicon
     ? `<img src="${t.favicon}" alt="${t.name}" class="tool-favicon"
@@ -460,8 +292,8 @@ function buildToolCard(t) {
     : `<span class="tool-ico-fallback">${t.emoji}</span>`;
 
   const cardAction = t.page
-    ? `onclick="handleCardClick('${t.id}','${t.page}',null,event)"`
-    : `onclick="handleCardClick('${t.id}',null,'${t.url}',event)"`;
+    ? `onclick="window.location.href='${t.page}'"`
+    : `onclick="window.open('${t.url}','_blank')"`;
 
   let planBadge = '';
   let cardClass = 'tool-card';
@@ -478,6 +310,10 @@ function buildToolCard(t) {
     planBadge = `<span class="tool-plan-badge tool-plan-badge-gratuit">Guide complet →</span>`;
   }
 
+  // Bouton collection — pris en charge par collections-picker.js si connecté
+  // sinon redirige vers profil.html pour connexion
+  const toolJson = JSON.stringify(t).replace(/'/g, "\'").replace(/"/g, '&quot;');
+
   return `
     <article class="${cardClass}" ${cardAction}>
       <div class="tool-head">
@@ -486,15 +322,14 @@ function buildToolCard(t) {
           <div class="tool-name">${t.name}</div>
           <div class="tool-cat">${t.category}</div>
         </div>
-        <button class="fav-btn ${isFav ? 'active' : ''}"
-          onclick="toggleFavorite('${t.id}', event)"
-          title="${isFav ? 'Retirer des favoris' : 'Ajouter aux favoris'}">♥</button>
+        <button class="fav-btn"
+          onclick="openCollectionPicker(event, ${toolJson})"
+          title="Ajouter à une collection">♡</button>
       </div>
       <p class="tool-desc">${t.description}</p>
       <div class="tool-foot">
         <span class="price-tag price-${t.price}">${priceLabel[t.price]}</span>
         <span class="stars">${renderStars(t.rating)}</span>
-        <button class="col-btn" onclick="openCollectionMenu('${t.id}','${t.name}',event)" title="Ajouter à une collection">📁</button>
       </div>
       ${planBadge}
     </article>`;
@@ -1041,6 +876,11 @@ function showQuizResults() {
   document.getElementById('quiz-body').style.display    = 'none';
   document.getElementById('quiz-results').style.display = 'block';
   document.getElementById('quiz-progress-bar').style.width = '100%';
+
+  // Sauvegarder dans Firebase si l'utilisateur est connecté
+  if (window._firebaseUser && window._saveQuizToFirebase) {
+    window._saveQuizToFirebase(window._firebaseUser.uid, answers, selected);
+  }
 }
 
 function restartQuiz() {
@@ -1147,7 +987,7 @@ window.closeSpotlight = closeSpotlight;
 // ── NAVIGATION DEPUIS LES PAGES SECONDAIRES ──
 (function() {
   const hash = window.location.hash.replace('#', '');
-  const pages = ['tools', 'blog', 'gallery'];
+  const pages = ['tools', 'blog', 'gallery', 'favorites'];
   if (pages.includes(hash)) {
     window.addEventListener('DOMContentLoaded', () => {
       if (typeof showPage === 'function') {
@@ -1157,11 +997,14 @@ window.closeSpotlight = closeSpotlight;
   }
 })();
 
-/* ── Exposition des fonctions pour albexia.js ── */
-window.renderTools     = renderTools;
-window.updateFavCount  = updateFavCount;
-
-window.onerror = function(msg, src, line) {
-  document.body.innerHTML = '<div style="color:red;padding:20px;font-size:14px">' +
-    'ERREUR: ' + msg + '<br>Ligne: ' + line + '</div>';
-};
+// ═══════════════════════════════════════
+// COLLECTION PICKER — fallback
+// Si collections-picker.js n'est pas encore
+// chargé, redirige vers profil.html
+// ═══════════════════════════════════════
+if (typeof window.openCollectionPicker === 'undefined') {
+  window.openCollectionPicker = function(event, tool) {
+    event.stopPropagation();
+    window.location.href = 'profil.html';
+  };
+}
