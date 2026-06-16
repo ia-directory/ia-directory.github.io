@@ -778,6 +778,8 @@
       .prefs-grid { grid-template-columns: 1fr; }
     }
   </style>
+  <!-- Firebase initialisation -->
+  <script type="module" src="js/firebase-config.js"></script>
 </head>
 <body>
 
@@ -1093,8 +1095,18 @@
   };
 
   // ─── AUTH STATE OBSERVER ──────────────────────
+  // Timeout de sécurité — si Firebase met trop de temps
+  const safetyTimer = setTimeout(() => {
+    const loader = document.getElementById('page-loader');
+    if (loader && loader.style.display !== 'none') {
+      loader.style.display = 'none';
+      document.getElementById('auth-wall').style.display = 'flex';
+    }
+  }, 6000);
+
   watchAuthState(async (user) => {
     currentUser = user;
+    clearTimeout(safetyTimer);
 
     // Cacher le loader initial dans tous les cas
     const loader = document.getElementById('page-loader');
