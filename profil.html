@@ -216,6 +216,36 @@
       overflow: hidden;
     }
     .avatar img { width: 100%; height: 100%; object-fit: cover; }
+
+    .avatar-wrapper {
+      position: relative;
+      width: 80px;
+      height: 80px;
+      flex-shrink: 0;
+    }
+    .avatar-wrapper .avatar {
+      width: 80px;
+      height: 80px;
+    }
+    .avatar-camera-btn {
+      position: absolute;
+      bottom: 0;
+      right: 0;
+      width: 26px;
+      height: 26px;
+      background: #fff;
+      border: 2px solid var(--bg);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      cursor: pointer;
+      font-size: .75rem;
+      box-shadow: 0 2px 8px rgba(0,0,0,.4);
+      transition: transform .2s;
+    }
+    .avatar-camera-btn:hover { transform: scale(1.1); }
+    #avatar-file-input { display: none; }
     .profile-info h1 {
       font-size: 1.5rem;
       font-weight: 700;
@@ -629,6 +659,85 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
+    /* ── QUIZ INLINE ─────────────────────────────── */
+    .profile-quiz-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 20px;
+    }
+    .quiz-progress-wrap { margin-bottom: 16px; }
+    .quiz-progress-bar-track {
+      height: 4px;
+      background: var(--surface2);
+      border-radius: 2px;
+      margin-bottom: 8px;
+      overflow: hidden;
+    }
+    .quiz-progress-bar-fill {
+      height: 100%;
+      background: var(--accent);
+      border-radius: 2px;
+      transition: width .3s ease;
+      width: 0%;
+    }
+    .quiz-step-label { font-size: .78rem; color: var(--muted); }
+    .quiz-question {
+      font-size: 1rem;
+      font-weight: 600;
+      margin-bottom: 14px;
+      color: var(--text);
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+    .quiz-option {
+      padding: 11px 16px;
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-size: .875rem;
+      cursor: pointer;
+      text-align: left;
+      font-family: inherit;
+      transition: all .15s;
+    }
+    .quiz-option:hover  { border-color: var(--accent); background: rgba(108,99,255,0.1); }
+    .quiz-option.selected { border-color: var(--accent); background: rgba(108,99,255,0.2); color: #a8a3ff; }
+
+    .pq-result-card {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 14px;
+      background: rgba(108,99,255,0.08);
+      border: 1px solid rgba(108,99,255,0.2);
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      text-decoration: none;
+      color: var(--text);
+      transition: background .2s;
+    }
+    .pq-result-card:hover { background: rgba(108,99,255,0.15); }
+    .pq-result-ico {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      overflow: hidden;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.2rem;
+    }
+    .pq-result-ico img { width: 100%; height: 100%; object-fit: cover; }
+    .pq-result-name { font-weight: 600; font-size: .9rem; }
+    .pq-result-cat  { font-size: .78rem; color: var(--muted); }
+
     /* ── EMPTY STATE ─────────────────────────────── */
     .empty-state {
       text-align: center;
@@ -709,7 +818,11 @@
   <!-- HERO -->
   <div class="profile-hero">
     <div class="profile-hero-inner">
-      <div class="avatar" id="user-avatar">?</div>
+      <div class="avatar-wrapper">
+        <div class="avatar" id="user-avatar">?</div>
+        <button class="avatar-camera-btn" onclick="document.getElementById('avatar-file-input').click()" title="Changer la photo">📷</button>
+        <input type="file" id="avatar-file-input" accept="image/*" onchange="handleAvatarUpload(event)">
+      </div>
       <div class="profile-info">
         <h1 id="user-name">—</h1>
         <div class="email" id="user-email">—</div>
@@ -733,17 +846,47 @@
       </div>
     </section>
 
-    <!-- ── 2. HISTORIQUE QUIZ ───────────────────── -->
-    <section class="section">
+    <!-- ── 2. QUIZ + HISTORIQUE ──────────────────── -->
+    <section class="section" id="section-quiz">
       <div class="section-header">
         <div class="section-title">
-          🧠 Historique quiz
+          🧠 Mon quiz IA
           <span class="section-count" id="quiz-count">0</span>
         </div>
-        <a href="index.html#quiz" class="btn-sm btn-outline" style="text-decoration:none">
-          Refaire le quiz →
-        </a>
+        <button class="btn-sm btn-outline" onclick="openProfileQuiz()">
+          ✨ Nouveau quiz
+        </button>
       </div>
+
+      <!-- QUIZ INLINE -->
+      <div id="profile-quiz-container" style="display:none">
+        <div class="profile-quiz-card">
+          <div class="quiz-progress-wrap">
+            <div class="quiz-progress-bar-track">
+              <div class="quiz-progress-bar-fill" id="pq-progress-bar"></div>
+            </div>
+            <div class="quiz-step-label" id="pq-step-label">Question 1 sur 5</div>
+          </div>
+          <div class="quiz-question" id="pq-question"></div>
+          <div class="quiz-options" id="pq-options"></div>
+          <button class="btn-sm btn-outline" onclick="closeProfileQuiz()" style="margin-top:12px">Annuler</button>
+        </div>
+      </div>
+
+      <!-- RÉSULTATS QUIZ -->
+      <div id="profile-quiz-results" style="display:none">
+        <div class="profile-quiz-card">
+          <div style="font-size:1rem;font-weight:700;margin-bottom:4px">🎯 Tes 3 outils recommandés</div>
+          <div style="font-size:.8rem;color:var(--muted);margin-bottom:16px" id="pq-results-sub"></div>
+          <div id="pq-results-grid" style="display:flex;flex-direction:column;gap:10px"></div>
+          <div style="display:flex;gap:8px;margin-top:16px;flex-wrap:wrap">
+            <button class="btn-sm btn-outline" onclick="restartProfileQuiz()">🔄 Recommencer</button>
+            <button class="btn-primary btn-sm" onclick="closeProfileQuiz()">Fermer</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORIQUE -->
       <div id="quiz-history-container">
         <div class="loader"><div class="spinner"></div> Chargement…</div>
       </div>
@@ -844,7 +987,8 @@
   import {
     getCollections, createCollection, renameCollection, deleteCollection,
     getQuizHistory, deleteQuizSession,
-    getUserProfile, updateDisplayName, updateLangue, updateNewsletter
+    getUserProfile, updateDisplayName, updateLangue, updateNewsletter,
+    updatePhotoBase64
   } from './js/firestore.js';
 
   // ─── STATE ────────────────────────────────────
@@ -930,6 +1074,7 @@
       await loadCollections();
       await loadQuizHistory();
       initPrefs();
+      handleRedirectParam();
     } else {
       document.getElementById('auth-wall').style.display    = 'flex';
       document.getElementById('profile-page').style.display = 'none';
@@ -1142,6 +1287,18 @@
   // PRÉFÉRENCES
   // ══════════════════════════════════════════════
 
+  // ─── GESTION REDIRECT DEPUIS INDEX.HTML ──────
+  function handleRedirectParam() {
+    const params = new URLSearchParams(window.location.search);
+    const hash   = window.location.hash;
+    if (params.get('redirect') === 'quiz' || hash === '#quiz') {
+      // Nettoyer l'URL
+      history.replaceState(null, '', 'profil.html');
+      // Ouvrir le quiz après un court délai
+      setTimeout(() => openProfileQuiz(), 400);
+    }
+  }
+
   function initPrefs() {
     document.getElementById('pref-name').value = userProfile?.displayName || currentUser.displayName || '';
     document.getElementById('pref-langue').value = userProfile?.langue || 'fr';
@@ -1176,6 +1333,151 @@
   // ─── HELPER ───────────────────────────────────
   function escHtml(str) {
     return (str || '').replace(/'/g, "\\'").replace(/"/g, '&quot;');
+  }
+
+  // ══════════════════════════════════════
+  // QUIZ INLINE DANS LE PROFIL
+  // ══════════════════════════════════════
+
+  const PQ_QUESTIONS = [
+    { id:'metier',    question:'Tu es plutôt…',                        options:[{label:'✍️ Rédacteur / Copywriter',value:'redacteur'},{label:'🎨 Designer / Créatif',value:'designer'},{label:'💻 Développeur',value:'developpeur'},{label:'🚀 Entrepreneur / Freelance',value:'entrepreneur'},{label:'🎓 Étudiant',value:'etudiant'},{label:'👤 Autre',value:'autre'}] },
+    { id:'objectif',  question:"Ton objectif principal avec l'IA…",    options:[{label:'⚡ Gagner du temps',value:'temps'},{label:'✏️ Créer du contenu',value:'contenu'},{label:'📚 Apprendre',value:'apprendre'},{label:'💰 Générer des revenus',value:'revenus'},{label:"📋 M'organiser",value:'organiser'}] },
+    { id:'budget',    question:'Ton budget mensuel pour un outil IA…', options:[{label:'🆓 Gratuit uniquement',value:'free'},{label:'💳 Moins de 20$/mois',value:'freemium'},{label:'💎 Plus de 20$/mois',value:'paid'}] },
+    { id:'connexion', question:'Ta connexion internet est…',            options:[{label:'🚀 Rapide et stable',value:'rapide'},{label:'📶 Correcte',value:'moyenne'},{label:'🐢 Lente ou instable',value:'lente'}] },
+    { id:'niveau',    question:'Ton niveau avec les outils IA…',       options:[{label:'🌱 Débutant complet',value:'debutant'},{label:'🌿 Quelques expériences',value:'intermediaire'},{label:'🌳 Utilisateur régulier',value:'avance'}] }
+  ];
+
+  const METIER_CATS = {
+    redacteur:['Texte','Productivité'], designer:['Image','Design','Vidéo'],
+    developpeur:['Code','Productivité'], entrepreneur:['Texte','Productivité','Recherche'],
+    etudiant:['Texte','Recherche','Productivité'], autre:['Texte','Productivité','Image'],
+  };
+  const CATS_LOURDES = ['Vidéo','Image','Musique'];
+  const METIER_LABELS = { redacteur:'✍️ Rédacteur', designer:'🎨 Designer', developpeur:'💻 Développeur', entrepreneur:'🚀 Entrepreneur', etudiant:'🎓 Étudiant', autre:'👤 Autre' };
+  const BUDGET_LABELS    = { free:'🆓 Gratuit', freemium:'💳 <20$/mois', paid:'💎 >20$/mois' };
+  const CONNEXION_LABELS = { rapide:'🚀 Rapide', moyenne:'📶 Correcte', lente:'🐢 Lente' };
+  const NIVEAU_LABELS    = { debutant:'🌱 Débutant', intermediaire:'🌿 Intermédiaire', avance:'🌳 Avancé' };
+
+  let pqState = { step: 0, answers: {}, tools: [] };
+
+  // Charger les outils depuis tools.json
+  async function loadToolsForQuiz() {
+    if (pqState.tools.length) return pqState.tools;
+    try {
+      const res  = await fetch('data/tools.json');
+      pqState.tools = await res.json();
+    } catch { pqState.tools = []; }
+    return pqState.tools;
+  }
+
+  window.openProfileQuiz = async function() {
+    pqState.step    = 0;
+    pqState.answers = {};
+    await loadToolsForQuiz();
+    document.getElementById('profile-quiz-results').style.display   = 'none';
+    document.getElementById('profile-quiz-container').style.display = 'block';
+    document.getElementById('section-quiz').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    renderPQStep();
+  };
+
+  window.closeProfileQuiz = function() {
+    document.getElementById('profile-quiz-container').style.display = 'none';
+    document.getElementById('profile-quiz-results').style.display   = 'none';
+  };
+
+  window.restartProfileQuiz = function() {
+    pqState.step = 0; pqState.answers = {};
+    document.getElementById('profile-quiz-results').style.display   = 'none';
+    document.getElementById('profile-quiz-container').style.display = 'block';
+    renderPQStep();
+  };
+
+  function renderPQStep() {
+    const q     = PQ_QUESTIONS[pqState.step];
+    const total = PQ_QUESTIONS.length;
+    const pct   = (pqState.step / total) * 100;
+    document.getElementById('pq-progress-bar').style.width  = pct + '%';
+    document.getElementById('pq-step-label').textContent    = `Question ${pqState.step + 1} sur ${total}`;
+    document.getElementById('pq-question').textContent      = q.question;
+    document.getElementById('pq-options').innerHTML = q.options.map(o =>
+      `<button class="quiz-option" onclick="selectPQOption('${q.id}','${o.value}')">${o.label}</button>`
+    ).join('');
+  }
+
+  window.selectPQOption = function(qId, value) {
+    pqState.answers[qId] = value;
+    document.querySelectorAll('#pq-options .quiz-option').forEach(btn => {
+      const opt = PQ_QUESTIONS[pqState.step].options.find(o => o.value === value);
+      if (btn.textContent.trim() === opt?.label.trim()) btn.classList.add('selected');
+    });
+    setTimeout(() => {
+      pqState.step++;
+      if (pqState.step < PQ_QUESTIONS.length) renderPQStep();
+      else showPQResults();
+    }, 280);
+  };
+
+  function scoreTool(tool, answers) {
+    let score = 0;
+    const cats = METIER_CATS[answers.metier] || ['Texte'];
+    if (cats[0] === tool.category)         score += 3;
+    else if (cats.includes(tool.category)) score += 1;
+    if (answers.budget === 'free'     && tool.price === 'free') score += 3;
+    if (answers.budget === 'freemium' && tool.price !== 'paid') score += 2;
+    if (answers.budget === 'paid')                               score += 1;
+    if (answers.connexion === 'lente' && CATS_LOURDES.includes(tool.category)) score -= 3;
+    if (answers.niveau === 'debutant' && !tool.page) score += 1;
+    if (answers.niveau === 'avance'   && tool.page)  score += 1;
+    score += (tool.rating || 3) * 0.3;
+    return score;
+  }
+
+  async function showPQResults() {
+    const answers = pqState.answers;
+    const tools   = pqState.tools.filter(t => !t.langue || t.langue === 'fr');
+    const scored  = tools.map(t => ({ tool: t, score: scoreTool(t, answers) }));
+    scored.sort((a, b) => b.score - a.score);
+
+    const selected = [];
+    const usedCats = new Set();
+    for (const item of scored) {
+      if (selected.length >= 3) break;
+      if (!usedCats.has(item.tool.category)) { selected.push(item.tool); usedCats.add(item.tool.category); }
+    }
+    for (const item of scored) {
+      if (selected.length >= 3) break;
+      if (!selected.find(t => t.id === item.tool.id)) selected.push(item.tool);
+    }
+
+    const sub = [METIER_LABELS[answers.metier], BUDGET_LABELS[answers.budget], CONNEXION_LABELS[answers.connexion], NIVEAU_LABELS[answers.niveau]].filter(Boolean).join(' · ');
+    document.getElementById('pq-results-sub').textContent = sub;
+
+    document.getElementById('pq-results-grid').innerHTML = selected.map(t => {
+      const href = t.page || t.url || '#';
+      const ico  = t.favicon
+        ? `<div class="pq-result-ico"><img src="${t.favicon}" alt="${t.name}" onerror="this.parentElement.textContent='${t.emoji||'🤖'}'"></div>`
+        : `<div class="pq-result-ico">${t.emoji || '🤖'}</div>`;
+      const price = { free:'Gratuit', freemium:'Freemium', paid:'Payant' }[t.price] || '';
+      return `
+        <a class="pq-result-card" href="${href}" target="_blank">
+          ${ico}
+          <div style="flex:1">
+            <div class="pq-result-name">${t.name}</div>
+            <div class="pq-result-cat">${t.category} · ${price}</div>
+          </div>
+          <span style="color:var(--muted);font-size:.85rem">→</span>
+        </a>`;
+    }).join('');
+
+    document.getElementById('profile-quiz-container').style.display = 'none';
+    document.getElementById('profile-quiz-results').style.display   = 'block';
+
+    // Sauvegarder dans Firebase
+    try {
+      await saveQuizSession(currentUser.uid, answers, selected);
+      await loadQuizHistory();
+      showToast('✅ Session quiz sauvegardée !');
+    } catch(e) { console.warn('Erreur sauvegarde quiz:', e); }
   }
 
   // ─── CLOSE MODALS ON OVERLAY CLICK ───────────
