@@ -412,10 +412,10 @@ async function initProfile(user, auth, db) {
     if (btn) btn.classList.add('active');
     if (tab) tab.classList.add('active');
 
-    if (tabId === 'favorites')     getFavorites().then(renderFavorites);
-    if (tabId === 'collections')   getCollections().then(renderCollections);
-    if (tabId === 'history')       getHistory().then(renderHistory);
-    if (tabId === 'notifications') getNotifications().then(renderNotifications);
+    if (tabId === "favorites")     getFavorites().then(renderFavorites).catch(e => console.warn(e));
+    if (tabId === "collections")   getCollections().then(renderCollections).catch(e => console.warn(e));
+    if (tabId === "history")       getHistory().then(renderHistory).catch(e => console.warn(e));
+    if (tabId === "notifications") getNotifications().then(renderNotifications).catch(e => console.warn(e));
   };
 
   document.querySelectorAll('.profile-nav-item[data-tab]').forEach(btn => {
@@ -432,24 +432,20 @@ async function initProfile(user, auth, db) {
   });
 
   /* ── Chargement initial du dashboard ── */
-  try {
-    const [favs, cols, hist, notifs] = await Promise.all([
-      getFavorites(), getCollections(), getHistory(), getNotifications()
-    ]);
-    renderFavorites(favs);
-    renderCollections(cols);
-    renderHistory(hist);
-    renderRecentHistory(hist);
-    renderNotifications(notifs);
-  } catch(err) {
-    console.error("Erreur chargement profil:", err.code, err.message);
-    const detail = err.code === "permission-denied"
-      ? "Accès refusé — vérifiez les règles Firestore"
-      : err.code === "failed-precondition"
-      ? "Index Firestore manquant — voir console"
-      : err.message || "Erreur inconnue";
-    showToast("⚠ " + detail);
-  }
+  const safe = fn => fn.catch(e => { console.warn("Firestore:", e.code, e.message); return []; });
+
+  const [favs, cols, hist, notifs] = await Promise.all([
+    safe(getFavorites()),
+    safe(getCollections()),
+    safe(getHistory()),
+    safe(getNotifications()),
+  ]);
+
+  renderFavorites(favs);
+  renderCollections(cols);
+  renderHistory(hist);
+  renderRecentHistory(hist);
+  renderNotifications(notifs);
   }
 
   /* Hash URL → aller directement au bon onglet */
