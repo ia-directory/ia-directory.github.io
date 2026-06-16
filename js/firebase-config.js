@@ -12,16 +12,14 @@ import { getFirestore, doc, setDoc, getDoc, updateDoc,
          collection, addDoc, getDocs, deleteDoc, query, orderBy }
   from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
 
-// ─── REMPLACE CES VALEURS PAR TES CLÉS FIREBASE ───────────────────────────
 const firebaseConfig = {
-  apiKey:            "VOTRE_API_KEY",
-  authDomain:        "VOTRE_PROJECT.firebaseapp.com",
-  projectId:         "VOTRE_PROJECT_ID",
-  storageBucket:     "VOTRE_PROJECT.appspot.com",
-  messagingSenderId: "VOTRE_SENDER_ID",
-  appId:             "VOTRE_APP_ID"
+  apiKey:            "AIzaSyA6B14vp5wz-0em9eboEAXRVhHy7WF_Lvk",
+  authDomain:        "albexia-dc650.firebaseapp.com",
+  projectId:         "albexia-dc650",
+  storageBucket:     "albexia-dc650.firebasestorage.app",
+  messagingSenderId: "805830291200",
+  appId:             "1:805830291200:web:c24122224c1abaf4360de5"
 };
-// ───────────────────────────────────────────────────────────────────────────
 
 const app  = initializeApp(firebaseConfig);
 const auth = getAuth(app);
