@@ -154,10 +154,8 @@
       <button class="lang-btn" data-lang="es" onclick="changerLangue('es')">ES</button>
     </div>
     <div class="nav-profile-slot">
-      <!-- Avatar dynamique injecté par watchAuthState -->
-      <div id="nav-user-slot">
-        <a href="profil.html" id="nav-login-btn" class="nav-link">Connexion</a>
-      </div>
+      <a href="profil.html" id="nav-profile-btn" class="nav-link" style="display:none">👤 Mon profil</a>
+      <a href="profil.html" id="nav-login-btn" class="nav-link">Connexion</a>
     </div>
     <button class="nav-cta" id="open-submit-btn">Soumettre un outil +</button>
 
@@ -475,7 +473,7 @@
         <button class="btn-outline" onclick="showPage('gallery')">Voir la galerie</button>
       </div>
       <div class="hero-quiz-cta">
-        <button class="btn-quiz" onclick="handleQuizCTA()">
+        <button class="btn-quiz" onclick="openQuiz()">
           🎯 Trouver mon outil IA en 30 secondes
         </button>
         <span class="hero-quiz-sub">5 questions · Recommandations personnalisées · Gratuit</span>
@@ -810,56 +808,12 @@
 <script type="module" src="js/collections-picker.js"></script>
 <script type="module">
   import { watchAuthState } from 'js/auth.js';
-
   watchAuthState((user) => {
-    const slot = document.getElementById('nav-user-slot');
-    if (!slot) return;
-
-    if (user) {
-      // Construire l'avatar nav
-      const name  = user.displayName || 'U';
-      const photo = user.photoURL;
-      const initial = name.charAt(0).toUpperCase();
-
-      slot.innerHTML = `
-        <a href="profil.html" id="nav-avatar-btn" title="Mon profil" style="
-          display:inline-flex;align-items:center;gap:8px;
-          text-decoration:none;color:inherit;">
-          <div style="
-            width:34px;height:34px;border-radius:50%;
-            background:var(--accent,#6c63ff);
-            display:flex;align-items:center;justify-content:center;
-            font-weight:700;font-size:.9rem;color:#fff;
-            overflow:hidden;flex-shrink:0;
-            border:2px solid rgba(108,99,255,0.4);">
-            ${photo
-              ? `<img src="${photo}" alt="${initial}"
-                   style="width:100%;height:100%;object-fit:cover"
-                   onerror="this.style.display='none';this.parentElement.textContent='${initial}'">`
-              : initial}
-          </div>
-          <span style="font-size:.85rem;font-weight:500;display:none" class="nav-name-label">
-            ${name.split(' ')[0]}
-          </span>
-        </a>`;
-    } else {
-      slot.innerHTML = `<a href="profil.html" id="nav-login-btn" class="nav-link">Connexion</a>`;
-    }
-
-    // Exposer l'user pour handleQuizCTA
-    window._navUser = user;
+    const profileBtn = document.getElementById('nav-profile-btn');
+    const loginBtn   = document.getElementById('nav-login-btn');
+    if (profileBtn) profileBtn.style.display = user ? 'inline-flex' : 'none';
+    if (loginBtn)   loginBtn.style.display   = user ? 'none' : 'inline-flex';
   });
-
-  // Bouton quiz CTA
-  window.handleQuizCTA = function() {
-    if (window._navUser) {
-      // Connecté → profil avec ancre quiz
-      window.location.href = 'profil.html#quiz';
-    } else {
-      // Non connecté → profil pour se connecter
-      window.location.href = 'profil.html?redirect=quiz';
-    }
-  };
 </script>
   <script>
 function handleFooterNewsletter(e) {
