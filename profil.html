@@ -8,6 +8,8 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/style.css">
+  
   <style>
     /* ── RESET & BASE ─────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -759,9 +761,62 @@
 <body>
 
 <!-- ── NAV ─────────────────────────────────────── -->
-<nav class="nav">
-  <a href="index.html" class="nav-logo">Alb<span>e</span>xia</a>
-  <a href="index.html" class="nav-back">← Retour à l'annuaire</a>
+<<nav>
+   
+   <div class="logo">
+      <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" height="32" aria-label="Albexia">
+  <style>
+    /* Animation de construction pour les polygones */
+    .poly-part {
+      animation: buildIn 1.2s ease-out forwards;
+      opacity: 0;
+    }
+
+    /* Animation d'apparition pour le texte */
+    .logo-text {
+      animation: fadeIn 1s ease-out 0.8s forwards; /* Démarre après 0.8s */
+      opacity: 0;
+    }
+
+    @keyframes buildIn {
+      0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.8);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-5px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Délais spécifiques pour chaque pièce pour un effet "construction" */
+    .part-1 { animation-delay: 0.1s; }
+    .part-2 { animation-delay: 0.3s; }
+    .part-3 { animation-delay: 0.5s; }
+  </style>
+
+  <polygon class="poly-part part-1" points="2,10 14,32 10,32" fill="#ff6b9d"/>
+  
+  <polygon class="poly-part part-2" points="14,2 18,12 10,12" fill="#ff6b9d" opacity="0.6"/>
+  
+  <polygon class="poly-part part-3" points="26,10 14,32 18,32" fill="#ff6b9d"/>
+
+  <text class="logo-text" x="36" y="26" font-family="Georgia, serif" font-size="20" font-weight="700" fill="#f0f0f5" letter-spacing="-0.5">
+  Albe<tspan fill="#ff6b9d">x</tspan>ia
+</text>
+      </svg
+ <a href="index.html" class="nav-back">← Retour à l'annuaire</a>
 </nav>
 
 <!-- ══════════════════════════════════════════════
@@ -983,13 +1038,13 @@
 ══════════════════════════════════════════════ -->
 <script type="module">
   import { loginWithGoogle, loginWithEmail, registerWithEmail, logout, watchAuthState }
-    from './js/auth.js';
+    from 'js/auth.js';
   import {
     getCollections, createCollection, renameCollection, deleteCollection,
     getQuizHistory, deleteQuizSession,
     getUserProfile, updateDisplayName, updateLangue, updateNewsletter,
     updatePhotoBase64
-  } from './js/firestore.js';
+  } from 'js/firestore.js';
 
   // ─── STATE ────────────────────────────────────
   let currentUser    = null;
