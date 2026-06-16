@@ -202,24 +202,28 @@ async function initProfile(user, auth, db) {
   }
 
   async function getCollections() {
-    const snap = await db.collection('collections')
-      .where('user_id', '==', user.uid)
-      .orderBy('created_at', 'desc').get();
+    const snap = await db.collection("collections").where("user_id", "==", user.uid).get();
     return snap.docs.map(d => ({ id: d.id, ...d.data() }));
   }
 
   async function getHistory() {
-    const snap = await db.collection('history')
-      .where('user_id', '==', user.uid)
-      .orderBy('visited_at', 'desc').limit(50).get();
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const snap = await db.collection("history").where("user_id", "==", user.uid).get();
+    const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    return all.sort((a, b) => {
+      const ta = a.visited_at?.toMillis ? a.visited_at.toMillis() : 0;
+      const tb = b.visited_at?.toMillis ? b.visited_at.toMillis() : 0;
+      return tb - ta;
+    }).slice(0, 50);
   }
 
   async function getNotifications() {
-    const snap = await db.collection('notifications')
-      .where('user_id', '==', user.uid)
-      .orderBy('created_at', 'desc').limit(30).get();
-    return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    const snap = await db.collection("notifications").where("user_id", "==", user.uid).get();
+    const all = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+    return all.sort((a, b) => {
+      const ta = a.created_at?.toMillis ? a.created_at.toMillis() : 0;
+      const tb = b.created_at?.toMillis ? b.created_at.toMillis() : 0;
+      return tb - ta;
+    }).slice(0, 30);
   }
 
   /* ── Renderers ── */
@@ -438,8 +442,14 @@ async function initProfile(user, auth, db) {
     renderRecentHistory(hist);
     renderNotifications(notifs);
   } catch(err) {
-    console.error('Erreur chargement profil:', err);
-    showToast('Erreur lors du chargement des données');
+    console.error("Erreur chargement profil:", err.code, err.message);
+    const detail = err.code === "permission-denied"
+      ? "Accès refusé — vérifiez les règles Firestore"
+      : err.code === "failed-precondition"
+      ? "Index Firestore manquant — voir console"
+      : err.message || "Erreur inconnue";
+    showToast("⚠ " + detail);
+  }
   }
 
   /* Hash URL → aller directement au bon onglet */
