@@ -6,7 +6,7 @@
 import {
   db, doc, setDoc, getDoc, updateDoc,
   collection, addDoc, getDocs, deleteDoc, query, orderBy
-} from './firebase-config.js';
+} from 'js/firebase-config.js';
 
 // ══════════════════════════════════════
 // COLLECTIONS D'OUTILS
