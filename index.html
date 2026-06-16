@@ -78,6 +78,9 @@
   <!-- ═══ STYLES ═══ -->
   <link rel="stylesheet" href="css/style.css">
   <link rel="stylesheet" href="css/plans-cards.css">
+
+  <!-- ═══ FIREBASE ═══ -->
+  <script type="module" src="js/firebase-config.js"></script>
 </head>
 <body>
 
@@ -150,7 +153,10 @@
       <button class="lang-btn" data-lang="en" onclick="changerLangue('en')">EN</button>
       <button class="lang-btn" data-lang="es" onclick="changerLangue('es')">ES</button>
     </div>
-    <div class="nav-profile-slot"></div>
+    <div class="nav-profile-slot">
+      <a href="profil.html" id="nav-profile-btn" class="nav-link" style="display:none">👤 Mon profil</a>
+      <a href="profil.html" id="nav-login-btn" class="nav-link">Connexion</a>
+    </div>
     <button class="nav-cta" id="open-submit-btn">Soumettre un outil +</button>
 
 
@@ -798,7 +804,17 @@
 </div>
 
   
-<script src="js/albexia.js"></script>
+
+<script type="module" src="js/collections-picker.js"></script>
+<script type="module">
+  import { watchAuthState } from 'js/auth.js';
+  watchAuthState((user) => {
+    const profileBtn = document.getElementById('nav-profile-btn');
+    const loginBtn   = document.getElementById('nav-login-btn');
+    if (profileBtn) profileBtn.style.display = user ? 'inline-flex' : 'none';
+    if (loginBtn)   loginBtn.style.display   = user ? 'none' : 'inline-flex';
+  });
+</script>
   <script>
 function handleFooterNewsletter(e) {
   e.preventDefault();
