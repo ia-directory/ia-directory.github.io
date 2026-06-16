@@ -8,8 +8,6 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="css/style.css">
-  
   <style>
     /* ── RESET & BASE ─────────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -68,6 +66,29 @@
     .nav-back:hover { color: var(--text); }
 
     /* ── AUTH WALL ───────────────────────────────── */
+    /* Loader initial — masque le flash d'auth */
+    #page-loader {
+      position: fixed;
+      inset: 0;
+      background: var(--bg);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 9999;
+      flex-direction: column;
+      gap: 16px;
+    }
+    #page-loader .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid var(--border);
+      border-top-color: var(--accent);
+    }
+    #page-loader p {
+      color: var(--muted);
+      font-size: .85rem;
+    }
+
     #auth-wall {
       min-height: calc(100vh - 65px);
       display: flex;
@@ -761,67 +782,20 @@
 <body>
 
 <!-- ── NAV ─────────────────────────────────────── -->
-<<nav>
-   
-   <div class="logo">
-      <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" height="32" aria-label="Albexia">
-  <style>
-    /* Animation de construction pour les polygones */
-    .poly-part {
-      animation: buildIn 1.2s ease-out forwards;
-      opacity: 0;
-    }
-
-    /* Animation d'apparition pour le texte */
-    .logo-text {
-      animation: fadeIn 1s ease-out 0.8s forwards; /* Démarre après 0.8s */
-      opacity: 0;
-    }
-
-    @keyframes buildIn {
-      0% {
-        opacity: 0;
-        transform: translateY(10px) scale(0.8);
-      }
-      100% {
-        opacity: 1;
-        transform: translateY(0) scale(1);
-      }
-    }
-
-    @keyframes fadeIn {
-      0% {
-        opacity: 0;
-        transform: translateX(-5px);
-      }
-      100% {
-        opacity: 1;
-        transform: translateX(0);
-      }
-    }
-
-    /* Délais spécifiques pour chaque pièce pour un effet "construction" */
-    .part-1 { animation-delay: 0.1s; }
-    .part-2 { animation-delay: 0.3s; }
-    .part-3 { animation-delay: 0.5s; }
-  </style>
-
-  <polygon class="poly-part part-1" points="2,10 14,32 10,32" fill="#ff6b9d"/>
-  
-  <polygon class="poly-part part-2" points="14,2 18,12 10,12" fill="#ff6b9d" opacity="0.6"/>
-  
-  <polygon class="poly-part part-3" points="26,10 14,32 18,32" fill="#ff6b9d"/>
-
-  <text class="logo-text" x="36" y="26" font-family="Georgia, serif" font-size="20" font-weight="700" fill="#f0f0f5" letter-spacing="-0.5">
-  Albe<tspan fill="#ff6b9d">x</tspan>ia
-</text>
-      </svg
- <a href="index.html" class="nav-back">← Retour à l'annuaire</a>
+<nav class="nav">
+  <a href="index.html" class="nav-logo">Alb<span>e</span>xia</a>
+  <a href="index.html" class="nav-back">← Retour à l'annuaire</a>
 </nav>
 
 <!-- ══════════════════════════════════════════════
      MUR D'AUTHENTIFICATION
 ══════════════════════════════════════════════ -->
+<!-- LOADER INITIAL -->
+<div id="page-loader">
+  <div class="spinner"></div>
+  <p>Chargement…</p>
+</div>
+
 <div id="auth-wall">
   <div class="auth-card">
     <div class="auth-logo">🤖</div>
@@ -1121,6 +1095,11 @@
   // ─── AUTH STATE OBSERVER ──────────────────────
   watchAuthState(async (user) => {
     currentUser = user;
+
+    // Cacher le loader initial dans tous les cas
+    const loader = document.getElementById('page-loader');
+    if (loader) loader.style.display = 'none';
+
     if (user) {
       document.getElementById('auth-wall').style.display    = 'none';
       document.getElementById('profile-page').style.display = 'block';
