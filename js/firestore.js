@@ -91,7 +91,7 @@ export async function saveQuizSession(uid, answers, results) {
       emoji:    t.emoji    || '🤖',
       favicon:  t.favicon  || '',
       category: t.category || '',
-      price:    t.price    || 'free',
+      price:    tool.price    || 'free',
       url:      t.url      || '',
       page:     t.page     || '',
     })),
@@ -141,8 +141,8 @@ export async function updateNewsletter(uid, newsletterOk) {
   await updateDoc(ref, { newsletterOk });
 }
 
-// Mettre à jour la photo de profil (base64 compressée)
-export async function updatePhotoBase64(uid, photoBase64) {
+// Mettre à jour la photo de profil (base64 ou URL)
+export async function updatePhotoURL(uid, photoURL) {
   const ref = doc(db, 'users', uid);
-  await updateDoc(ref, { photoBase64 });
+  await updateDoc(ref, { photoURL });
 }
