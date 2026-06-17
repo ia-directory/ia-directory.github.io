@@ -184,12 +184,12 @@
       <button class="lang-btn" data-lang="es" onclick="changerLangue('es')">ES</button>
     </div>
     <div class="nav-profile-slot">
-  <!-- Avatar connecté -->
+  <!-- Avatar connecté — caché par défaut -->
   <a href="profil.html" id="nav-profile-btn" class="nav-avatar-link" style="display:none" title="Mon profil">
     <div class="nav-avatar" id="nav-avatar">?</div>
   </a>
-  <!-- Bouton connexion -->
-  <a href="profil.html" id="nav-login-btn" class="nav-link" style="display:none">Connexion</a>
+  <!-- Bouton connexion — visible par défaut -->
+  <a href="profil.html" id="nav-login-btn" class="nav-link">Connexion</a>
 </div>
     <button class="nav-cta" id="open-submit-btn">Soumettre un outil +</button>
 
@@ -844,15 +844,16 @@
   import { auth, db, doc, getDoc, onAuthStateChanged }
     from 'js/firebase-config.js';
 
-  function setNavAvatar(photoURL, initial) {
-    const navAvatar  = document.getElementById('nav-avatar');
-    const profileBtn = document.getElementById('nav-profile-btn');
-    const loginBtn   = document.getElementById('nav-login-btn');
-    if (!profileBtn || !loginBtn) return;
+  // ← Masquer "Connexion" immédiatement pendant la vérification Firebase
+  const profileBtn = document.getElementById('nav-profile-btn');
+  const loginBtn   = document.getElementById('nav-login-btn');
+  if (loginBtn) loginBtn.style.display = 'none';
 
+  function setNavAvatar(photoURL, initial) {
+    const navAvatar = document.getElementById('nav-avatar');
+    if (!profileBtn || !loginBtn) return;
     profileBtn.style.display = 'inline-flex';
     loginBtn.style.display   = 'none';
-
     if (!navAvatar) return;
     if (photoURL) {
       const img = document.createElement('img');
@@ -868,8 +869,6 @@
   }
 
   function setNavLoggedOut() {
-    const profileBtn = document.getElementById('nav-profile-btn');
-    const loginBtn   = document.getElementById('nav-login-btn');
     if (!profileBtn || !loginBtn) return;
     profileBtn.style.display = 'none';
     loginBtn.style.display   = 'inline-flex';
@@ -877,23 +876,20 @@
 
   onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // 1. Affichage immédiat avec photo Google OAuth
       const initial = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
       setNavAvatar(user.photoURL || null, initial);
-
-      // 2. Enrichissement avec photo uploadée dans Firestore
       try {
         const snap = await getDoc(doc(db, 'users', user.uid));
         if (snap.exists() && snap.data().photoURL) {
           setNavAvatar(snap.data().photoURL, initial);
         }
-      } catch(e) { /* offline : on garde la photo Google */ }
-
+      } catch(e) {}
     } else {
       setNavLoggedOut();
     }
   });
 </script>
+ 
   <script>
 function handleFooterNewsletter(e) {
   e.preventDefault();
