@@ -875,6 +875,7 @@
   }
 
   onAuthStateChanged(auth, async (user) => {
+    window._firebaseUser = user || null;
     if (user) {
       const initial = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
       setNavAvatar(user.photoURL || null, initial);
