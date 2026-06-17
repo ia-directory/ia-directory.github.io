@@ -758,6 +758,12 @@ const CATS_LOURDES = ['Vidéo', 'Image', 'Musique'];
 const quizState = { step: 0, answers: {} };
 
 function openQuiz() {
+  // Si l'utilisateur n'est pas connecté → rediriger vers profil.html pour connexion puis quiz
+  if (!window._firebaseUser) {
+    window.location.href = 'profil.html?redirect=quiz';
+    return;
+  }
+
   const params = new URLSearchParams(window.location.search);
   const quizParam = params.get('quiz');
   if (quizParam) {
