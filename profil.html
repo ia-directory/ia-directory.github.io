@@ -725,6 +725,161 @@
       .collections-grid { grid-template-columns: 1fr; }
       .prefs-grid { grid-template-columns: 1fr; }
     }
+
+    /* ══ QUIZ MODAL ══════════════════════════════════ */
+    .quiz-modal {
+      max-width: 520px;
+      padding: 0;
+      overflow: hidden;
+    }
+    .quiz-modal .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 20px 24px 16px;
+      border-bottom: 1px solid var(--border);
+    }
+    .quiz-modal .modal-header h3 {
+      margin: 0;
+      font-size: 1.1rem;
+      font-weight: 700;
+    }
+    .modal-close {
+      background: none;
+      border: none;
+      color: var(--text-muted);
+      font-size: 1.2rem;
+      cursor: pointer;
+      padding: 4px 8px;
+      border-radius: 6px;
+      transition: background .15s;
+    }
+    .modal-close:hover { background: rgba(255,255,255,.07); color: var(--text); }
+    .quiz-body, .quiz-results { padding: 24px; }
+    .quiz-progress {
+      height: 4px;
+      background: rgba(255,255,255,.08);
+      border-radius: 2px;
+      margin-bottom: 10px;
+      overflow: hidden;
+    }
+    .quiz-progress-bar {
+      height: 100%;
+      background: var(--purple);
+      border-radius: 2px;
+      transition: width .3s ease;
+      width: 0%;
+    }
+    .quiz-step-label {
+      font-size: .75rem;
+      color: var(--text-muted);
+      margin-bottom: 18px;
+    }
+    .quiz-question {
+      font-size: 1.1rem;
+      font-weight: 600;
+      margin-bottom: 18px;
+      line-height: 1.4;
+    }
+    .quiz-options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .quiz-option {
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      color: var(--text);
+      font-size: .95rem;
+      padding: 12px 16px;
+      text-align: left;
+      cursor: pointer;
+      transition: background .15s, border-color .15s;
+    }
+    .quiz-option:hover { background: rgba(108,99,255,.12); border-color: var(--purple); }
+    .quiz-option.selected { background: rgba(108,99,255,.2); border-color: var(--purple); }
+    .quiz-results-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      margin-bottom: 6px;
+    }
+    .quiz-results-sub {
+      font-size: .8rem;
+      color: var(--text-muted);
+      margin-bottom: 20px;
+    }
+    .quiz-results-grid {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+      margin-bottom: 20px;
+    }
+    .quiz-result-card {
+      background: rgba(255,255,255,.04);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 14px 16px;
+      cursor: pointer;
+      transition: border-color .15s, background .15s;
+    }
+    .quiz-result-card:hover { border-color: var(--purple); background: rgba(108,99,255,.08); }
+    .quiz-result-head {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 8px;
+    }
+    .quiz-result-ico {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.4rem;
+      background: rgba(255,255,255,.06);
+      flex-shrink: 0;
+    }
+    .quiz-result-ico img { width: 100%; height: 100%; object-fit: cover; }
+    .quiz-result-name { font-weight: 600; font-size: .95rem; }
+    .quiz-result-cat  { font-size: .75rem; color: var(--text-muted); }
+    .quiz-result-desc { font-size: .82rem; color: var(--text-muted); margin: 0 0 8px; line-height: 1.4; }
+    .quiz-result-cta  { font-size: .8rem; color: var(--purple); font-weight: 600; }
+    .quiz-results-actions {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    .btn-quiz-share, .btn-quiz-whatsapp {
+      background: rgba(255,255,255,.06);
+      border: 1px solid var(--border);
+      border-radius: 8px;
+      color: var(--text);
+      font-size: .85rem;
+      padding: 8px 14px;
+      cursor: pointer;
+      transition: background .15s;
+    }
+    .btn-quiz-share:hover   { background: rgba(255,255,255,.1); }
+    .btn-quiz-whatsapp:hover{ background: rgba(37,211,102,.15); border-color: #25d366; }
+    .quiz-copy-confirm {
+      margin-top: 10px;
+      font-size: .82rem;
+      color: var(--teal, #00d4aa);
+    }
+    .price-tag {
+      font-size: .72rem;
+      font-weight: 600;
+      padding: 3px 8px;
+      border-radius: 20px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .price-free     { background: rgba(0,212,170,.15); color: #00d4aa; }
+    .price-freemium { background: rgba(108,99,255,.15); color: #6c63ff; }
+    .price-paid     { background: rgba(255,107,157,.15); color: #ff6b9d; }
   </style>
 </head>
 <body>
@@ -831,8 +986,8 @@
           🧠 Historique quiz
           <span class="section-count" id="quiz-count">0</span>
         </div>
-        <a href="index.html#quiz" class="btn-sm btn-outline" style="text-decoration:none">
-          Refaire le quiz →
+        <a href="index.html#quiz" class="btn-sm btn-outline" style="text-decoration:none" onclick="event.preventDefault();openQuizInProfil()">
+          Faire le quiz →
         </a>
       </div>
       <div id="quiz-history-container">
@@ -945,6 +1100,39 @@
   </div>
 </div>
 
+<!-- ══ QUIZ MODAL ═══════════════════════════════ -->
+<div class="modal-overlay" id="quiz-overlay">
+  <div class="modal quiz-modal" role="dialog" aria-modal="true" aria-labelledby="quiz-title">
+
+    <div class="modal-header">
+      <h3 id="quiz-title">🎯 Trouver mon outil IA</h3>
+      <button class="modal-close" onclick="closeQuiz()" aria-label="Fermer">✕</button>
+    </div>
+
+    <div class="quiz-body" id="quiz-body">
+      <div class="quiz-progress">
+        <div class="quiz-progress-bar" id="quiz-progress-bar"></div>
+      </div>
+      <div class="quiz-step-label" id="quiz-step-label">Question 1 sur 5</div>
+      <div class="quiz-question" id="quiz-question"></div>
+      <div class="quiz-options" id="quiz-options"></div>
+    </div>
+
+    <div class="quiz-results" id="quiz-results" style="display:none">
+      <div class="quiz-results-title">🎯 Vos 3 outils recommandés</div>
+      <div class="quiz-results-sub" id="quiz-results-sub"></div>
+      <div class="quiz-results-grid" id="quiz-results-grid"></div>
+      <div class="quiz-results-actions">
+        <button class="btn-sm btn-outline" onclick="restartQuiz()">🔄 Recommencer</button>
+        <button class="btn-quiz-share" onclick="copyQuizLink()">🔗 Copier le lien</button>
+        <button class="btn-quiz-whatsapp" onclick="shareWhatsApp()">💬 WhatsApp</button>
+      </div>
+      <div class="quiz-copy-confirm" id="quiz-copy-confirm" style="display:none">✓ Lien copié !</div>
+    </div>
+
+  </div>
+</div>
+
 <!-- ── TOAST ──────────────────────────────────── -->
 <div id="toast"></div>
 
@@ -957,7 +1145,7 @@
   import {
     getCollections, createCollection, renameCollection, deleteCollection,
     removeToolFromCollection,
-    getQuizHistory, deleteQuizSession,
+    getQuizHistory, deleteQuizSession, saveQuizSession,
     getUserProfile, updateDisplayName, updateLangue, updateNewsletter, updatePhotoURL,
     updateSkipExitModal
   } from './js/firestore.js';
@@ -969,6 +1157,251 @@
   let quizHistory    = [];
   let renameTargetId = null;
   let toastTimer     = null;
+
+  // ══ QUIZ ══════════════════════════════════════
+
+  const QUIZ_QUESTIONS = [
+    {
+      id: 'metier',
+      question: 'Tu es plutôt…',
+      options: [
+        { label: '✍️ Rédacteur / Copywriter',   value: 'redacteur'    },
+        { label: '🎨 Designer / Créatif',        value: 'designer'     },
+        { label: '💻 Développeur',               value: 'developpeur'  },
+        { label: '🚀 Entrepreneur / Freelance',  value: 'entrepreneur' },
+        { label: '🎓 Étudiant',                  value: 'etudiant'     },
+        { label: '👤 Autre',                     value: 'autre'        },
+      ]
+    },
+    {
+      id: 'objectif',
+      question: "Ton objectif principal avec l'IA…",
+      options: [
+        { label: '⚡ Gagner du temps',           value: 'temps'     },
+        { label: '✏️ Créer du contenu',          value: 'contenu'   },
+        { label: '📚 Apprendre',                 value: 'apprendre' },
+        { label: '💰 Générer des revenus',       value: 'revenus'   },
+        { label: "📋 M'organiser",               value: 'organiser' },
+      ]
+    },
+    {
+      id: 'budget',
+      question: 'Ton budget mensuel pour un outil IA…',
+      options: [
+        { label: '🆓 Gratuit uniquement',        value: 'free'     },
+        { label: '💳 Moins de 20$/mois',         value: 'freemium' },
+        { label: '💎 Plus de 20$/mois',          value: 'paid'     },
+      ]
+    },
+    {
+      id: 'connexion',
+      question: 'Ta connexion internet est…',
+      options: [
+        { label: '🚀 Rapide et stable',          value: 'rapide'  },
+        { label: '📶 Correcte',                  value: 'moyenne' },
+        { label: '🐢 Lente ou instable',         value: 'lente'   },
+      ]
+    },
+    {
+      id: 'niveau',
+      question: 'Ton niveau avec les outils IA…',
+      options: [
+        { label: '🌱 Débutant complet',          value: 'debutant'      },
+        { label: '🌿 Quelques expériences',      value: 'intermediaire' },
+        { label: '🌳 Utilisateur régulier',      value: 'avance'        },
+      ]
+    }
+  ];
+
+  const METIER_CATS = {
+    redacteur:    ['Texte', 'Productivité'],
+    designer:     ['Image', 'Design', 'Vidéo'],
+    developpeur:  ['Code', 'Productivité'],
+    entrepreneur: ['Texte', 'Productivité', 'Recherche'],
+    etudiant:     ['Texte', 'Recherche', 'Productivité'],
+    autre:        ['Texte', 'Productivité', 'Image'],
+  };
+
+  const CATS_LOURDES = ['Vidéo', 'Image', 'Musique'];
+
+  const quizState = { step: 0, answers: {} };
+
+  // Charger les tools pour les recommandations (fetch tools.json)
+  let _quizTools = null;
+  async function getQuizTools() {
+    if (_quizTools) return _quizTools;
+    try {
+      const res = await fetch('./tools.json');
+      const data = await res.json();
+      _quizTools = Array.isArray(data) ? data : (data.tools || []);
+    } catch(e) {
+      _quizTools = [];
+    }
+    return _quizTools;
+  }
+
+  window.openQuizInProfil = function() {
+    quizState.step    = 0;
+    quizState.answers = {};
+    document.getElementById('quiz-results').style.display = 'none';
+    document.getElementById('quiz-body').style.display    = 'block';
+    document.getElementById('quiz-overlay').classList.add('open');
+    document.body.style.overflow = 'hidden';
+    renderQuizStep();
+  };
+
+  // Appelée depuis index.html via ?redirect=quiz après connexion
+  function checkQuizRedirect() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('redirect') === 'quiz') {
+      // Nettoyer l'URL
+      history.replaceState({}, '', window.location.pathname);
+      // Lancer le quiz dès que la page profil est affichée
+      window._pendingQuizOpen = true;
+    }
+  }
+  checkQuizRedirect();
+
+  window.closeQuiz = function() {
+    document.getElementById('quiz-overlay').classList.remove('open');
+    document.body.style.overflow = '';
+  };
+
+  function renderQuizStep() {
+    const q     = QUIZ_QUESTIONS[quizState.step];
+    const total = QUIZ_QUESTIONS.length;
+    const pct   = (quizState.step / total) * 100;
+    document.getElementById('quiz-progress-bar').style.width = pct + '%';
+    document.getElementById('quiz-step-label').textContent   = `Question ${quizState.step + 1} sur ${total}`;
+    document.getElementById('quiz-question').textContent     = q.question;
+    document.getElementById('quiz-options').innerHTML = q.options.map(o =>
+      `<button class="quiz-option" onclick="selectQuizOption('${q.id}','${o.value}')">${o.label}</button>`
+    ).join('');
+  }
+
+  window.selectQuizOption = function(questionId, value) {
+    quizState.answers[questionId] = value;
+    document.querySelectorAll('.quiz-option').forEach(btn => {
+      if (btn.textContent.trim() ===
+          QUIZ_QUESTIONS[quizState.step].options.find(o => o.value === value)?.label.trim()) {
+        btn.classList.add('selected');
+      }
+    });
+    setTimeout(async () => {
+      quizState.step++;
+      if (quizState.step < QUIZ_QUESTIONS.length) {
+        renderQuizStep();
+      } else {
+        await showQuizResultsInProfil();
+      }
+    }, 280);
+  };
+
+  function scoreOutil(tool, answers) {
+    let score = 0;
+    const cats = METIER_CATS[answers.metier] || ['Texte'];
+    if (cats[0] === tool.category)         score += 3;
+    else if (cats.includes(tool.category)) score += 1;
+    if (answers.budget === 'free'     && tool.price === 'free') score += 3;
+    if (answers.budget === 'freemium' && tool.price !== 'paid') score += 2;
+    if (answers.budget === 'paid')                               score += 1;
+    if (answers.connexion === 'lente' && CATS_LOURDES.includes(tool.category)) score -= 3;
+    if (answers.niveau === 'debutant' && !tool.page) score += 1;
+    if (answers.niveau === 'avance'   && tool.page)  score += 1;
+    score += (tool.rating || 3) * 0.3;
+    return score;
+  }
+
+  async function showQuizResultsInProfil() {
+    const answers = quizState.answers;
+    const tools   = await getQuizTools();
+    const scored  = tools.map(t => ({ tool: t, score: scoreOutil(t, answers) }));
+    scored.sort((a, b) => b.score - a.score);
+
+    const selected = [];
+    const usedCats = new Set();
+    for (const item of scored) {
+      if (selected.length >= 3) break;
+      if (!usedCats.has(item.tool.category)) {
+        selected.push(item.tool);
+        usedCats.add(item.tool.category);
+      }
+    }
+    for (const item of scored) {
+      if (selected.length >= 3) break;
+      if (!selected.find(t => t.id === item.tool.id)) selected.push(item.tool);
+    }
+
+    const metierLabel = QUIZ_QUESTIONS[0].options.find(o => o.value === answers.metier)?.label || '';
+    document.getElementById('quiz-results-sub').textContent =
+      `Profil : ${metierLabel} · Budget ${answers.budget} · Connexion ${answers.connexion}`;
+
+    const priceLabel = { free: 'Gratuit', freemium: 'Freemium', paid: 'Payant' };
+    document.getElementById('quiz-results-grid').innerHTML = selected.map(t => {
+      const href = t.page ? t.page : t.url;
+      const target = t.page ? '_self' : '_blank';
+      const iconHtml = t.favicon
+        ? `<img src="${t.favicon}" alt="${t.name}" style="width:36px;height:36px;border-radius:8px;" onerror="this.style.display='none'">`
+        : `<span style="font-size:1.4rem">${t.emoji || '🤖'}</span>`;
+      return `
+        <div class="quiz-result-card" onclick="window.open('${href}','${target}')">
+          <div class="quiz-result-head">
+            <div class="quiz-result-ico">${iconHtml}</div>
+            <div style="flex:1">
+              <div class="quiz-result-name">${t.name}</div>
+              <div class="quiz-result-cat">${t.category}</div>
+            </div>
+            <span class="price-tag price-${t.price}">${priceLabel[t.price] || ''}</span>
+          </div>
+          <p class="quiz-result-desc">${t.description}</p>
+          <div class="quiz-result-cta">Voir la fiche →</div>
+        </div>`;
+    }).join('');
+
+    document.getElementById('quiz-body').style.display    = 'none';
+    document.getElementById('quiz-results').style.display = 'block';
+    document.getElementById('quiz-progress-bar').style.width = '100%';
+
+    // Sauvegarder dans Firestore
+    if (currentUser) {
+      try {
+        await saveQuizSession(currentUser.uid, answers, selected);
+        await loadQuizHistory(); // Rafraîchir l'historique affiché
+      } catch(e) {
+        console.warn('Erreur sauvegarde quiz:', e);
+      }
+    }
+  }
+
+  window.restartQuiz = function() {
+    quizState.step    = 0;
+    quizState.answers = {};
+    document.getElementById('quiz-results').style.display = 'none';
+    document.getElementById('quiz-body').style.display    = 'block';
+    document.getElementById('quiz-copy-confirm').style.display = 'none';
+    renderQuizStep();
+  };
+
+  window.copyQuizLink = function() {
+    const a     = quizState.answers;
+    const param = [a.metier, a.objectif, a.budget, a.connexion, a.niveau].join('-');
+    const url   = `${window.location.origin}/index.html?quiz=${param}`;
+    navigator.clipboard.writeText(url).then(() => {
+      const el = document.getElementById('quiz-copy-confirm');
+      el.style.display = 'block';
+      setTimeout(() => { el.style.display = 'none'; }, 2500);
+    });
+  };
+
+  window.shareWhatsApp = function() {
+    const grid = document.getElementById('quiz-results-grid');
+    const noms = [...grid.querySelectorAll('.quiz-result-name')].map(el => '• ' + el.textContent).join('\n');
+    const a    = quizState.answers;
+    const param = [a.metier, a.objectif, a.budget, a.connexion, a.niveau].join('-');
+    const url  = `${window.location.origin}/index.html?quiz=${param}`;
+    const msg  = encodeURIComponent(`J'ai testé le quiz Albexia et voici mes 3 outils IA recommandés :\n${noms}\n\nTeste-le toi aussi → ${url}`);
+    window.open(`https://wa.me/?text=${msg}`, '_blank');
+  };
 
   // ─── TOAST ────────────────────────────────────
   window.showToast = function(msg) {
@@ -1050,6 +1483,11 @@
       await loadCollections();
       await loadQuizHistory();
       initPrefs();
+      // Lancer le quiz si redirigé depuis index.html
+      if (window._pendingQuizOpen) {
+        window._pendingQuizOpen = false;
+        setTimeout(() => window.openQuizInProfil(), 300);
+      }
     } else {
       // Pas connecté → montrer le formulaire de connexion
       document.getElementById('auth-wall').style.display    = 'flex';
@@ -1412,6 +1850,8 @@
         renameTargetId = null;
         // Si c'est le modal exit, réinitialiser l'URL cible
         if (overlay.id === 'modal-exit-tool') _exitTargetUrl = null;
+        // Reset scroll si c'est le quiz
+        if (overlay.id === 'quiz-overlay') document.body.style.overflow = '';
       }
     });
   });
@@ -1419,6 +1859,7 @@
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
       document.querySelectorAll('.modal-overlay').forEach(o => o.classList.remove('open'));
+      document.body.style.overflow = '';
       renameTargetId = null;
     }
   });
