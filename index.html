@@ -841,56 +841,56 @@
 <script src="js/app.js"></script>
 <script type="module" src="js/collections-picker.js"></script>
 <script type="module">
-  import { watchAuthState } from 'js/auth.js';
-  import { db, doc, getDoc } from 'js/firebase-config.js';
+  import { auth, db, doc, getDoc, onAuthStateChanged }
+    from 'js/firebase-config.js';
 
-  function renderNavAvatar(photoURL, initial) {
+  function setNavAvatar(photoURL, initial) {
     const navAvatar  = document.getElementById('nav-avatar');
     const profileBtn = document.getElementById('nav-profile-btn');
     const loginBtn   = document.getElementById('nav-login-btn');
+    if (!profileBtn || !loginBtn) return;
 
     profileBtn.style.display = 'inline-flex';
     loginBtn.style.display   = 'none';
 
     if (!navAvatar) return;
     if (photoURL) {
-      navAvatar.innerHTML = '<img src="' + photoURL + '" alt="Profil" '
-        + 'style="width:100%;height:100%;object-fit:cover;border-radius:50%" '
-        + 'onerror="this.parentElement.textContent='' + initial + ''">';
+      const img = document.createElement('img');
+      img.src   = photoURL;
+      img.alt   = 'Profil';
+      img.style.cssText = 'width:100%;height:100%;object-fit:cover;border-radius:50%';
+      img.onerror = () => { navAvatar.textContent = initial; };
+      navAvatar.innerHTML = '';
+      navAvatar.appendChild(img);
     } else {
       navAvatar.textContent = initial;
     }
   }
 
-  watchAuthState(async (user) => {
+  function setNavLoggedOut() {
     const profileBtn = document.getElementById('nav-profile-btn');
     const loginBtn   = document.getElementById('nav-login-btn');
-    const navAvatar  = document.getElementById('nav-avatar');
-
     if (!profileBtn || !loginBtn) return;
+    profileBtn.style.display = 'none';
+    loginBtn.style.display   = 'inline-flex';
+  }
 
+  onAuthStateChanged(auth, async (user) => {
     if (user) {
-      // Affichage immédiat avec les données Google (pas d'attente Firestore)
-      let photoURL = user.photoURL || null;
-      let initial  = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
-      renderNavAvatar(photoURL, initial);
+      // 1. Affichage immédiat avec photo Google OAuth
+      const initial = (user.displayName || user.email || 'U').charAt(0).toUpperCase();
+      setNavAvatar(user.photoURL || null, initial);
 
-      // Puis enrichissement avec photo uploadée dans Firestore
+      // 2. Enrichissement avec photo uploadée dans Firestore
       try {
         const snap = await getDoc(doc(db, 'users', user.uid));
-        if (snap.exists()) {
-          const data = snap.data();
-          if (data.photoURL) renderNavAvatar(data.photoURL, initial);
-          if (data.displayName) {
-            initial = data.displayName.charAt(0).toUpperCase();
-          }
+        if (snap.exists() && snap.data().photoURL) {
+          setNavAvatar(snap.data().photoURL, initial);
         }
-      } catch(e) { /* silencieux si offline */ }
+      } catch(e) { /* offline : on garde la photo Google */ }
 
     } else {
-      profileBtn.style.display = 'none';
-      loginBtn.style.display   = 'inline-flex';
-      if (navAvatar) navAvatar.textContent = '?';
+      setNavLoggedOut();
     }
   });
 </script>
