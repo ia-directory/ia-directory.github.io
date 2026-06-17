@@ -923,6 +923,28 @@
   </div>
 </div>
 
+<!-- ── MODAL QUITTER ALBEXIA ─────────────────── -->
+<div class="modal-overlay" id="modal-exit-tool">
+  <div class="modal">
+    <h3>🔗 Vous quittez Albexia</h3>
+    <p style="color:#aaa;font-size:.9rem;line-height:1.6;margin:8px 0 20px">
+      Vous allez être redirigé vers le site officiel de
+      <strong id="exit-tool-name" style="color:#f0f0f5"></strong>.<br>
+      Albexia n'est pas responsable du contenu externe.
+    </p>
+    <label style="display:flex;align-items:center;gap:10px;cursor:pointer;
+                  font-size:.875rem;color:#aaa;margin-bottom:24px">
+      <input type="checkbox" id="exit-skip-checkbox"
+             style="width:16px;height:16px;cursor:pointer;accent-color:#6c63ff">
+      Ne plus afficher ce message
+    </label>
+    <div class="modal-actions">
+      <button class="btn-sm btn-outline" onclick="closeExitModal()">Annuler</button>
+      <button class="btn-primary btn-sm" onclick="confirmExit()">Continuer →</button>
+    </div>
+  </div>
+</div>
+
 <!-- ── TOAST ──────────────────────────────────── -->
 <div id="toast"></div>
 
@@ -934,8 +956,10 @@
     from './js/auth.js';
   import {
     getCollections, createCollection, renameCollection, deleteCollection,
+    removeToolFromCollection,
     getQuizHistory, deleteQuizSession,
-    getUserProfile, updateDisplayName, updateLangue, updateNewsletter, updatePhotoURL
+    getUserProfile, updateDisplayName, updateLangue, updateNewsletter, updatePhotoURL,
+    updateSkipExitModal
   } from './js/firestore.js';
 
   // ─── STATE ────────────────────────────────────
@@ -1126,10 +1150,23 @@
           ? `<img src="${t.favicon}" alt="${t.name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
           : '';
         const emoji = `<span style="display:${t.favicon ? 'none' : 'flex'};align-items:center;justify-content:center;width:100%;height:100%">${t.emoji || '🤖'}</span>`;
+        const url   = t.page ? t.page : (t.url || '#');
         return `
-          <div class="tool-item">
-            <div class="tool-item-ico">${ico}${emoji}</div>
-            <div class="tool-item-name">${t.name}</div>
+          <div class="tool-item" style="position:relative;display:flex;align-items:center;gap:4px">
+            <div class="tool-item-body"
+                 onclick="handleToolClick('${url}','${escHtml(t.name)}')"
+                 style="display:flex;align-items:center;gap:8px;flex:1;cursor:pointer;
+                        padding:6px 8px;border-radius:8px;transition:background .15s;min-width:0"
+                 onmouseenter="this.style.background='rgba(255,255,255,0.05)'"
+                 onmouseleave="this.style.background='transparent'">
+              <div class="tool-item-ico">${ico}${emoji}</div>
+              <div class="tool-item-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.name}</div>
+            </div>
+            <button class="btn-icon" title="Retirer de la collection"
+                    onclick="handleRemoveTool('${col.id}','${t.id}')"
+                    style="opacity:.4;transition:opacity .15s;flex-shrink:0;font-size:.75rem"
+                    onmouseenter="this.style.opacity='1'"
+                    onmouseleave="this.style.opacity='.4'">✕</button>
           </div>`;
       }).join('');
 
@@ -1210,6 +1247,50 @@
       loadCollections();
       showToast('Collection supprimée.');
     });
+  };
+
+  // ══════════════════════════════════════════════
+  // RETIRER UN OUTIL D'UNE COLLECTION
+  // ══════════════════════════════════════════════
+
+  window.handleRemoveTool = async function(colId, toolId) {
+    if (!confirm('Retirer cet outil de la collection ?')) return;
+    await removeToolFromCollection(currentUser.uid, colId, toolId);
+    await loadCollections();
+    showToast('Outil retiré de la collection.');
+  };
+
+  // ══════════════════════════════════════════════
+  // MODALE QUITTER ALBEXIA
+  // ══════════════════════════════════════════════
+
+  let _exitTargetUrl = null;
+
+  window.handleToolClick = function(url, name) {
+    if (userProfile?.skipExitModal) {
+      window.open(url, '_blank');
+      return;
+    }
+    _exitTargetUrl = url;
+    document.getElementById('exit-tool-name').textContent = name;
+    document.getElementById('exit-skip-checkbox').checked  = false;
+    document.getElementById('modal-exit-tool').classList.add('open');
+  };
+
+  window.closeExitModal = function() {
+    document.getElementById('modal-exit-tool').classList.remove('open');
+    _exitTargetUrl = null;
+  };
+
+  window.confirmExit = async function() {
+    const skip = document.getElementById('exit-skip-checkbox').checked;
+    if (skip && currentUser) {
+      await updateSkipExitModal(currentUser.uid, true);
+      userProfile.skipExitModal = true;
+    }
+    const url = _exitTargetUrl;
+    closeExitModal();
+    if (url) window.open(url, '_blank');
   };
 
   // ══════════════════════════════════════════════
@@ -1329,6 +1410,8 @@
       if (e.target === overlay) {
         overlay.classList.remove('open');
         renameTargetId = null;
+        // Si c'est le modal exit, réinitialiser l'URL cible
+        if (overlay.id === 'modal-exit-tool') _exitTargetUrl = null;
       }
     });
   });
