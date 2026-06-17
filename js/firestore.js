@@ -146,3 +146,9 @@ export async function updatePhotoURL(uid, photoURL) {
   const ref = doc(db, 'users', uid);
   await updateDoc(ref, { photoURL });
 }
+
+// Mettre à jour la préférence modale de sortie
+export async function updateSkipExitModal(uid, value) {
+  const ref = doc(db, 'users', uid);
+  await updateDoc(ref, { skipExitModal: value });
+}
