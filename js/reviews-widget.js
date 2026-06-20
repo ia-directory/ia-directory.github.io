@@ -13,7 +13,7 @@
    ═══════════════════════════════════════ */
 
 import { auth, onAuthStateChanged }
-  from '../../js/firebase-config.js';
+  from './firebase-config.js';
 
 import {
   getToolSlugFromPath,
@@ -23,7 +23,7 @@ import {
   submitReview,
   deleteUserReview,
   reportReview,
-} from '../../js/reviews.js';
+} from './reviews.js';
 
 // ── Config ───────────────────────────────────
 const TOOL_SLUG = getToolSlugFromPath(window.location.pathname);
