@@ -1208,8 +1208,7 @@
     "rating": 4,
     "url": "https://canva.com",
     "tags": [
-      "design", "visuels", "présentations" ],
-    "page": "tools/featured/canva.html",
+    "design", "visuels", "présentations" ],
     "plan": "featured",
     "langue": "fr",
     "traductions": {
@@ -1224,7 +1223,7 @@
     "note": 4.7,
     "lien_affilie": "https://canva.com",
     "ideal_pour": "Non-designers",
-    "page": "tools/canva-ai.html"
+    "page": "tools/featured/canva.html"
   },
   {
     "id": "19-en",
