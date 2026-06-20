@@ -220,7 +220,6 @@ async function loadAllData() {
     renderBlog();
     renderGallery();
     checkToolsParam(); // ← Spotlight notification
-    renderRatingsOnCards(); // ← Ratings Firestore
   } catch (err) {
     console.error('Erreur chargement données:', err);
     showError('tools-grid',   'Impossible de charger les outils.');
@@ -341,34 +340,6 @@ function buildToolCard(t) {
     </article>`;
 }
 
-// ════════════════════════════════════════
-// RATINGS FIRESTORE — enrichir les cartes
-// Appelé après renderTools()
-// ════════════════════════════════════════
-async function renderRatingsOnCards() {
-  if (typeof window._getRatingSummaries !== 'function') return;
-  try {
-    const cards = document.querySelectorAll('[data-tool-slug]');
-    const visibleSlugs = [...new Set([...cards].map(c => c.dataset.toolSlug))];
-    if (!visibleSlugs.length) return;
-    const summaries = await window._getRatingSummaries(visibleSlugs);
-    cards.forEach(card => {
-      const slug    = card.dataset.toolSlug;
-      const summary = summaries.get(slug);
-      const badge   = card.querySelector('.tool-rating-badge');
-      if (!badge) return;
-      if (!summary || !summary.ratingCount) {
-        badge.innerHTML = ''; // Pas d'avis → rien
-        return;
-      }
-      const avg = summary.ratingAverage.toFixed(1);
-      badge.innerHTML = `<span class="stars-live">⭐ ${avg}</span><span class="review-count"> · ${summary.ratingCount} avis</span>`;
-    });
-  } catch (err) {
-    console.warn('Ratings Firestore non chargés:', err);
-  }
-}
-
 // ═══════════════════════════════════════
 // TOOLS
 // ═══════════════════════════════════════
@@ -403,7 +374,7 @@ function renderTools() {
   document.getElementById('tools-grid').innerHTML = paged.map(t => buildToolCard(t)).join('');
 
   setPaginationEl('tools-grid', buildPaginationHTML(state.toolsPage, totalPages, total, start + 1, shownEnd, 'tools', 'outils'));
-  renderRatingsOnCards(); // ← Ratings Firestore
+  window.dispatchEvent(new CustomEvent('albexia:toolsRendered'));
 }
 
 function buildPaginationHTML(current, totalPages, totalItems, shownStart, shownEnd, section, label) {
