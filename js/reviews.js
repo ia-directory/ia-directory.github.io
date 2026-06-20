@@ -248,3 +248,9 @@ export async function reportReview(reviewId, reporterUid, reason) {
     createdAt: serverTimestamp(),
   });
 }
+
+// ──────────────────────────────────────────
+// EXPOSITION GLOBALE — pour app.js (script classique)
+// ──────────────────────────────────────────
+window._getRatingSummaries = getRatingSummaries;
+window._getRatingSummary   = getRatingSummary;

@@ -220,7 +220,7 @@ async function loadAllData() {
     renderBlog();
     renderGallery();
     checkToolsParam(); // ← Spotlight notification
-    renderRatingsOnCards(); // ← Ratings Firestore sur les cartes
+    renderRatingsOnCards(); // ← Ratings Firestore
   } catch (err) {
     console.error('Erreur chargement données:', err);
     showError('tools-grid',   'Impossible de charger les outils.');
@@ -356,11 +356,13 @@ async function renderRatingsOnCards() {
       const slug    = card.dataset.toolSlug;
       const summary = summaries.get(slug);
       const badge   = card.querySelector('.tool-rating-badge');
-      if (!badge || !summary || !summary.ratingCount) return;
+      if (!badge) return;
+      if (!summary || !summary.ratingCount) {
+        badge.innerHTML = ''; // Pas d'avis → rien
+        return;
+      }
       const avg = summary.ratingAverage.toFixed(1);
-      badge.innerHTML = `
-        <span class="stars-live">⭐ ${avg}</span>
-        <span class="review-count">· ${summary.ratingCount} avis</span>`;
+      badge.innerHTML = `<span class="stars-live">⭐ ${avg}</span><span class="review-count"> · ${summary.ratingCount} avis</span>`;
     });
   } catch (err) {
     console.warn('Ratings Firestore non chargés:', err);
@@ -371,7 +373,7 @@ async function renderRatingsOnCards() {
 // TOOLS
 // ═══════════════════════════════════════
 
-async function renderTools() {
+function renderTools() {
   const toolsLangue = filtrerParLangue(state.tools);
   const cats = ['Tous', ...new Set(toolsLangue.map(t => t.category))];
 
