@@ -691,16 +691,65 @@
 
     /* ── RESPONSIVE ──────────────────────────────── */
     @media (max-width: 768px) {
-      .sidebar { display: none; }
-      .mobile-tabs { display: flex; }
-      .profile-main { padding: 20px 16px 64px; }
-    }
     @media (max-width: 600px) {
       .auth-card { padding: 28px 20px; }
       .collections-grid { grid-template-columns: 1fr; }
       .prefs-grid { grid-template-columns: 1fr; }
     }
 
+
+    /* ── MES AVIS ────────────────────────────────── */
+    .avis-list { display: flex; flex-direction: column; gap: 16px; }
+    .avis-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: border-color .2s;
+    }
+    .avis-card:hover { border-color: rgba(108,99,255,0.35); }
+    .avis-card-head { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+    .avis-tool-ico {
+      width: 40px; height: 40px; border-radius: 10px;
+      background: rgba(108,99,255,0.15);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem; overflow: hidden; flex-shrink: 0;
+    }
+    .avis-tool-ico img { width: 100%; height: 100%; object-fit: cover; }
+    .avis-tool-info { flex: 1; min-width: 0; }
+    .avis-tool-name { font-size: .95rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .avis-tool-link { font-size: .78rem; color: var(--accent); text-decoration: none; display: inline-flex; align-items: center; gap: 3px; margin-top: 2px; opacity: .8; transition: opacity .15s; }
+    .avis-tool-link:hover { opacity: 1; }
+    .avis-stars { color: #f5a623; font-size: 1rem; letter-spacing: 1px; flex-shrink: 0; }
+    .avis-stars .off { color: rgba(255,255,255,0.15); }
+    .avis-comment { font-size: .875rem; color: #c0c0d8; line-height: 1.6; margin-bottom: 14px; font-style: italic; }
+    .avis-no-comment { font-size: .8rem; color: var(--muted); margin-bottom: 14px; font-style: italic; }
+    .avis-card-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+    .avis-date { font-size: .75rem; color: var(--muted); }
+    .avis-actions { display: flex; gap: 8px; }
+    .btn-avis-edit {
+      padding: 6px 14px; background: rgba(108,99,255,0.12);
+      border: 1px solid rgba(108,99,255,0.25); border-radius: var(--radius-sm);
+      color: #a8a3ff; font-size: .8rem; font-weight: 500;
+      cursor: pointer; font-family: inherit; text-decoration: none; transition: opacity .15s;
+    }
+    .btn-avis-edit:hover { opacity: .8; }
+    .btn-avis-delete {
+      padding: 6px 14px; background: rgba(255,71,87,0.08);
+      border: 1px solid rgba(255,71,87,0.2); border-radius: var(--radius-sm);
+      color: #ff6b78; font-size: .8rem; font-weight: 500;
+      cursor: pointer; font-family: inherit; transition: opacity .15s;
+    }
+    .btn-avis-delete:hover { opacity: .8; }
+    .avis-stats {
+      display: flex; gap: 20px; margin-bottom: 24px;
+      padding: 16px 20px; background: var(--surface);
+      border: 1px solid var(--border); border-radius: var(--radius); flex-wrap: wrap;
+    }
+    .avis-stat-item { text-align: center; }
+    .avis-stat-n { font-size: 1.4rem; font-weight: 700; color: var(--text); }
+    .avis-stat-n span { color: #f5a623; }
+    .avis-stat-l { font-size: .75rem; color: var(--muted); margin-top: 2px; }
 
     /* ══ SIDEBAR LAYOUT ══════════════════════════════ */
     #profile-page {
@@ -1148,6 +1197,7 @@
   <div class="mobile-tabs">
     <button class="mobile-tab active" onclick="switchSection('collections')">📁 Collections</button>
     <button class="mobile-tab" onclick="switchSection('quiz')">🧠 Quiz</button>
+    <button class="mobile-tab" onclick="switchSection('avis')">💬 Mes Avis</button>
     <button class="mobile-tab" onclick="switchSection('parametres')">⚙️ Paramètres</button>
   </div>
 
@@ -1182,6 +1232,11 @@
           <span class="sidebar-item-icon">🧠</span>
           <span class="sidebar-item-label">Historique quiz</span>
           <span class="sidebar-badge" id="quiz-count">0</span>
+        </button>
+        <button class="sidebar-item" data-section="avis" data-tooltip="Mes Avis" onclick="switchSection('avis')">
+          <span class="sidebar-item-icon">💬</span>
+          <span class="sidebar-item-label">Mes Avis</span>
+          <span class="sidebar-badge" id="avis-count">0</span>
         </button>
         <button class="sidebar-item" data-section="parametres" data-tooltip="Paramètres" onclick="switchSection('parametres')">
           <span class="sidebar-item-icon">⚙️</span>
@@ -1223,7 +1278,17 @@
         </div>
       </div>
 
-      <!-- 3. PARAMÈTRES -->
+      <!-- 3. MES AVIS -->
+      <div class="profile-section" id="section-avis">
+        <div class="section-header">
+          <div class="section-title">💬 Mes Avis</div>
+        </div>
+        <div id="avis-container">
+          <div class="loader"><div class="spinner"></div> Chargement…</div>
+        </div>
+      </div>
+
+      <!-- 4. PARAMÈTRES -->
       <div class="profile-section" id="section-parametres">
         <div class="section-header">
           <div class="section-title">⚙️ Paramètres</div>
@@ -1370,6 +1435,7 @@
     getUserProfile, updateDisplayName, updateLangue, updateNewsletter, updatePhotoURL,
     updateSkipExitModal
   } from './js/firestore.js';
+  import { getUserReviews, deleteUserReview } from './js/reviews.js';
 
   // ─── STATE ────────────────────────────────────
   let currentUser    = null;
@@ -1743,6 +1809,7 @@
       renderHero();
       await loadCollections();
       await loadQuizHistory();
+      await loadAvis();
       initPrefs();
       // Lancer le quiz si redirigé depuis index.html
       if (window._pendingQuizOpen) {
@@ -2064,6 +2131,111 @@
     await deleteQuizSession(currentUser.uid, sessionId);
     await loadQuizHistory();
     showToast('Session supprimée.');
+  };
+
+  // ══════════════════════════════════════════════
+  // MES AVIS
+  // ══════════════════════════════════════════════
+
+  let userAvis = [];
+
+  async function loadAvis() {
+    try {
+      userAvis = await getUserReviews(currentUser.uid);
+    } catch(e) {
+      userAvis = [];
+    }
+    renderAvis();
+  }
+
+  function renderAvis() {
+    const container = document.getElementById('avis-container');
+    if (!container) return;
+
+    const countEl = document.getElementById('avis-count');
+    if (countEl) countEl.textContent = userAvis.length;
+
+    if (userAvis.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">💬</div>
+          <p>Tu n'as encore laissé aucun avis.<br>
+             Ouvre la fiche d'un outil et partage ton expérience !</p>
+          <a href="./index.html#tools" class="btn-primary btn-sm"
+             style="display:inline-block;text-decoration:none">Explorer les outils →</a>
+        </div>`;
+      return;
+    }
+
+    const avgNote = (userAvis.reduce((s, r) => s + r.rating, 0) / userAvis.length).toFixed(1);
+    const statsHtml = `
+      <div class="avis-stats">
+        <div class="avis-stat-item">
+          <div class="avis-stat-n">${userAvis.length}</div>
+          <div class="avis-stat-l">Avis publiés</div>
+        </div>
+        <div class="avis-stat-item">
+          <div class="avis-stat-n"><span>★</span> ${avgNote}</div>
+          <div class="avis-stat-l">Note moyenne donnée</div>
+        </div>
+      </div>`;
+
+    const cardsHtml = userAvis.map(r => {
+      const stars = [1,2,3,4,5].map(i =>
+        `<span class="${i <= r.rating ? '' : 'off'}">★</span>`
+      ).join('');
+
+      const date = r.updatedAt?.seconds
+        ? new Date(r.updatedAt.seconds * 1000).toLocaleDateString('fr-FR', {
+            day: 'numeric', month: 'long', year: 'numeric'
+          })
+        : '';
+
+      const ico = r.toolFavicon
+        ? `<img src="${r.toolFavicon}" alt="${escHtml(r.toolName)}" onerror="this.style.display='none'">`
+        : (r.toolEmoji || '🤖');
+
+      const ficheUrl = r.toolPage || '#';
+
+      return `
+        <div class="avis-card">
+          <div class="avis-card-head">
+            <div class="avis-tool-ico">${ico}</div>
+            <div class="avis-tool-info">
+              <div class="avis-tool-name">${escHtml(r.toolName)}</div>
+              <a class="avis-tool-link" href="${ficheUrl}">Voir la fiche →</a>
+            </div>
+            <div class="avis-stars">${stars}</div>
+          </div>
+          ${r.comment
+            ? `<p class="avis-comment">"${escHtml(r.comment)}"</p>`
+            : `<p class="avis-no-comment">Aucun commentaire laissé.</p>`
+          }
+          <div class="avis-card-foot">
+            <span class="avis-date">📅 ${date}</span>
+            <div class="avis-actions">
+              <a class="btn-avis-edit" href="${ficheUrl}#avis-utilisateurs">✏️ Modifier</a>
+              <button class="btn-avis-delete"
+                      onclick="handleDeleteAvis('${r.toolSlug}')">🗑 Supprimer</button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    container.innerHTML = statsHtml + `<div class="avis-list">${cardsHtml}</div>`;
+  }
+
+  window.handleDeleteAvis = async function(toolSlug) {
+    if (!confirm('Supprimer cet avis définitivement ?')) return;
+    try {
+      await deleteUserReview(currentUser.uid, toolSlug);
+      userAvis = userAvis.filter(r => r.toolSlug !== toolSlug);
+      renderAvis();
+      showToast('Avis supprimé.');
+    } catch(e) {
+      showToast('⚠ Erreur lors de la suppression.');
+      console.error(e);
+    }
   };
 
   // ══════════════════════════════════════════════
