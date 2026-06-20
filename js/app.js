@@ -314,8 +314,13 @@ function buildToolCard(t) {
   // sinon redirige vers profil.html pour connexion
   const toolJson = JSON.stringify(t).replace(/'/g, "\'").replace(/"/g, '&quot;');
 
+  // Slug pour identifier la carte et recevoir le rating Firestore
+  const slug = t.page
+    ? t.page.split('/').pop().replace(/\.html?$/, '').toLowerCase()
+    : String(t.id);
+
   return `
-    <article class="${cardClass}" ${cardAction}>
+    <article class="${cardClass}" ${cardAction} data-tool-slug="${slug}">
       <div class="tool-head">
         <div class="tool-ico" style="background:${col.bg}">${iconHtml}</div>
         <div style="flex:1">
@@ -329,10 +334,38 @@ function buildToolCard(t) {
       <p class="tool-desc">${t.description}</p>
       <div class="tool-foot">
         <span class="price-tag price-${t.price}">${priceLabel[t.price]}</span>
-        <span class="stars">${renderStars(t.rating)}</span>
+        <span class="tool-rating-badge" data-slug="${slug}">
+          <span class="stars">${renderStars(t.rating)}</span>
+        </span>
       </div>
       ${planBadge}
     </article>`;
+}
+
+// ════════════════════════════════════════
+// RATINGS FIRESTORE — enrichir les cartes
+// Appelé après renderTools()
+// ════════════════════════════════════════
+async function renderRatingsOnCards() {
+  if (typeof window._getRatingSummaries !== 'function') return;
+  try {
+    const cards = document.querySelectorAll('[data-tool-slug]');
+    const visibleSlugs = [...new Set([...cards].map(c => c.dataset.toolSlug))];
+    if (!visibleSlugs.length) return;
+    const summaries = await window._getRatingSummaries(visibleSlugs);
+    cards.forEach(card => {
+      const slug    = card.dataset.toolSlug;
+      const summary = summaries.get(slug);
+      const badge   = card.querySelector('.tool-rating-badge');
+      if (!badge || !summary || !summary.ratingCount) return;
+      const avg = summary.ratingAverage.toFixed(1);
+      badge.innerHTML = `
+        <span class="stars-live">⭐ ${avg}</span>
+        <span class="review-count">· ${summary.ratingCount} avis</span>`;
+    });
+  } catch (err) {
+    console.warn('Ratings Firestore non chargés:', err);
+  }
 }
 
 // ═══════════════════════════════════════
