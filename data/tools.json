@@ -1208,10 +1208,9 @@
     "rating": 4,
     "url": "https://canva.com",
     "tags": [
-      "design",
-      "visuels",
-      "présentations"
-    ],
+      "design", "visuels", "présentations" ],
+    "page": "tools/featured/canva.html",
+    "plan": "featured",
     "langue": "fr",
     "traductions": {
       "en": "19-en",
