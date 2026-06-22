@@ -837,7 +837,9 @@
 
 </div>
 
-<script type="module" src="js/app.js"></script>
+<!-- Doit être AVANT app.js -->
+<script type="module" src="js/ratings-loader.js"></script>
+<script src="js/app.js"></script>
 <script type="module" src="js/collections-picker.js"></script>
 <script type="module">
   import { auth, db, doc, getDoc, onAuthStateChanged }
