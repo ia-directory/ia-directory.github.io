@@ -152,3 +152,35 @@ export async function updateSkipExitModal(uid, value) {
   const ref = doc(db, 'users', uid);
   await updateDoc(ref, { skipExitModal: value });
 }
+
+// ══════════════════════════════════════
+// PROFIL PUBLIC
+// ══════════════════════════════════════
+
+// Rendre une collection publique ou privée
+export async function setCollectionPublic(uid, colId, isPublic) {
+  const ref = doc(db, 'users', uid, 'collections', colId);
+  await updateDoc(ref, { isPublic });
+}
+
+// Lire le profil public d'un utilisateur (sans auth)
+export async function getPublicProfile(uid) {
+  const ref  = doc(db, 'users', uid);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return null;
+  const data = snap.data();
+  // On n'expose que les champs publics
+  return {
+    displayName: data.displayName || 'Utilisateur Albexia',
+    photoURL:    data.photoURL    || null,
+  };
+}
+
+// Lire les collections publiques d'un utilisateur (sans auth)
+export async function getPublicCollections(uid) {
+  const ref  = collection(db, 'users', uid, 'collections');
+  const snap = await getDocs(query(ref, orderBy('createdAt', 'desc')));
+  return snap.docs
+    .map(d => ({ id: d.id, ...d.data() }))
+    .filter(c => c.isPublic === true);
+}
