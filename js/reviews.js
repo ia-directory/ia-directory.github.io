@@ -248,3 +248,22 @@ export async function reportReview(reviewId, reporterUid, reason) {
     createdAt: serverTimestamp(),
   });
 }
+
+      // ──────────────────────────────────────────
+// EXPOSITION GLOBALE POUR L'ANNUAIRE (INDEX)
+// ──────────────────────────────────────────
+
+/**
+ * Rend accessible la fonction de récupération groupée à app.js
+ * en s'accrochant à la fenêtre globale de l'application (window).
+ */
+window._getRatingSummaries = async function(toolSlugs) {
+  try {
+    // Utilise la fonction parallélisée déjà existante ci-dessus (plus rapide !)
+    return await getRatingSummaries(toolSlugs);
+  } catch (error) {
+    console.error("[Albexia-Avis] Échec de la passerelle de notation globale:", error);
+    return new Map();
+  }
+};
+ 
