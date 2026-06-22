@@ -837,15 +837,16 @@
 
 </div>
 
-<script type="module">
-  import { getRatingSummaries } from './js/reviews.js';
-  window._getRatingSummaries = getRatingSummaries;
-</script>
 <script src="js/app.js"></script>
 <script type="module" src="js/collections-picker.js"></script>
 <script type="module">
   import { auth, db, doc, getDoc, onAuthStateChanged }
     from './js/firebase-config.js';
+  import { getRatingSummaries }
+    from './js/reviews.js';
+
+  // Exposer pour app.js (renderRatingsOnCards)
+  window._getRatingSummaries = getRatingSummaries;
 
   // ← Masquer "Connexion" immédiatement pendant la vérification Firebase
   const profileBtn = document.getElementById('nav-profile-btn');
