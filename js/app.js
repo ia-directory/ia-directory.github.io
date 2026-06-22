@@ -1,4 +1,3 @@
-
 /* ═══════════════════════════════════════
    Albexia — app.js
    Fonctionnalités : navigation, JSON,
@@ -335,7 +334,9 @@ function buildToolCard(t) {
       <p class="tool-desc">${t.description}</p>
       <div class="tool-foot">
         <span class="price-tag price-${t.price}">${priceLabel[t.price]}</span>
-        <span class="tool-rating-badge" data-slug="${slug}"></span>
+        <span class="tool-rating-badge" data-slug="${slug}">
+          <span class="stars">${renderStars(t.rating)}</span>
+        </span>
       </div>
       ${planBadge}
     </article>`;
@@ -401,12 +402,8 @@ function renderTools() {
   document.getElementById('tools-grid').innerHTML = paged.map(t => buildToolCard(t)).join('');
 
   setPaginationEl('tools-grid', buildPaginationHTML(state.toolsPage, totalPages, total, start + 1, shownEnd, 'tools', 'outils'));
-  
-  // ← CHARGER LES AVIS FIRESTORE
-  if (typeof window._enrichCardsWithRatings === 'function') {
-    window._enrichCardsWithRatings();
-  }
-                    }
+}
+
 function buildPaginationHTML(current, totalPages, totalItems, shownStart, shownEnd, section, label) {
   if (totalPages <= 1) return '';
   let pages = '';
