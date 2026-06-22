@@ -1,3 +1,5 @@
+import { getRatingSummaries } from './reviews.js';
+
 /* ═══════════════════════════════════════
    Albexia — app.js
    Fonctionnalités : navigation, JSON,
