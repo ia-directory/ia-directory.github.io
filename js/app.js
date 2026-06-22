@@ -350,41 +350,69 @@ function buildToolCard(t) {
 // RATINGS FIRESTORE — enrichir les cartes
 // Appelé après renderTools()
 // ════════════════════════════════════════
+// ════════════════════════════════════════
+// RATINGS FIRESTORE — enrichir les cartes
+// Appelé après renderTools()
+// ════════════════════════════════════════
 async function renderRatingsOnCards() {
   if (typeof window._getRatingSummaries !== 'function') return;
   try {
-    // 1. Correction : On cible vos vraies cartes qui ont la classe ".tools-card"
-    const cards = document.querySelectorAll('.tools-card');
-    
-    // Extrait les slugs depuis l'attribut "data-slug" utilisé dans createToolCard
-    const visibleSlugs = [...new Set([...cards].map(c => c.getAttribute('data-slug')).filter(Boolean))];
+    // 1. Cible vos vraies cartes qui ont la classe ".tool-card"
+    const cards = document.querySelectorAll('.tool-card');
+    if (!cards.length) return;
+
+    const visibleSlugs = [];
+
+    // 2. Extrait le vrai slug textuel directement calculé depuis la page de l'outil
+    cards.forEach(card => {
+      // Lit la destination de l'action ou l'attribut existant
+      const onclickAttr = card.getAttribute('onclick') || '';
+      const match = onclickAttr.match(/window\.location\.href\s*=\s*['"](.*?)['"]/);
+      
+      let slug = '';
+      if (match && match[1]) {
+        // Extrait le nom du fichier (ex: tools/featured/canva.html -> canva)
+        slug = match[1].split('/').pop().replace(/\.html?$/, '').toLowerCase().trim();
+      } else {
+        // En repli, utilise l'attribut data-tool-slug généré
+        slug = card.getAttribute('data-tool-slug');
+      }
+
+      if (slug) {
+        card.setAttribute('data-calculated-slug', slug);
+        visibleSlugs.push(slug);
+      }
+    });
+
     if (!visibleSlugs.length) return;
 
-    // Récupération des données depuis la passerelle globale (reviews.js)
-    const summaries = await window._getRatingSummaries(visibleSlugs);
+    // 3. Récupération des données depuis la passerelle globale (reviews.js)
+    const summaries = await window._getRatingSummaries([...new Set(visibleSlugs)]);
     if (!summaries) return;
 
+    // 4. Met à jour l'affichage de chaque carte avec les vrais avis Firestore
     cards.forEach(card => {
-      const slug = card.getAttribute('data-slug');
+      const slug = card.getAttribute('data-calculated-slug');
       if (!slug) return;
 
       const summary = summaries.get(slug);
       
-      // 2. Fallback automatique : Note de 4.8 (1 avis) si aucun avis n'est présent sur Firestore
+      // Fallback automatique : Note de 4.8 (1 avis) si aucun avis n'est présent sur Firestore
       const avg = summary && summary.ratingAverage !== null ? summary.ratingAverage.toFixed(1) : "4.8";
       const count = summary && summary.ratingCount ? summary.ratingCount : 1;
 
-      // 3. Correction : On cherche la bonne classe HTML ".tools-card-rating" générée par votre script
-      const badge = card.querySelector('.tools-card-rating');
+      // Cible la bonne classe HTML ".tool-rating-badge" générée par buildToolCard
+      const badge = card.querySelector('.tool-rating-badge');
       if (!badge) return;
 
       // Écrit la nouvelle note calculée en temps réel
-      badge.innerHTML = `★ ${avg} <span>(${count})</span>`;
+      badge.innerHTML = `★ ${avg} <span>(${count} ${count > 1 ? 'avis' : 'avis'})</span>`;
     });
   } catch (err) {
     console.warn('Ratings Firestore non chargés:', err);
   }
 }
+
 
 
 // ═══════════════════════════════════════
