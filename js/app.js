@@ -401,7 +401,7 @@ function renderTools() {
 
   setPaginationEl('tools-grid', buildPaginationHTML(state.toolsPage, totalPages, total, start + 1, shownEnd, 'tools', 'outils'));
 
-  // Charger les ratings Firestore sur les cartes (remplace l'ancien système tools.json)
+  // Ratings Firestore — remplace l'ancien système tools.json
   renderRatingsOnCards();
 }
 
