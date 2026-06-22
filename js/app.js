@@ -217,6 +217,10 @@ async function loadAllData() {
     state.blog    = blog;
     state.gallery = gallery;
     renderTools();
+     if (typeof renderRatingsOnCards === 'function') {
+  renderRatingsOnCards();
+}
+
     renderBlog();
     renderGallery();
     checkToolsParam(); // ← Spotlight notification
