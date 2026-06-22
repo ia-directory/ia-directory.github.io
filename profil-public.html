@@ -1,0 +1,514 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Profil — Albexia</title>
+  <meta name="description" content="Collections d'outils IA partagées sur Albexia.">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg:       #0d0d14;
+      --surface:  #13131f;
+      --surface2: #1a1a2e;
+      --border:   rgba(255,255,255,0.08);
+      --accent:   #6c63ff;
+      --accent2:  #00d4aa;
+      --text:     #f0f0f5;
+      --muted:    #8888aa;
+      --radius:   14px;
+      --radius-sm:8px;
+    }
+
+    body {
+      font-family: 'Inter', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+
+    /* ── NAV ── */
+    .nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 24px;
+      background: var(--surface);
+      border-bottom: 1px solid var(--border);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .nav-logo {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--text);
+      text-decoration: none;
+      letter-spacing: -0.5px;
+    }
+    .nav-logo span { color: var(--accent); }
+    .nav-back {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      color: var(--muted);
+      text-decoration: none;
+      font-size: .875rem;
+      transition: color .2s;
+    }
+    .nav-back:hover { color: var(--text); }
+
+    /* ── LOADER ── */
+    #page-loader {
+      min-height: calc(100vh - 65px);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      color: var(--muted);
+      font-size: .9rem;
+    }
+    .spinner {
+      width: 20px; height: 20px;
+      border: 2px solid var(--border);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin .7s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* ── ERROR ── */
+    #page-error {
+      display: none;
+      min-height: calc(100vh - 65px);
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 12px;
+      color: var(--muted);
+      text-align: center;
+      padding: 24px;
+    }
+    #page-error .icon { font-size: 3rem; }
+    #page-error h2 { font-size: 1.2rem; color: var(--text); }
+
+    /* ── CONTENU PRINCIPAL ── */
+    #page-content { display: none; }
+
+    /* ── HERO ── */
+    .hero {
+      background: linear-gradient(135deg, rgba(108,99,255,0.15) 0%, rgba(0,212,170,0.08) 100%);
+      border-bottom: 1px solid var(--border);
+      padding: 48px 24px 36px;
+    }
+    .hero-inner {
+      max-width: 860px;
+      margin: 0 auto;
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .avatar {
+      width: 80px; height: 80px;
+      border-radius: 50%;
+      background: var(--accent);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: #fff;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .avatar img { width: 100%; height: 100%; object-fit: cover; }
+    .hero-info { flex: 1; min-width: 200px; }
+    .hero-info h1 { font-size: 1.5rem; font-weight: 700; margin-bottom: 4px; }
+    .hero-meta {
+      color: var(--muted);
+      font-size: .875rem;
+      margin-bottom: 14px;
+    }
+    .hero-actions { display: flex; gap: 10px; flex-wrap: wrap; }
+
+    .btn-share {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      background: rgba(108,99,255,0.15);
+      border: 1px solid rgba(108,99,255,0.3);
+      border-radius: var(--radius-sm);
+      color: #a8a3ff;
+      font-size: .85rem;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      transition: background .2s;
+    }
+    .btn-share:hover { background: rgba(108,99,255,0.25); }
+
+    .btn-cta {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 18px;
+      background: var(--accent);
+      border: none;
+      border-radius: var(--radius-sm);
+      color: #fff;
+      font-size: .85rem;
+      font-weight: 600;
+      text-decoration: none;
+      transition: opacity .2s;
+    }
+    .btn-cta:hover { opacity: .85; }
+
+    /* ── MAIN ── */
+    .main {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 40px 24px;
+    }
+
+    /* ── SECTION TITRE ── */
+    .section-title {
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 20px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .section-title span {
+      background: var(--surface2);
+      border-radius: 20px;
+      padding: 2px 10px;
+      font-size: .78rem;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    /* ── COLLECTIONS GRID ── */
+    .collections-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 16px;
+      margin-bottom: 48px;
+    }
+    .collection-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      transition: border-color .2s;
+    }
+    .collection-card:hover { border-color: rgba(108,99,255,0.4); }
+    .collection-name {
+      font-weight: 600;
+      font-size: .95rem;
+      margin-bottom: 4px;
+    }
+    .collection-meta {
+      color: var(--muted);
+      font-size: .8rem;
+      margin-bottom: 14px;
+    }
+    .tools-list {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      max-height: 220px;
+      overflow-y: auto;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .tool-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 7px 8px;
+      border-radius: var(--radius-sm);
+      background: var(--surface2);
+      text-decoration: none;
+      color: var(--text);
+      transition: background .15s;
+    }
+    .tool-item:hover { background: rgba(108,99,255,0.12); }
+    .tool-ico {
+      width: 28px; height: 28px;
+      border-radius: 7px;
+      background: rgba(108,99,255,0.15);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: .9rem;
+      overflow: hidden;
+      flex-shrink: 0;
+    }
+    .tool-ico img { width: 100%; height: 100%; object-fit: cover; }
+    .tool-name {
+      font-size: .85rem;
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .col-empty {
+      font-size: .8rem;
+      color: var(--muted);
+      text-align: center;
+      padding: 12px 0;
+    }
+
+    /* ── EMPTY STATE ── */
+    .empty-state {
+      text-align: center;
+      padding: 64px 20px;
+      color: var(--muted);
+      grid-column: 1 / -1;
+    }
+    .empty-state .icon { font-size: 2.5rem; margin-bottom: 12px; }
+    .empty-state p { font-size: .9rem; margin-bottom: 20px; }
+
+    /* ── FOOTER ── */
+    .footer {
+      border-top: 1px solid var(--border);
+      padding: 24px;
+      text-align: center;
+      color: var(--muted);
+      font-size: .85rem;
+    }
+    .footer a {
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 600;
+    }
+    .footer a:hover { text-decoration: underline; }
+
+    /* ── TOAST ── */
+    #toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(20px);
+      background: #1e1e2e;
+      border: 1px solid var(--border);
+      border-radius: 24px;
+      padding: 10px 20px;
+      font-size: .875rem;
+      color: var(--text);
+      opacity: 0;
+      transition: all .25s;
+      z-index: 999;
+      white-space: nowrap;
+    }
+    #toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 600px) {
+      .hero-inner { flex-direction: column; align-items: flex-start; }
+      .collections-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="nav">
+  <a class="nav-logo" href="./index.html">Alb<span>e</span>xia</a>
+  <a class="nav-back" href="./index.html">← Retour à l'annuaire</a>
+</nav>
+
+<!-- LOADER -->
+<div id="page-loader">
+  <div class="spinner"></div>
+  Chargement du profil…
+</div>
+
+<!-- ERREUR -->
+<div id="page-error">
+  <div class="icon">🔍</div>
+  <h2>Profil introuvable</h2>
+  <p>Ce profil n'existe pas ou n'est plus disponible.</p>
+  <a href="./index.html" class="btn-cta" style="margin-top:8px">Retour à l'annuaire →</a>
+</div>
+
+<!-- CONTENU -->
+<div id="page-content">
+
+  <!-- HERO -->
+  <section class="hero">
+    <div class="hero-inner">
+      <div class="avatar" id="hero-avatar">?</div>
+      <div class="hero-info">
+        <h1 id="hero-name">—</h1>
+        <p class="hero-meta" id="hero-meta">Membre Albexia</p>
+        <div class="hero-actions">
+          <button class="btn-share" onclick="shareProfile()">🔗 Partager ce profil</button>
+          <a class="btn-cta" href="./profil.html">✨ Créer mon profil →</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="section-title">
+      📁 Collections publiques <span id="col-count">0</span>
+    </div>
+    <div class="collections-grid" id="collections-grid">
+      <!-- injecté par JS -->
+    </div>
+  </main>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    Créé avec <a href="./index.html">Albexia</a> · L'annuaire des outils IA en français
+  </footer>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast"></div>
+
+<script type="module">
+  import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+  import {
+    getFirestore, doc, getDoc,
+    collection, getDocs, query, orderBy
+  } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+  // ── CONFIG FIREBASE ──────────────────────────
+  // Remplace par ta config Firebase réelle
+  import { firebaseConfig } from './js/firebase-config.js';
+  const app = initializeApp(firebaseConfig);
+  const db  = getFirestore(app);
+
+  // ── HELPERS ──────────────────────────────────
+  function $(id) { return document.getElementById(id); }
+
+  function showToast(msg) {
+    const t = $('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+  }
+
+  function escHtml(str) {
+    return (str || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  }
+
+  // ── PARTAGE ──────────────────────────────────
+  window.shareProfile = function() {
+    navigator.clipboard.writeText(window.location.href)
+      .then(() => showToast('✅ Lien copié !'))
+      .catch(() => showToast('⚠ Impossible de copier le lien.'));
+  };
+
+  // ── INIT ─────────────────────────────────────
+  async function init() {
+    const params = new URLSearchParams(window.location.search);
+    const uid    = params.get('id');
+
+    if (!uid) { showError(); return; }
+
+    try {
+      // 1. Profil utilisateur
+      const userSnap = await getDoc(doc(db, 'users', uid));
+      if (!userSnap.exists()) { showError(); return; }
+      const userData = userSnap.data();
+
+      // 2. Collections publiques
+      const colSnap = await getDocs(
+        query(collection(db, 'users', uid, 'collections'), orderBy('createdAt', 'desc'))
+      );
+      const cols = colSnap.docs
+        .map(d => ({ id: d.id, ...d.data() }))
+        .filter(c => c.isPublic === true);
+
+      // 3. Affichage
+      renderProfile(userData, cols);
+
+    } catch(e) {
+      console.error(e);
+      showError();
+    }
+  }
+
+  function showError() {
+    $('page-loader').style.display = 'none';
+    $('page-error').style.display  = 'flex';
+  }
+
+  function renderProfile(user, cols) {
+    const name = user.displayName || 'Utilisateur Albexia';
+
+    // SEO dynamique
+    document.title = `${name} — Profil Albexia`;
+    document.querySelector('meta[name="description"]').setAttribute(
+      'content',
+      `Découvrez les collections d'outils IA de ${name} sur Albexia.`
+    );
+
+    // Avatar
+    const avatarEl = $('hero-avatar');
+    if (user.photoURL) {
+      avatarEl.innerHTML = `<img src="${escHtml(user.photoURL)}" alt="${escHtml(name)}" onerror="this.parentElement.textContent='${escHtml(name[0]?.toUpperCase() || '?')}'">`;
+    } else {
+      avatarEl.textContent = name[0]?.toUpperCase() || '?';
+    }
+
+    // Nom + meta
+    $('hero-name').textContent = name;
+    $('hero-meta').textContent = `Membre Albexia · ${cols.length} collection${cols.length !== 1 ? 's' : ''} publique${cols.length !== 1 ? 's' : ''}`;
+    $('col-count').textContent = cols.length;
+
+    // Collections
+    const grid = $('collections-grid');
+    if (cols.length === 0) {
+      grid.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📁</div>
+          <p>Aucune collection publique pour l'instant.</p>
+          <a href="./index.html" class="btn-cta">Explorer les outils →</a>
+        </div>`;
+    } else {
+      grid.innerHTML = cols.map(col => {
+        const tools  = col.tools || [];
+        const count  = tools.length;
+        const toolsHtml = count === 0
+          ? `<div class="col-empty">Collection vide</div>`
+          : tools.map(t => {
+              const href = t.page || t.url || '#';
+              const ico  = t.favicon
+                ? `<div class="tool-ico"><img src="${escHtml(t.favicon)}" alt="${escHtml(t.name)}" onerror="this.parentElement.textContent='${t.emoji||'🤖'}'"></div>`
+                : `<div class="tool-ico">${t.emoji || '🤖'}</div>`;
+              return `<a class="tool-item" href="${escHtml(href)}" target="_blank" rel="noopener">${ico}<span class="tool-name">${escHtml(t.name)}</span></a>`;
+            }).join('');
+
+        return `
+          <div class="collection-card">
+            <div class="collection-name">📁 ${escHtml(col.name)}</div>
+            <div class="collection-meta">${count} outil${count !== 1 ? 's' : ''}</div>
+            <div class="tools-list">${toolsHtml}</div>
+          </div>`;
+      }).join('');
+    }
+
+    // Afficher le contenu
+    $('page-loader').style.display  = 'none';
+    $('page-content').style.display = 'block';
+  }
+
+  init();
+</script>
+
+</body>
+</html>

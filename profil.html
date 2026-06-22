@@ -1244,8 +1244,12 @@
         </button>
       </nav>
 
-      <!-- Footer : déconnexion -->
+      <!-- Footer : partager + déconnexion -->
       <div class="sidebar-footer">
+        <button class="sidebar-item" data-tooltip="Mon profil public" onclick="sharePublicProfile()" style="color:var(--accent2)">
+          <span class="sidebar-item-icon">🔗</span>
+          <span class="sidebar-item-label">Partager mon profil</span>
+        </button>
         <button class="sidebar-item sidebar-item-logout" data-tooltip="Déconnexion" onclick="handleLogout()">
           <span class="sidebar-item-icon">🚪</span>
           <span class="sidebar-item-label">Déconnexion</span>
@@ -1433,7 +1437,7 @@
     removeToolFromCollection,
     getQuizHistory, deleteQuizSession, saveQuizSession,
     getUserProfile, updateDisplayName, updateLangue, updateNewsletter, updatePhotoURL,
-    updateSkipExitModal
+    updateSkipExitModal, setCollectionPublic
   } from './js/firestore.js';
   import { getUserReviews, deleteUserReview } from './js/reviews.js';
 
@@ -1943,16 +1947,24 @@
         ? `<div class="col-empty-tools">Aucun outil pour l'instant</div>`
         : '';
 
+      const isPublic   = col.isPublic === true;
+      const toggleTip  = isPublic ? 'Rendre privée' : 'Rendre publique';
+      const toggleIcon = isPublic ? '🌐' : '🔒';
+      const publicBadge = isPublic
+        ? '<span style="color:var(--accent2);font-size:.75rem">🌐 Publique</span>'
+        : '<span style="color:var(--muted);font-size:.75rem">🔒 Privée</span>';
+
       return `
         <div class="collection-card" data-id="${col.id}">
           <div class="collection-top">
             <div class="collection-name">${col.name}</div>
             <div style="display:flex;gap:4px">
+              <button class="btn-icon" onclick="toggleColPublic('${col.id}',${isPublic})" title="${toggleTip}" style="font-size:.9rem">${toggleIcon}</button>
               <button class="btn-icon" onclick="openRenameModal('${col.id}','${escHtml(col.name)}')" title="Renommer">✏️</button>
               <button class="btn-icon" onclick="confirmDeleteCol('${col.id}','${escHtml(col.name)}')" title="Supprimer">🗑️</button>
             </div>
           </div>
-          <div class="collection-meta">${tools.length} outil${tools.length > 1 ? 's' : ''}</div>
+          <div class="collection-meta">${tools.length} outil${tools.length > 1 ? 's' : ''} · ${publicBadge}</div>
           <div class="collection-tools-list">${toolItems}${emptyTools}</div>
         </div>`;
     }).join('');
@@ -1972,6 +1984,25 @@
   }
 
   // Nouvelle collection
+  // ── TOGGLE PUBLIC /PRIVÉ ─────────────────────
+  window.toggleColPublic = async function(colId, currentIsPublic) {
+    const newVal = !currentIsPublic;
+    await setCollectionPublic(currentUser.uid, colId, newVal);
+    const col = collections.find(c => c.id === colId);
+    if (col) col.isPublic = newVal;
+    renderCollections();
+    showToast(newVal ? '🌐 Collection rendue publique !' : '🔒 Collection rendue privée.');
+  };
+
+  // ── PARTAGER LE PROFIL PUBLIC ─────────────────
+  window.sharePublicProfile = function() {
+    const base = location.origin + location.pathname.replace('profil.html', 'profil-public.html');
+    const url  = base + '?id=' + currentUser.uid;
+    navigator.clipboard.writeText(url)
+      .then(() => showToast('✅ Lien copié !'))
+      .catch(() => showToast('⚠ Impossible de copier.'));
+  };
+
   window.openNewColModal = function() {
     document.getElementById('new-col-name').value = '';
     document.getElementById('modal-new-col').classList.add('open');
