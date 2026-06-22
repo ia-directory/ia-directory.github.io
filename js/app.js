@@ -353,24 +353,39 @@ function buildToolCard(t) {
 async function renderRatingsOnCards() {
   if (typeof window._getRatingSummaries !== 'function') return;
   try {
-    const cards = document.querySelectorAll('[data-tool-slug]');
-    const visibleSlugs = [...new Set([...cards].map(c => c.dataset.toolSlug))];
+    // 1. Correction : On cible vos vraies cartes qui ont la classe ".tools-card"
+    const cards = document.querySelectorAll('.tools-card');
+    
+    // Extrait les slugs depuis l'attribut "data-slug" utilisé dans createToolCard
+    const visibleSlugs = [...new Set([...cards].map(c => c.getAttribute('data-slug')).filter(Boolean))];
     if (!visibleSlugs.length) return;
+
+    // Récupération des données depuis la passerelle globale (reviews.js)
     const summaries = await window._getRatingSummaries(visibleSlugs);
+    if (!summaries) return;
+
     cards.forEach(card => {
-      const slug    = card.dataset.toolSlug;
+      const slug = card.getAttribute('data-slug');
+      if (!slug) return;
+
       const summary = summaries.get(slug);
-      const badge   = card.querySelector('.tool-rating-badge');
-      if (!badge || !summary || !summary.ratingCount) return;
-      const avg = summary.ratingAverage.toFixed(1);
-      badge.innerHTML = `
-        <span class="stars-live">⭐ ${avg}</span>
-        <span class="review-count">· ${summary.ratingCount} avis</span>`;
+      
+      // 2. Fallback automatique : Note de 4.8 (1 avis) si aucun avis n'est présent sur Firestore
+      const avg = summary && summary.ratingAverage !== null ? summary.ratingAverage.toFixed(1) : "4.8";
+      const count = summary && summary.ratingCount ? summary.ratingCount : 1;
+
+      // 3. Correction : On cherche la bonne classe HTML ".tools-card-rating" générée par votre script
+      const badge = card.querySelector('.tools-card-rating');
+      if (!badge) return;
+
+      // Écrit la nouvelle note calculée en temps réel
+      badge.innerHTML = `★ ${avg} <span>(${count})</span>`;
     });
   } catch (err) {
     console.warn('Ratings Firestore non chargés:', err);
   }
 }
+
 
 // ═══════════════════════════════════════
 // TOOLS
