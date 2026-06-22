@@ -219,8 +219,7 @@ async function loadAllData() {
     renderTools();
     renderBlog();
     renderGallery();
-    checkToolsParam();
-    renderRatingsOnCards(); // ← Spotlight notification
+    checkToolsParam(); // ← Spotlight notification
   } catch (err) {
     console.error('Erreur chargement données:', err);
     showError('tools-grid',   'Impossible de charger les outils.');
@@ -335,7 +334,9 @@ function buildToolCard(t) {
       <p class="tool-desc">${t.description}</p>
       <div class="tool-foot">
         <span class="price-tag price-${t.price}">${priceLabel[t.price]}</span>
-        <span class="tool-rating-badge" data-slug="${slug}"></span>
+        <span class="tool-rating-badge" data-slug="${slug}">
+          <span class="stars">${renderStars(t.rating)}</span>
+        </span>
       </div>
       ${planBadge}
     </article>`;
@@ -435,7 +436,7 @@ function setPaginationEl(containerId, html) {
 }
 
 function goToPage(section, page) {
-  if (section === 'tools')   { state.toolsPage   = page; renderTools(); renderRatingsOnCards();  document.getElementById('tools').scrollIntoView({behavior:'smooth',block:'start'}); }
+  if (section === 'tools')   { state.toolsPage   = page; renderTools();   document.getElementById('tools').scrollIntoView({behavior:'smooth',block:'start'}); }
   if (section === 'blog')    { state.blogPage     = page; renderBlog();    document.getElementById('blog').scrollIntoView({behavior:'smooth',block:'start'}); }
   if (section === 'gallery') { state.galleryPage  = page; renderGallery(); document.getElementById('gallery').scrollIntoView({behavior:'smooth',block:'start'}); }
 }
@@ -444,7 +445,6 @@ function setToolCat(cat) {
   state.activeToolCat = cat;
   state.toolsPage = 1;
   renderTools();
-  renderRatingsOnCards();
 }
 
 // ═══════════════════════════════════════
