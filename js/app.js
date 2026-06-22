@@ -1,4 +1,3 @@
-import { getRatingSummaries } from './reviews.js';
 
 /* ═══════════════════════════════════════
    Albexia — app.js
@@ -402,11 +401,12 @@ function renderTools() {
   document.getElementById('tools-grid').innerHTML = paged.map(t => buildToolCard(t)).join('');
 
   setPaginationEl('tools-grid', buildPaginationHTML(state.toolsPage, totalPages, total, start + 1, shownEnd, 'tools', 'outils'));
-
-  // Ratings Firestore — remplace l'ancien système tools.json
-  renderRatingsOnCards();
-}
-
+  
+  // ← CHARGER LES AVIS FIRESTORE
+  if (typeof window._enrichCardsWithRatings === 'function') {
+    window._enrichCardsWithRatings();
+  }
+                    }
 function buildPaginationHTML(current, totalPages, totalItems, shownStart, shownEnd, section, label) {
   if (totalPages <= 1) return '';
   let pages = '';
