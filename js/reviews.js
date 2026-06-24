@@ -257,6 +257,101 @@ export async function reportReview(reviewId, reporterUid, reason) {
  * Rend accessible la fonction de récupération groupée à app.js
  * en s'accrochant à la fenêtre globale de l'application (window).
  */
+// ──────────────────────────────────────────
+// VOTES "UTILE" SUR LES AVIS
+// ──────────────────────────────────────────
+
+/**
+ * Subcollection : reviews/{reviewId}/voters/{uid}
+ * Valeur : "yes" | "no"
+ *
+ * Compteurs dénormalisés sur le doc avis :
+ *   helpful_yes: number
+ *   helpful_no:  number
+ *
+ * Règle : un seul vote par utilisateur par avis.
+ * Re-voter avec la même valeur → annule le vote (toggle).
+ * Re-voter avec une valeur différente → change le vote.
+ */
+
+import {
+  doc as _doc2,
+  getDoc as _getDoc2,
+  setDoc as _setDoc2,
+  deleteDoc as _deleteDoc2,
+} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+/**
+ * Retourne le vote actuel d'un utilisateur sur un avis.
+ * @returns {string|null} "yes" | "no" | null
+ */
+export async function getUserVote(reviewId, uid) {
+  const ref  = _doc2(db, 'reviews', reviewId, 'voters', uid);
+  const snap = await _getDoc2(ref);
+  return snap.exists() ? snap.data().value : null;
+}
+
+/**
+ * Vote ou annule le vote sur un avis.
+ * @param {string} reviewId
+ * @param {string} uid
+ * @param {"yes"|"no"} value
+ */
+export async function voteReview(reviewId, uid, value) {
+  const reviewRef = doc(db, 'reviews', reviewId);
+  const voterRef  = _doc2(db, 'reviews', reviewId, 'voters', uid);
+
+  const [reviewSnap, voterSnap] = await Promise.all([
+    getDoc(reviewRef),
+    _getDoc2(voterRef),
+  ]);
+
+  if (!reviewSnap.exists()) throw new Error('Avis introuvable');
+
+  const currentVote = voterSnap.exists() ? voterSnap.data().value : null;
+  const batch = writeBatch(db);
+
+  if (currentVote === value) {
+    // Même valeur → annuler le vote (toggle off)
+    batch.delete(voterRef);
+    batch.update(reviewRef, {
+      [`helpful_${value}`]: increment(-1),
+    });
+  } else {
+    // Nouveau vote ou changement
+    batch.set(voterRef, { value, uid, updatedAt: serverTimestamp() });
+    batch.update(reviewRef, {
+      [`helpful_${value}`]: increment(1),
+      // Si changement de vote, décrémenter l'ancien
+      ...(currentVote ? { [`helpful_${currentVote}`]: increment(-1) } : {}),
+    });
+  }
+
+  await batch.commit();
+
+  // Retourner le nouvel état
+  return currentVote === value ? null : value;
+}
+
+/**
+ * Initialise les compteurs de vote sur un avis existant
+ * (si les champs n'existent pas encore).
+ */
+export async function ensureVoteFields(reviewId) {
+  const ref  = doc(db, 'reviews', reviewId);
+  const snap = await getDoc(ref);
+  if (!snap.exists()) return;
+  const data = snap.data();
+  const updates = {};
+  if (data.helpful_yes === undefined) updates.helpful_yes = 0;
+  if (data.helpful_no  === undefined) updates.helpful_no  = 0;
+  if (Object.keys(updates).length) await updateDoc(ref, updates);
+}
+
+// ──────────────────────────────────────────
+// EXPOSITION GLOBALE POUR L'ANNUAIRE (INDEX)
+// ──────────────────────────────────────────
+
 window._getRatingSummaries = async function(toolSlugs) {
   try {
     // Utilise la fonction parallélisée déjà existante ci-dessus (plus rapide !)
