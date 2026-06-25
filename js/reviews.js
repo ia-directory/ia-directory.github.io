@@ -209,10 +209,10 @@ export async function voteReview(reviewId, uid, value) {
   if (currentVote === value) {
     // Toggle off → annuler le vote
     batch.delete(voterRef);
-    // setDoc merge:true pour créer le champ s'il n'existe pas
-    batch.set(reviewRef, {
+    // update() requis pour les FieldValue (increment) — set+merge ne supporte pas increment
+    batch.update(reviewRef, {
       [`helpful_${value}`]: increment(-1),
-    }, { merge: true });
+    });
   } else {
     // Nouveau vote ou changement
     batch.set(voterRef, { value, uid, updatedAt: serverTimestamp() });
@@ -220,8 +220,8 @@ export async function voteReview(reviewId, uid, value) {
     if (currentVote) {
       updates[`helpful_${currentVote}`] = increment(-1);
     }
-    // merge:true → crée helpful_yes/no s'ils n'existent pas encore
-    batch.set(reviewRef, updates, { merge: true });
+    // update() requis pour les FieldValue (increment)
+    batch.update(reviewRef, updates);
   }
 
   await batch.commit();
