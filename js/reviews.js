@@ -10,11 +10,8 @@
 import {
   db, doc, setDoc, getDoc, updateDoc,
   collection, getDocs, deleteDoc, query,
-} from './firebase-config.js';
-
-import {
   where, increment, serverTimestamp, writeBatch,
-} from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+} from './firebase-config.js';
 
 // ──────────────────────────────────────────
 // HELPERS
@@ -95,9 +92,9 @@ export async function submitReview(uid, toolSlug, toolMeta, rating, comment, use
 
 export async function getToolReviews(toolSlug) {
   const ref  = collection(db, 'reviews');
-  const q    = query(ref, where('toolSlug', '==', toolSlug), where('flagged', '==', false));
+  const q    = query(ref, where('toolSlug', '==', toolSlug));
   const snap = await getDocs(q);
-  const reviews = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const reviews = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => r.flagged !== true);
   reviews.sort((a, b) => (b.updatedAt?.seconds || 0) - (a.updatedAt?.seconds || 0));
   return reviews;
 }
@@ -144,7 +141,7 @@ export async function getUserReviews(uid) {
   const ref  = collection(db, 'reviews');
   const q    = query(ref, where('uid', '==', uid));
   const snap = await getDocs(q);
-  const reviews = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+  const reviews = snap.docs.map(d => ({ id: d.id, ...d.data() })).filter(r => r.flagged !== true);
   reviews.sort((a, b) => (b.updatedAt?.seconds || 0) - (a.updatedAt?.seconds || 0));
   return reviews;
 }
