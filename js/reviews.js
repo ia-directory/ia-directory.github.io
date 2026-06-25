@@ -204,23 +204,34 @@ export async function voteReview(reviewId, uid, value) {
   if (!reviewSnap.exists()) throw new Error('Avis introuvable');
 
   const currentVote = voterSnap.exists() ? voterSnap.data().value : null;
+  const reviewData  = reviewSnap.data();
   const batch = writeBatch(db);
+
+  // Migration silencieuse : initialise helpful_yes/no à 0 si absents
+  // (avis créés avant l'ajout des compteurs)
+  const needsInit =
+    reviewData.helpful_yes === undefined ||
+    reviewData.helpful_no  === undefined;
+  if (needsInit) {
+    batch.set(reviewRef, {
+      helpful_yes: reviewData.helpful_yes ?? 0,
+      helpful_no:  reviewData.helpful_no  ?? 0,
+    }, { merge: true });
+  }
 
   if (currentVote === value) {
     // Toggle off → annuler le vote
     batch.delete(voterRef);
-    // update() requis pour les FieldValue (increment) — set+merge ne supporte pas increment
     batch.update(reviewRef, {
       [`helpful_${value}`]: increment(-1),
     });
   } else {
-    // Nouveau vote ou changement
+    // Nouveau vote ou changement de vote
     batch.set(voterRef, { value, uid, updatedAt: serverTimestamp() });
     const updates = { [`helpful_${value}`]: increment(1) };
     if (currentVote) {
       updates[`helpful_${currentVote}`] = increment(-1);
     }
-    // update() requis pour les FieldValue (increment)
     batch.update(reviewRef, updates);
   }
 
