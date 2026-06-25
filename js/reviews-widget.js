@@ -318,26 +318,13 @@ async function handleVote(btn) {
     const newVote = await voteReview(reviewId, currentUser.uid, value);
     userVotes[reviewId] = newVote;
 
-    // Mise à jour locale des compteurs
-    const review = allReviews.find(r => r.id === reviewId);
-    if (review) {
-      const prevVote = newVote === null ? value : (newVote !== value ? value : null);
-      if (newVote === null) {
-        review[`helpful_${value}`] = Math.max(0, (review[`helpful_${value}`] || 0) - 1);
-      } else {
-        if (prevVote && prevVote !== newVote) {
-          review[`helpful_${prevVote}`] = Math.max(0, (review[`helpful_${prevVote}`] || 0) - 1);
-        }
-        review[`helpful_${newVote}`] = (review[`helpful_${newVote}`] || 0) + 1;
-      }
-    }
-    render();
-  } catch {
-    rvToast('⚠ Erreur lors du vote.');
+    // Relire le document depuis Firestore pour avoir les vrais compteurs
+    await refreshWidget();
+  } catch(e) {
+    rvToast('⚠ ' + (e?.code || e?.message || String(e)));
     allBtns?.forEach(b => { b.disabled = false; });
   }
 }
-
 
 async function handleReport(btn) {
   if (!currentUser) { rvToast('Connectez-vous pour signaler un avis.'); return; }

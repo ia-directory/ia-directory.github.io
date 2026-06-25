@@ -5,7 +5,7 @@
    ═══════════════════════════════════════ */
 
 import { auth, onAuthStateChanged }
-  from '/js/firebase-config.js';
+  from '../../js/firebase-config.js';
 
 import {
   getToolReviews,
@@ -16,7 +16,7 @@ import {
   reportReview,
   getUserVote,
   voteReview,
-} from '/js/reviews.js';
+} from '../../js/reviews.js';
 
 // ── Config depuis URL ─────────────────────────
 const params   = new URLSearchParams(window.location.search);
@@ -75,8 +75,7 @@ async function loadAll() {
   // Mettre à jour le titre de la page
   if (toolMeta.name) {
     document.title = `Avis ${toolMeta.name} — Albexia`;
-    const bcEl = document.getElementById('bc-tool-name');
-    if (bcEl) bcEl.textContent = toolMeta.name;
+    document.getElementById('bc-tool-name').textContent = toolMeta.name;
   }
 
   applyFilterSort();
@@ -342,22 +341,10 @@ async function handleVote(btn) {
     const newVote = await voteReview(reviewId, currentUser.uid, value);
     userVotes[reviewId] = newVote;
 
-    const review = allReviews.find(r => r.id === reviewId);
-    if (review) {
-      const prevVote = newVote === null ? value : (newVote !== value ? value : null);
-      if (newVote === null) {
-        review[`helpful_${value}`] = Math.max(0, (review[`helpful_${value}`] || 0) - 1);
-      } else {
-        if (prevVote && prevVote !== newVote) {
-          review[`helpful_${prevVote}`] = Math.max(0, (review[`helpful_${prevVote}`] || 0) - 1);
-        }
-        review[`helpful_${newVote}`] = (review[`helpful_${newVote}`] || 0) + 1;
-      }
-    }
-    applyFilterSort();
-    renderList();
-  } catch {
-    rvToast('⚠ Erreur lors du vote.');
+    // Relire depuis Firestore pour avoir les vrais compteurs
+    await loadAll();
+  } catch(e) {
+    rvToast('⚠ ' + (e?.code || e?.message || String(e)));
     allBtns?.forEach(b => { b.disabled = false; });
   }
 }
