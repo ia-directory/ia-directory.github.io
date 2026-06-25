@@ -332,10 +332,9 @@ async function handleVote(btn) {
       }
     }
     render();
-  // Par :
-} catch(e) {
-  rvToast('⚠ ' + (e?.code || e?.message || String(e)));
-     allBtns?.forEach(b => { b.disabled = false; });
+  } catch {
+    rvToast('⚠ Erreur lors du vote.');
+    allBtns?.forEach(b => { b.disabled = false; });
   }
 }
 
