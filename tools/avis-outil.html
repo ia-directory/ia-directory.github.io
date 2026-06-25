@@ -31,15 +31,7 @@
     </div>
   </nav>
 
-  <!-- BREADCRUMB -->
-  <div class="tool-breadcrumb" id="breadcrumb">
-    <div class="container">
-      <a href="../../index.html">Accueil</a> ›
-      <a href="../../index.html#tools">Outils</a> ›
-      <span id="bc-tool-name">…</span> ›
-      Avis
-    </div>
-  </div>
+  
 
   <main>
     <div class="container" style="max-width:760px;margin:0 auto;padding:0 24px 80px">
@@ -47,7 +39,7 @@
       <!-- HEADER OUTIL -->
       <div class="avo-header" id="avo-header">
         <div class="avo-skeleton-header">
-          <div class="rv-skeleton rv-sk-avatar" style="width:56px;height:56px;border-radius:14px"></div>
+          <div class="rv-skeleton rv-sk-avatar" style="width:56px;height:56px;border-radius:14px;flex-shrink:0"></div>
           <div style="flex:1">
             <div class="rv-skeleton rv-sk-line" style="width:40%;margin-bottom:10px"></div>
             <div class="rv-skeleton rv-sk-line" style="width:25%"></div>
@@ -55,15 +47,19 @@
         </div>
       </div>
 
-      <!-- BLOC RÉSUMÉ + DISTRIBUTION -->
-      <div id="avo-summary"></div>
+      <!-- BLOC RÉSUMÉ -->
+      <div id="avo-summary">
+        <div class="rv-skeleton" style="height:180px;border-radius:16px;margin-bottom:28px"></div>
+      </div>
 
       <!-- CONTRÔLES -->
-      <div id="avo-controls"></div>
+      <div id="avo-controls">
+        <div class="rv-skeleton" style="height:44px;border-radius:12px;margin-bottom:20px"></div>
+      </div>
 
-      <!-- LISTE AVIS -->
+      <!-- LISTE AVIS — skeleton statique, sans JS -->
       <div id="avo-list">
-        <div class="rv-skeleton-wrap">${[1,2,3].map(() => `
+        <div class="rv-skeleton-wrap">
           <div class="rv-skeleton-card">
             <div class="rv-skeleton rv-sk-avatar"></div>
             <div style="flex:1">
@@ -71,7 +67,23 @@
               <div class="rv-skeleton rv-sk-line" style="width:100%"></div>
               <div class="rv-skeleton rv-sk-line" style="width:70%;margin-top:6px"></div>
             </div>
-          </div>`).join('')}
+          </div>
+          <div class="rv-skeleton-card">
+            <div class="rv-skeleton rv-sk-avatar"></div>
+            <div style="flex:1">
+              <div class="rv-skeleton rv-sk-line" style="width:55%;margin-bottom:8px"></div>
+              <div class="rv-skeleton rv-sk-line" style="width:100%"></div>
+              <div class="rv-skeleton rv-sk-line" style="width:60%;margin-top:6px"></div>
+            </div>
+          </div>
+          <div class="rv-skeleton-card">
+            <div class="rv-skeleton rv-sk-avatar"></div>
+            <div style="flex:1">
+              <div class="rv-skeleton rv-sk-line" style="width:35%;margin-bottom:8px"></div>
+              <div class="rv-skeleton rv-sk-line" style="width:100%"></div>
+              <div class="rv-skeleton rv-sk-line" style="width:80%;margin-top:6px"></div>
+            </div>
+          </div>
         </div>
       </div>
 
