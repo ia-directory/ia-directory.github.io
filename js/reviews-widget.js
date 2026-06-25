@@ -332,11 +332,9 @@ async function handleVote(btn) {
       }
     }
     render();
-  } catch {
-    rvToast('⚠ Erreur lors du vote.');
-    allBtns?.forEach(b => { b.disabled = false; });
-  }
-}
+  // Par :
+} catch(e) {
+  rvToast('⚠ ' + (e?.code || e?.message || String(e)));
 
 async function handleReport(btn) {
   if (!currentUser) { rvToast('Connectez-vous pour signaler un avis.'); return; }
