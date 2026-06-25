@@ -11,7 +11,7 @@ import {
   db, doc, setDoc, getDoc, updateDoc,
   collection, getDocs, deleteDoc, query,
   where, increment, serverTimestamp, writeBatch,
-} from './firebase-config.js';
+} from '/firebase-config.js';
 
 // ──────────────────────────────────────────
 // HELPERS
