@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Avis utilisateurs — Albexia</title>
+  <meta name="description" content="Tous les avis utilisateurs sur cet outil IA — Albexia, l'annuaire IA francophone.">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cpolygon points='16,2 28,30 4,30' fill='none' stroke='%23ff6b9d' stroke-width='2.5' stroke-linejoin='round'/%3E%3Ccircle cx='16' cy='22' r='3' fill='%23ff6b9d'/%3E%3C/svg%3E">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/style.css" />
+  <link rel="stylesheet" href="../../css/tool-detail.css" />
+</head>
+<body>
+
+  <!-- NAV -->
+  <nav>
+    <div class="logo">
+      <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" height="32" aria-label="Albexia">
+        <style>.poly-part{animation:buildIn 1.2s ease-out forwards;opacity:0}.logo-text{animation:fadeIn 1s ease-out 0.8s forwards;opacity:0}@keyframes buildIn{0%{opacity:0;transform:translateY(10px) scale(.8)}100%{opacity:1;transform:translateY(0) scale(1)}}@keyframes fadeIn{0%{opacity:0;transform:translateX(-5px)}100%{opacity:1;transform:translateX(0)}}.part-1{animation-delay:.1s}.part-2{animation-delay:.3s}.part-3{animation-delay:.5s}</style>
+        <polygon class="poly-part part-1" points="2,10 14,32 10,32" fill="#ff6b9d"/>
+        <polygon class="poly-part part-2" points="14,2 18,12 10,12" fill="#ff6b9d" opacity="0.6"/>
+        <polygon class="poly-part part-3" points="26,10 14,32 18,32" fill="#ff6b9d"/>
+        <text class="logo-text" x="36" y="26" font-family="Georgia,serif" font-size="20" font-weight="700" fill="#f0f0f5" letter-spacing="-0.5">Albe<tspan fill="#ff6b9d">x</tspan>ia</text>
+      </svg>
+    </div>
+    <div class="nav-links">
+      <button class="nav-link" onclick="window.location.href='../../index.html'">Accueil</button>
+      <button class="nav-link" onclick="window.location.href='../../index.html#tools'">Outils</button>
+    </div>
+  </nav>
+
+  <!-- BREADCRUMB -->
+  <div class="tool-breadcrumb" id="breadcrumb">
+    <div class="container">
+      <a href="../../index.html">Accueil</a> ›
+      <a href="../../index.html#tools">Outils</a> ›
+      <span id="bc-tool-name">…</span> ›
+      Avis
+    </div>
+  </div>
+
+  <main>
+    <div class="container" style="max-width:760px;margin:0 auto;padding:0 24px 80px">
+
+      <!-- HEADER OUTIL -->
+      <div class="avo-header" id="avo-header">
+        <div class="avo-skeleton-header">
+          <div class="rv-skeleton rv-sk-avatar" style="width:56px;height:56px;border-radius:14px"></div>
+          <div style="flex:1">
+            <div class="rv-skeleton rv-sk-line" style="width:40%;margin-bottom:10px"></div>
+            <div class="rv-skeleton rv-sk-line" style="width:25%"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- BLOC RÉSUMÉ + DISTRIBUTION -->
+      <div id="avo-summary"></div>
+
+      <!-- CONTRÔLES -->
+      <div id="avo-controls"></div>
+
+      <!-- LISTE AVIS -->
+      <div id="avo-list">
+        <div class="rv-skeleton-wrap">${[1,2,3].map(() => `
+          <div class="rv-skeleton-card">
+            <div class="rv-skeleton rv-sk-avatar"></div>
+            <div style="flex:1">
+              <div class="rv-skeleton rv-sk-line" style="width:40%;margin-bottom:8px"></div>
+              <div class="rv-skeleton rv-sk-line" style="width:100%"></div>
+              <div class="rv-skeleton rv-sk-line" style="width:70%;margin-top:6px"></div>
+            </div>
+          </div>`).join('')}
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <footer>
+    <p>© 2026 <a href="../../index.html">Albexia</a> — L'annuaire IA francophone</p>
+  </footer>
+
+  <div id="rv-toast" class="rv-toast"></div>
+
+  <script type="module" src="../../js/avis-outil.js"></script>
+</body>
+</html>
