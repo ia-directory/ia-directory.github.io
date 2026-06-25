@@ -341,8 +341,33 @@ async function handleVote(btn) {
     const newVote = await voteReview(reviewId, currentUser.uid, value);
     userVotes[reviewId] = newVote;
 
-    // Relire depuis Firestore pour avoir les vrais compteurs
-    await loadAll();
+    // Mise à jour chirurgicale du DOM — sans re-render toute la liste
+    const yesBtn = card?.querySelector('.rv-vote-yes');
+    const noBtn  = card?.querySelector('.rv-vote-no');
+    const yesNum = yesBtn?.querySelector('.rv-vote-num');
+    const noNum  = noBtn?.querySelector('.rv-vote-num');
+
+    let yes = parseInt(yesNum?.textContent || '0');
+    let no  = parseInt(noNum?.textContent  || '0');
+
+    const prevVote = userVotes[reviewId] === newVote ? null : value;
+    if (newVote === null) {
+      if (value === 'yes') yes = Math.max(0, yes - 1);
+      else                  no  = Math.max(0, no  - 1);
+    } else {
+      if (newVote === 'yes') yes++;
+      else                    no++;
+      if (prevVote && prevVote !== newVote) {
+        if (prevVote === 'yes') yes = Math.max(0, yes - 1);
+        else                     no  = Math.max(0, no  - 1);
+      }
+    }
+
+    if (yesNum) yesNum.textContent = yes;
+    if (noNum)  noNum.textContent  = no;
+    yesBtn?.classList.toggle('voted', newVote === 'yes');
+    noBtn?.classList.toggle('voted',  newVote === 'no');
+    allBtns?.forEach(b => { b.disabled = false; });
   } catch(e) {
     rvToast('⚠ ' + (e?.code || e?.message || String(e)));
     allBtns?.forEach(b => { b.disabled = false; });
