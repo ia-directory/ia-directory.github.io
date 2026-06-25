@@ -5,7 +5,7 @@
    ═══════════════════════════════════════ */
 
 import { auth, onAuthStateChanged }
-  from '../../js/firebase-config.js';
+  from './js/firebase-config.js';
 
 import {
   getToolReviews,
@@ -16,7 +16,7 @@ import {
   reportReview,
   getUserVote,
   voteReview,
-} from '../../js/reviews.js';
+} from './js/reviews.js';
 
 // ── Config depuis URL ─────────────────────────
 const params   = new URLSearchParams(window.location.search);
