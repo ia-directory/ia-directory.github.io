@@ -75,7 +75,8 @@ async function loadAll() {
   // Mettre à jour le titre de la page
   if (toolMeta.name) {
     document.title = `Avis ${toolMeta.name} — Albexia`;
-    document.getElementById('bc-tool-name').textContent = toolMeta.name;
+    const bcEl = document.getElementById('bc-tool-name');
+    if (bcEl) bcEl.textContent = toolMeta.name;
   }
 
   applyFilterSort();
