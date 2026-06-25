@@ -5,7 +5,7 @@
    ═══════════════════════════════════════ */
 
 import { auth, onAuthStateChanged }
-  from '../../js/firebase-config.js';
+  from '/js/firebase-config.js';
 
 import {
   getToolSlugFromPath,
@@ -17,7 +17,7 @@ import {
   reportReview,
   getUserVote,
   voteReview,
-} from '../../js/reviews.js';
+} from '/js/reviews.js';
 
 // ── Config ────────────────────────────────────
 const TOOL_SLUG    = getToolSlugFromPath(window.location.pathname);
@@ -318,8 +318,41 @@ async function handleVote(btn) {
     const newVote = await voteReview(reviewId, currentUser.uid, value);
     userVotes[reviewId] = newVote;
 
-    // Relire le document depuis Firestore pour avoir les vrais compteurs
-    await refreshWidget();
+    // Mise à jour chirurgicale du DOM — sans re-render toute la section
+    const yesBtn = card?.querySelector('.rv-vote-yes');
+    const noBtn  = card?.querySelector('.rv-vote-no');
+
+    // Lire les compteurs actuels depuis le DOM
+    const yesNum = yesBtn?.querySelector('.rv-vote-num');
+    const noNum  = noBtn?.querySelector('.rv-vote-num');
+
+    // Calculer les nouveaux compteurs
+    let yes = parseInt(yesNum?.textContent || '0');
+    let no  = parseInt(noNum?.textContent  || '0');
+
+    // Annuler l'ancien vote si changement
+    const prevVote = userVotes[reviewId] === newVote ? null : value;
+    if (newVote === null) {
+      // Toggle off
+      if (value === 'yes') yes = Math.max(0, yes - 1);
+      else                  no  = Math.max(0, no  - 1);
+    } else {
+      // Nouveau vote
+      if (newVote === 'yes') yes++;
+      else                    no++;
+      // Retirer l'ancien si changement
+      if (prevVote && prevVote !== newVote) {
+        if (prevVote === 'yes') yes = Math.max(0, yes - 1);
+        else                     no  = Math.max(0, no  - 1);
+      }
+    }
+
+    // Appliquer au DOM
+    if (yesNum) yesNum.textContent = yes;
+    if (noNum)  noNum.textContent  = no;
+    yesBtn?.classList.toggle('voted', newVote === 'yes');
+    noBtn?.classList.toggle('voted',  newVote === 'no');
+    allBtns?.forEach(b => { b.disabled = false; });
   } catch(e) {
     rvToast('⚠ ' + (e?.code || e?.message || String(e)));
     allBtns?.forEach(b => { b.disabled = false; });
