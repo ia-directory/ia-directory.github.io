@@ -5,7 +5,7 @@
    ═══════════════════════════════════════ */
 
 import { auth, onAuthStateChanged }
-  from '/js/firebase-config.js';
+  from '../../js/firebase-config.js';
 
 import {
   getToolReviews,
@@ -16,7 +16,7 @@ import {
   reportReview,
   getUserVote,
   voteReview,
-} from '/js/reviews.js';
+} from '../../js/reviews.js';
 
 // ── Config depuis URL ─────────────────────────
 const params   = new URLSearchParams(window.location.search);
@@ -52,7 +52,6 @@ async function loadAll() {
       currentUser ? getUserReview(currentUser.uid, TOOL_SLUG) : Promise.resolve(null),
     ]);
 
-    // Récupérer meta depuis premier avis ou ratings_summary
     if (allReviews.length) {
       const first = allReviews[0];
       toolMeta.name    = first.toolName    || TOOL_SLUG;
@@ -60,7 +59,6 @@ async function loadAll() {
       toolMeta.page    = first.toolPage    || '';
     }
 
-    // Charger les votes de l'utilisateur
     if (currentUser && allReviews.length) {
       const results = await Promise.all(
         allReviews.map(r => getUserVote(r.id, currentUser.uid).then(v => ({ id: r.id, vote: v })))
@@ -72,7 +70,7 @@ async function loadAll() {
     console.error(e);
   }
 
-  // Mettre à jour le titre de la page
+  // FIX 1 : guard null sur bc-tool-name (évite le crash + chargement infini)
   if (toolMeta.name) {
     document.title = `Avis ${toolMeta.name} — Albexia`;
     const bcEl = document.getElementById('bc-tool-name');
@@ -261,7 +259,6 @@ function renderList() {
 
   el.innerHTML = `<div class="rv-list">${cards}</div>${loadMoreBtn}`;
 
-  // Events votes + signaler + load more
   el.querySelectorAll('.rv-vote-btn').forEach(btn => {
     btn.addEventListener('click', () => handleVote(btn));
   });
@@ -342,7 +339,7 @@ async function handleVote(btn) {
     const newVote = await voteReview(reviewId, currentUser.uid, value);
     userVotes[reviewId] = newVote;
 
-    // Mise à jour chirurgicale du DOM — sans re-render toute la liste
+    // FIX 2 : mise à jour chirurgicale du DOM (sans re-render brutal)
     const yesBtn = card?.querySelector('.rv-vote-yes');
     const noBtn  = card?.querySelector('.rv-vote-no');
     const yesNum = yesBtn?.querySelector('.rv-vote-num');
@@ -351,17 +348,18 @@ async function handleVote(btn) {
     let yes = parseInt(yesNum?.textContent || '0');
     let no  = parseInt(noNum?.textContent  || '0');
 
-    const prevVote = userVotes[reviewId] === newVote ? null : value;
     if (newVote === null) {
+      // Toggle off — retirer le vote
       if (value === 'yes') yes = Math.max(0, yes - 1);
       else                  no  = Math.max(0, no  - 1);
     } else {
+      // Nouveau vote
       if (newVote === 'yes') yes++;
       else                    no++;
-      if (prevVote && prevVote !== newVote) {
-        if (prevVote === 'yes') yes = Math.max(0, yes - 1);
-        else                     no  = Math.max(0, no  - 1);
-      }
+      // Retirer l'ancien si changement de camp
+      const prevVote = value !== newVote ? value : null;
+      if (prevVote === 'yes') yes = Math.max(0, yes - 1);
+      else if (prevVote === 'no') no = Math.max(0, no - 1);
     }
 
     if (yesNum) yesNum.textContent = yes;
@@ -369,6 +367,7 @@ async function handleVote(btn) {
     yesBtn?.classList.toggle('voted', newVote === 'yes');
     noBtn?.classList.toggle('voted',  newVote === 'no');
     allBtns?.forEach(b => { b.disabled = false; });
+
   } catch(e) {
     rvToast('⚠ ' + (e?.code || e?.message || String(e)));
     allBtns?.forEach(b => { b.disabled = false; });
