@@ -335,6 +335,10 @@ async function handleVote(btn) {
   // Par :
 } catch(e) {
   rvToast('⚠ ' + (e?.code || e?.message || String(e)));
+     allBtns?.forEach(b => { b.disabled = false; });
+  }
+}
+
 
 async function handleReport(btn) {
   if (!currentUser) { rvToast('Connectez-vous pour signaler un avis.'); return; }
