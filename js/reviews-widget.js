@@ -313,6 +313,7 @@ async function handleVote(btn) {
   allBtns?.forEach(b => { b.disabled = true; });
 
   try {
+    const prevVote = userVotes[reviewId] || null;  // lire AVANT écrasement
     const newVote = await voteReview(reviewId, currentUser.uid, value);
     userVotes[reviewId] = newVote;
 
@@ -334,7 +335,6 @@ async function handleVote(btn) {
       if (newVote === 'yes') yes++;
       else                    no++;
       // Retirer l'ancien si changement de camp
-      const prevVote = value !== newVote ? value : null;
       if (prevVote === 'yes') yes = Math.max(0, yes - 1);
       else if (prevVote === 'no') no = Math.max(0, no - 1);
     }
