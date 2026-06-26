@@ -345,6 +345,13 @@ async function handleVote(btn) {
     noBtn?.classList.toggle('voted',  newVote === 'no');
     allBtns?.forEach(b => { b.disabled = false; });
 
+    // Sync allReviews en mémoire — évite le drift au changement de filtre/tri
+    const review = allReviews.find(r => r.id === reviewId);
+    if (review) {
+      review.helpful_yes = yes;
+      review.helpful_no  = no;
+    }
+
   } catch(e) {
     rvToast('⚠ ' + (e?.code || e?.message || String(e)));
     allBtns?.forEach(b => { b.disabled = false; });
