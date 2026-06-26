@@ -94,12 +94,6 @@ function applyFilterSort() {
     list.sort((a, b) => (b.updatedAt?.seconds || 0) - (a.updatedAt?.seconds || 0));
   } else if (activeSort === 'oldest') {
     list.sort((a, b) => (a.updatedAt?.seconds || 0) - (b.updatedAt?.seconds || 0));
-  } else if (activeSort === 'useful') {
-    list.sort((a, b) => {
-      const sA = (a.helpful_yes || 0) - (a.helpful_no || 0);
-      const sB = (b.helpful_yes || 0) - (b.helpful_no || 0);
-      return sB - sA;
-    });
   }
 
   filtered = list;
@@ -194,7 +188,6 @@ function renderControls() {
   const sorts = [
     { key: 'recent', label: 'Plus récents' },
     { key: 'oldest', label: 'Plus anciens' },
-    { key: 'useful', label: 'Plus utiles'  },
   ];
 
   el.innerHTML = `
@@ -367,6 +360,13 @@ async function handleVote(btn) {
     yesBtn?.classList.toggle('voted', newVote === 'yes');
     noBtn?.classList.toggle('voted',  newVote === 'no');
     allBtns?.forEach(b => { b.disabled = false; });
+
+    // Sync allReviews en mémoire — évite le drift au changement de filtre/tri
+    const review = allReviews.find(r => r.id === reviewId);
+    if (review) {
+      review.helpful_yes = yes;
+      review.helpful_no  = no;
+    }
 
   } catch(e) {
     rvToast('⚠ ' + (e?.code || e?.message || String(e)));
