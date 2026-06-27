@@ -3489,4 +3489,56 @@ nav .logo { display: flex; align-items: center; }
 }
 .tool-rating-badge { color: #f5a623; } 
 
-   
+
+/* ═══════════════════════════════════════
+   PATCH style.css — Bouton save vidéo
+   À coller à la fin de css/style.css
+   ═══════════════════════════════════════ */
+
+/* ── Pied de carte vidéo (canal + bouton save) ── */
+.outil-video-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+/* ── Bouton sauvegarder vidéo ── */
+.btn-save-video {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 6px;
+  border: 1px solid rgba(255,255,255,0.12);
+  background: transparent;
+  color: var(--text-dim, #888);
+  cursor: pointer;
+  flex-shrink: 0;
+  transition: color .2s, border-color .2s, background .2s;
+}
+
+.btn-save-video:hover {
+  color: #ff6b9d;
+  border-color: rgba(255,107,157,0.4);
+  background: rgba(255,107,157,0.08);
+}
+
+/* État "sauvegardé" */
+.btn-save-video.saved {
+  color: #ff6b9d;
+  border-color: rgba(255,107,157,0.5);
+  background: rgba(255,107,157,0.12);
+}
+
+.btn-save-video.saved svg {
+  fill: #ff6b9d;
+  stroke: #ff6b9d;
+}
+
+.btn-save-video:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
