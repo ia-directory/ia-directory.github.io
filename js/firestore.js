@@ -184,3 +184,36 @@ export async function getPublicCollections(uid) {
     .map(d => ({ id: d.id, ...d.data() }))
     .filter(c => c.isPublic === true);
 }
+
+// ══════════════════════════════════════
+// VIDÉOS SAUVEGARDÉES
+// Stockées dans users/{uid}/savedVideos (sous-collection)
+// Chaque doc : { videoId, outilId, titre, canal, duree, youtubeId, savedAt }
+// ══════════════════════════════════════
+
+// Sauvegarder une vidéo (idempotent : pas de doublon si déjà présente)
+export async function saveVideo(uid, videoData) {
+  const ref = doc(db, 'users', uid, 'savedVideos', videoData.videoId);
+  await setDoc(ref, {
+    videoId:   videoData.videoId,
+    outilId:   videoData.outilId   || '',
+    titre:     videoData.titre     || '',
+    canal:     videoData.canal     || '',
+    duree:     videoData.duree     || '',
+    youtubeId: videoData.youtubeId || '',
+    savedAt:   new Date().toISOString(),
+  });
+}
+
+// Retirer une vidéo sauvegardée
+export async function unsaveVideo(uid, videoId) {
+  const ref = doc(db, 'users', uid, 'savedVideos', videoId);
+  await deleteDoc(ref);
+}
+
+// Lire toutes les vidéos sauvegardées d'un utilisateur (les plus récentes en premier)
+export async function getSavedVideos(uid) {
+  const ref  = collection(db, 'users', uid, 'savedVideos');
+  const snap = await getDocs(query(ref, orderBy('savedAt', 'desc')));
+  return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}

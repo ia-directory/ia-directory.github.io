@@ -33,6 +33,12 @@ document.addEventListener('DOMContentLoaded', async () => {
   bindSoumission();
   bindEscape();
   peuplerSelectSoumission();
+
+  /* Charger la note réelle depuis Firestore (via le script module dans le HTML).
+     On utilise l'id de l'outil comme toolSlug, cohérent avec reviews.js */
+  if (typeof window._chargerNoteReelle === 'function') {
+    window._chargerNoteReelle(OUTIL.outil.id);
+  }
 });
 
 /* ─── CHARGEMENT JSON ─── */
@@ -81,11 +87,14 @@ function renderIdentite() {
   const sub = document.getElementById('outil-sous-titre');
   if (sub) sub.textContent = o.descriptionCourte;
 
-  /* Catégorie + note */
+  /* Catégorie */
   const cat = document.getElementById('outil-cat');
   if (cat) cat.textContent = o.categorie;
+
+  /* Zone note : laissée vide ici, peuplée par _chargerNoteReelle()
+     qui lit Firestore. Si aucun avis réel → reste vide. */
   const note = document.getElementById('outil-note');
-  if (note) note.innerHTML = `${genEtoiles(o.note)} <strong>${o.note}</strong> <span>(${o.avis} avis)</span>`;
+  if (note) note.innerHTML = '';
 
   /* Compteur vidéos */
   const count = document.getElementById('outil-count');
@@ -162,7 +171,8 @@ function setFiltreType(type) {
   if (type !== 'video') {
     OUTIL.filtreDureeMin = 0;
     OUTIL.filtreDureeMax = 999999;
-    document.getElementById('btn-duree-label') && (document.getElementById('btn-duree-label').textContent = 'Durée');
+    const labelEl = document.getElementById('btn-duree-label');
+    if (labelEl) labelEl.textContent = 'Durée';
     document.querySelectorAll('.duree-option').forEach((el, i) => el.classList.toggle('actif', i === 0));
   }
 
@@ -190,7 +200,7 @@ function setFiltreDuree(min, max, el, label) {
 /* ─── GRILLE VIDÉOS FILTRÉE ─── */
 function renderGrille() {
   const container = document.getElementById('outil-video-grille');
-  const compteur = document.getElementById('outil-video-count');
+  const compteur  = document.getElementById('outil-video-count');
   if (!container || !OUTIL.outil) return;
 
   const videos = filtrerVideos();
@@ -208,11 +218,15 @@ function renderGrille() {
   }
 
   container.innerHTML = videos.map(v => carteVideoHTML(v)).join('');
+
+  /* Rafraîchir l'état des boutons save selon les vidéos déjà sauvegardées */
+  if (typeof window._refreshSaveBtns === 'function') {
+    window._refreshSaveBtns();
+  }
 }
 
 function filtrerVideos() {
   return OUTIL.outil.videos.filter(v => {
-    /* Filtre durée (si filtre vidéo actif) */
     if (OUTIL.filtreType === 'video') {
       if (v.dureeSecondes < OUTIL.filtreDureeMin) return false;
       if (v.dureeSecondes > OUTIL.filtreDureeMax) return false;
@@ -223,11 +237,20 @@ function filtrerVideos() {
 
 /* ─── CARTE VIDÉO ─── */
 function carteVideoHTML(v) {
+  /* Données sérialisées pour le bouton save (pas de quotes simples dans les titres) */
+  const videoDataAttr = escHTML(JSON.stringify({
+    videoId:  v.id,
+    outilId:  OUTIL.outil.id,
+    titre:    v.titre,
+    canal:    v.canal,
+    duree:    v.duree,
+    youtubeId: v.youtubeId,
+  }));
+
   return `
-  <div class="outil-video-card"
-       onclick="ouvrirPlayer('${v.youtubeId}','${escHTML(v.titre)}')"
-       title="${escHTML(v.titre)}">
-    <div class="outil-video-thumb">
+  <div class="outil-video-card" title="${escHTML(v.titre)}">
+    <div class="outil-video-thumb"
+         onclick="ouvrirPlayer('${v.youtubeId}','${escHTML(v.titre).replace(/'/g,'&#39;')}')">
       <img src="https://img.youtube.com/vi/${v.youtubeId}/mqdefault.jpg"
            alt="${escHTML(v.titre)}"
            loading="lazy"
@@ -241,18 +264,35 @@ function carteVideoHTML(v) {
       <span class="thumb-duree">${escHTML(v.duree)}</span>
     </div>
     <div class="outil-video-info">
-      <p class="outil-video-titre">${escHTML(v.titre)}</p>
-      <p class="outil-video-canal">
-        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-        ${escHTML(v.canal)}
+      <p class="outil-video-titre"
+         onclick="ouvrirPlayer('${v.youtubeId}','${escHTML(v.titre).replace(/'/g,'&#39;')}')">
+        ${escHTML(v.titre)}
       </p>
+      <div class="outil-video-footer">
+        <p class="outil-video-canal">
+          <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+          ${escHTML(v.canal)}
+        </p>
+        <!-- Bouton sauvegarder -->
+        <button
+          class="btn-save-video"
+          data-video-id="${escHTML(v.id)}"
+          title="Sauvegarder cette vidéo"
+          aria-label="Sauvegarder cette vidéo"
+          onclick="event.stopPropagation(); window._toggleSaveVideo(this, JSON.parse(this.dataset.videoData));"
+          data-video-data="${videoDataAttr}">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+          </svg>
+        </button>
+      </div>
     </div>
   </div>`;
 }
 
 /* ─── PLAYER MODAL ─── */
 function ouvrirPlayer(youtubeId, titre) {
-  const modal = document.getElementById('tuto-player-modal');
+  const modal  = document.getElementById('tuto-player-modal');
   const iframe = document.getElementById('tuto-player-iframe');
   const titreEl = document.getElementById('tuto-player-titre');
   if (!modal || !iframe) return;
@@ -265,7 +305,7 @@ function ouvrirPlayer(youtubeId, titre) {
 }
 
 function fermerPlayer() {
-  const modal = document.getElementById('tuto-player-modal');
+  const modal  = document.getElementById('tuto-player-modal');
   const iframe = document.getElementById('tuto-player-iframe');
   if (!modal) return;
   modal.classList.remove('open');
@@ -276,7 +316,7 @@ function fermerPlayer() {
 
 /* Clic backdrop */
 document.addEventListener('click', e => {
-  if (e.target.id === 'tuto-player-modal') fermerPlayer();
+  if (e.target.id === 'tuto-player-modal')    fermerPlayer();
   if (e.target.id === 'tuto-modal-soumission') fermerModalSoumission();
 });
 
@@ -296,7 +336,6 @@ function ouvrirModalSoumission(outilId, outilNom) {
   if (!modal) return;
   if (nomEl) nomEl.textContent = outilNom || 'cet outil';
   if (idEl)  idEl.value = outilId || '';
-  /* Pré-sélectionner l'outil dans le select */
   const sel = document.getElementById('s-outil');
   if (sel && outilId) sel.value = outilId;
   modal.classList.add('open');
@@ -347,13 +386,6 @@ function peuplerSelectSoumission() {
 /* ─── UTILITAIRES ─── */
 function lireParamURL(param) {
   return new URLSearchParams(window.location.search).get(param);
-}
-
-function genEtoiles(note) {
-  const plein = Math.floor(note);
-  const demi  = note % 1 >= 0.5 ? 1 : 0;
-  const vide  = 5 - plein - demi;
-  return '★'.repeat(plein) + (demi ? '½' : '') + '☆'.repeat(vide);
 }
 
 function hexToRgba(hex, alpha) {
