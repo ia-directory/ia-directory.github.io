@@ -1126,13 +1126,140 @@
     .price-free     { background: rgba(0,212,170,.15); color: #00d4aa; }
     .price-freemium { background: rgba(108,99,255,.15); color: #6c63ff; }
     .price-paid     { background: rgba(255,107,157,.15); color: #ff6b9d; }
+
+    /* ── VIDÉOS SAUVEGARDÉES ───────────────────── */
+    .saved-videos-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .saved-video-card {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      transition: border-color .2s, transform .2s;
+    }
+    .saved-video-card:hover {
+      border-color: rgba(108,99,255,.4);
+      transform: translateY(-2px);
+    }
+    .saved-video-thumb {
+      position: relative;
+      aspect-ratio: 16/9;
+      overflow: hidden;
+      cursor: pointer;
+      background: #111;
+    }
+    .saved-video-thumb img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      transition: transform .3s;
+    }
+    .saved-video-thumb:hover img { transform: scale(1.04); }
+    .saved-video-play {
+      position: absolute;
+      inset: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      background: rgba(0,0,0,.4);
+      opacity: 0;
+      transition: opacity .2s;
+      color: #fff;
+    }
+    .saved-video-thumb:hover .saved-video-play { opacity: 1; }
+    .saved-video-duree {
+      position: absolute;
+      bottom: 8px;
+      right: 8px;
+      background: rgba(0,0,0,.75);
+      color: #fff;
+      font-size: .72rem;
+      font-weight: 600;
+      padding: 2px 7px;
+      border-radius: 4px;
+    }
+    .saved-video-info {
+      padding: 12px 14px 14px;
+    }
+    .saved-video-titre {
+      font-size: .875rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 6px;
+      cursor: pointer;
+      display: -webkit-box;
+      -webkit-line-clamp: 2;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+      line-height: 1.4;
+    }
+    .saved-video-titre:hover { color: var(--accent); }
+    .saved-video-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: .78rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+      flex-wrap: wrap;
+    }
+    .saved-video-outil {
+      color: var(--accent);
+      text-decoration: none;
+      font-size: .75rem;
+    }
+    .saved-video-outil:hover { text-decoration: underline; }
+    .saved-video-foot {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .saved-video-date { font-size: .75rem; color: var(--muted); }
+    .btn-unsave-video {
+      background: none;
+      border: 1px solid rgba(255,71,87,.3);
+      color: var(--danger);
+      border-radius: 6px;
+      padding: 4px 10px;
+      font-size: .75rem;
+      cursor: pointer;
+      transition: background .2s;
+    }
+    .btn-unsave-video:hover { background: rgba(255,71,87,.1); }
   </style>
 </head>
 <body>
 
 <!-- ── NAV ─────────────────────────────────────── -->
 <nav class="nav">
-  <a href="index.html" class="nav-logo">Alb<span>e</span>xia</a>
+  <a href="index.html" class="nav-logo" style="text-decoration:none;">
+    <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" height="28" aria-label="Albexia">
+      <style>
+        .pp-poly { animation: ppBuild 1.2s ease-out forwards; opacity: 0; }
+        .pp-text { animation: ppFade 1s ease-out 0.8s forwards; opacity: 0; }
+        @keyframes ppBuild {
+          0%   { opacity:0; transform:translateY(10px) scale(0.8); }
+          100% { opacity:1; transform:translateY(0) scale(1); }
+        }
+        @keyframes ppFade {
+          0%   { opacity:0; transform:translateX(-5px); }
+          100% { opacity:1; transform:translateX(0); }
+        }
+        .pp-p1 { animation-delay:.1s; }
+        .pp-p2 { animation-delay:.3s; }
+        .pp-p3 { animation-delay:.5s; }
+      </style>
+      <polygon class="pp-poly pp-p1" points="2,10 14,32 10,32" fill="#ff6b9d"/>
+      <polygon class="pp-poly pp-p2" points="14,2 18,12 10,12" fill="#ff6b9d" opacity="0.6"/>
+      <polygon class="pp-poly pp-p3" points="26,10 14,32 18,32" fill="#ff6b9d"/>
+      <text class="pp-text" x="36" y="26" font-family="Georgia, serif" font-size="20" font-weight="700" fill="#f0f0f5" letter-spacing="-0.5">
+        Albe<tspan fill="#ff6b9d">x</tspan>ia
+      </text>
+    </svg>
+  </a>
   <a href="index.html" class="nav-back">← Retour à l'annuaire</a>
 </nav>
 
@@ -1197,8 +1324,9 @@
   <div class="mobile-tabs">
     <button class="mobile-tab active" onclick="switchSection('collections')">📁 Collections</button>
     <button class="mobile-tab" onclick="switchSection('quiz')">🧠 Quiz</button>
-    <button class="mobile-tab" onclick="switchSection('avis')">💬 Mes Avis</button>
-    <button class="mobile-tab" onclick="switchSection('parametres')">⚙️ Paramètres</button>
+    <button class="mobile-tab" onclick="switchSection('avis')">💬 Avis</button>
+    <button class="mobile-tab" onclick="switchSection('videos')">🎬 Vidéos</button>
+    <button class="mobile-tab" onclick="switchSection('parametres')">⚙️ Params</button>
   </div>
 
   <div class="profile-layout">
@@ -1237,6 +1365,11 @@
           <span class="sidebar-item-icon">💬</span>
           <span class="sidebar-item-label">Mes Avis</span>
           <span class="sidebar-badge" id="avis-count">0</span>
+        </button>
+        <button class="sidebar-item" data-section="videos" data-tooltip="Vidéos sauvegardées" onclick="switchSection('videos')">
+          <span class="sidebar-item-icon">🎬</span>
+          <span class="sidebar-item-label">Vidéos sauvegardées</span>
+          <span class="sidebar-badge" id="videos-count">0</span>
         </button>
         <button class="sidebar-item" data-section="parametres" data-tooltip="Paramètres" onclick="switchSection('parametres')">
           <span class="sidebar-item-icon">⚙️</span>
@@ -1292,7 +1425,17 @@
         </div>
       </div>
 
-      <!-- 4. PARAMÈTRES -->
+      <!-- 4. VIDÉOS SAUVEGARDÉES -->
+      <div class="profile-section" id="section-videos">
+        <div class="section-header">
+          <div class="section-title">🎬 Vidéos sauvegardées</div>
+        </div>
+        <div id="saved-videos-container">
+          <div class="loader"><div class="spinner"></div> Chargement…</div>
+        </div>
+      </div>
+
+      <!-- 5. PARAMÈTRES -->
       <div class="profile-section" id="section-parametres">
         <div class="section-header">
           <div class="section-title">⚙️ Paramètres</div>
@@ -1437,7 +1580,8 @@
     removeToolFromCollection,
     getQuizHistory, deleteQuizSession, saveQuizSession,
     getUserProfile, updateDisplayName, updateLangue, updateNewsletter, updatePhotoURL,
-    updateSkipExitModal, setCollectionPublic
+    updateSkipExitModal, setCollectionPublic,
+    getSavedVideos, unsaveVideo
   } from './js/firestore.js';
   import { getUserReviews, deleteUserReview } from './js/reviews.js';
 
@@ -1446,6 +1590,7 @@
   let userProfile    = null;
   let collections    = [];
   let quizHistory    = [];
+  let savedVideos    = [];
   let renameTargetId = null;
   let toastTimer     = null;
 
@@ -1814,6 +1959,7 @@
       await loadCollections();
       await loadQuizHistory();
       await loadAvis();
+      await loadSavedVideos();
       initPrefs();
       // Lancer le quiz si redirigé depuis index.html
       if (window._pendingQuizOpen) {
@@ -2263,6 +2409,93 @@
       userAvis = userAvis.filter(r => r.toolSlug !== toolSlug);
       renderAvis();
       showToast('Avis supprimé.');
+    } catch(e) {
+      showToast('⚠ Erreur lors de la suppression.');
+      console.error(e);
+    }
+  };
+
+  // ══════════════════════════════════════════════
+  // VIDÉOS SAUVEGARDÉES
+  // ══════════════════════════════════════════════
+
+  async function loadSavedVideos() {
+    try {
+      savedVideos = await getSavedVideos(currentUser.uid);
+    } catch(e) {
+      savedVideos = [];
+    }
+    renderSavedVideos();
+  }
+
+  function renderSavedVideos() {
+    const container = document.getElementById('saved-videos-container');
+    if (!container) return;
+
+    const countEl = document.getElementById('videos-count');
+    if (countEl) countEl.textContent = savedVideos.length;
+
+    if (savedVideos.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">🎬</div>
+          <p>Aucune vidéo sauvegardée.<br>
+             Sur une fiche tutoriel, clique sur 🔖 pour retrouver la vidéo ici.</p>
+          <a href="./tutoriels.html" class="btn-primary btn-sm"
+             style="display:inline-block;text-decoration:none">Parcourir les tutoriels →</a>
+        </div>`;
+      return;
+    }
+
+    const cardsHtml = savedVideos.map(v => {
+      const savedDate = v.savedAt
+        ? new Date(v.savedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+        : '';
+
+      return `
+        <div class="saved-video-card">
+          <div class="saved-video-thumb"
+               onclick="window.open('https://www.youtube.com/watch?v=${escHtml(v.youtubeId)}','_blank')"
+               title="Regarder sur YouTube">
+            <img src="https://img.youtube.com/vi/${escHtml(v.youtubeId)}/mqdefault.jpg"
+                 alt="${escHtml(v.titre)}"
+                 loading="lazy"
+                 onerror="this.src='assets/placeholder-video.svg'">
+            <div class="saved-video-play">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor"><polygon points="5 3 19 12 5 21 5 3"/></svg>
+            </div>
+            <span class="saved-video-duree">${escHtml(v.duree)}</span>
+          </div>
+          <div class="saved-video-info">
+            <p class="saved-video-titre"
+               onclick="window.open('https://www.youtube.com/watch?v=${escHtml(v.youtubeId)}','_blank')">
+              ${escHtml(v.titre)}
+            </p>
+            <p class="saved-video-meta">
+              <span>${escHtml(v.canal)}</span>
+              ${v.outilId ? `<a href="tutoriel-outil.html?outil=${escHtml(v.outilId)}" class="saved-video-outil">Voir la vidéothèque →</a>` : ''}
+            </p>
+            <div class="saved-video-foot">
+              <span class="saved-video-date">📅 ${savedDate}</span>
+              <button class="btn-unsave-video"
+                      onclick="handleUnsaveVideo('${escHtml(v.videoId)}')">
+                🗑 Retirer
+              </button>
+            </div>
+          </div>
+        </div>`;
+    }).join('');
+
+    container.innerHTML = `<div class="saved-videos-grid">${cardsHtml}</div>`;
+  }
+
+  window.handleUnsaveVideo = async function(videoId) {
+    if (!confirm('Retirer cette vidéo de vos sauvegardes ?')) return;
+    try {
+      await unsaveVideo(currentUser.uid, videoId);
+      savedVideos = savedVideos.filter(v => v.videoId !== videoId);
+      renderSavedVideos();
+      showToast('Vidéo retirée.');
     } catch(e) {
       showToast('⚠ Erreur lors de la suppression.');
       console.error(e);

@@ -41,15 +41,45 @@
      ════════════════════════ -->
 <nav>
   <a href="index.html" class="logo" style="text-decoration:none;color:inherit;">
-    Albex<span class="dot">ia</span>
+    <div class="logo">
+      <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" height="32" aria-label="Albexia">
+        <style>
+          .poly-part {
+            animation: buildIn 1.2s ease-out forwards;
+            opacity: 0;
+          }
+          .logo-text {
+            animation: fadeIn 1s ease-out 0.8s forwards;
+            opacity: 0;
+          }
+          @keyframes buildIn {
+            0%   { opacity: 0; transform: translateY(10px) scale(0.8); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+          }
+          @keyframes fadeIn {
+            0%   { opacity: 0; transform: translateX(-5px); }
+            100% { opacity: 1; transform: translateX(0); }
+          }
+          .part-1 { animation-delay: 0.1s; }
+          .part-2 { animation-delay: 0.3s; }
+          .part-3 { animation-delay: 0.5s; }
+        </style>
+        <polygon class="poly-part part-1" points="2,10 14,32 10,32" fill="#ff6b9d"/>
+        <polygon class="poly-part part-2" points="14,2 18,12 10,12" fill="#ff6b9d" opacity="0.6"/>
+        <polygon class="poly-part part-3" points="26,10 14,32 18,32" fill="#ff6b9d"/>
+        <text class="logo-text" x="36" y="26" font-family="Georgia, serif" font-size="20" font-weight="700" fill="#f0f0f5" letter-spacing="-0.5">
+          Albe<tspan fill="#ff6b9d">x</tspan>ia
+        </text>
+      </svg>
+    </div>
   </a>
   <div class="nav-links">
-    <a href="index.html"      class="nav-link" style="text-decoration:none;">Outils</a>
-    <a href="blog.html"       class="nav-link" style="text-decoration:none;">Blog</a>
-    <a href="galerie.html"    class="nav-link" style="text-decoration:none;">Galerie</a>
-    <a href="tutoriels.html"  class="nav-link active" style="text-decoration:none;">Tutoriels</a>
+    <a href="index.html"       class="nav-link" style="text-decoration:none;">Outils</a>
+    <a href="blog.html"        class="nav-link" style="text-decoration:none;">Blog</a>
+    <a href="galerie.html"     class="nav-link" style="text-decoration:none;">Galerie</a>
+    <a href="tutoriels.html"   class="nav-link active" style="text-decoration:none;">Tutoriels</a>
     <a href="comparateur.html" class="nav-link" style="text-decoration:none;">Comparateur</a>
-    <a href="ressources.html" class="nav-link" style="text-decoration:none;">Ressources</a>
+    <a href="ressources.html"  class="nav-link" style="text-decoration:none;">Ressources</a>
   </div>
   <button class="nav-cta" id="btn-soumettre-header">
     ↑ Soumettre un tutoriel
@@ -92,6 +122,7 @@
       </div>
       <h1 id="outil-h1" class="outil-h1">Maîtrisez l'outil : La vidéothèque complète</h1>
       <p id="outil-sous-titre" class="outil-sous-titre">Chargement…</p>
+      <!-- Zone note : vide au départ, peuplée par le script module si avis réels existent -->
       <div id="outil-note" class="outil-note"></div>
       <div id="outil-tags" class="tuto-card-tags" style="margin-top:14px;padding:0;"></div>
     </div>
@@ -115,7 +146,6 @@
         <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="23 7 16 12 23 17 23 7"/><rect x="1" y="5" width="15" height="14" rx="2"/></svg>
         Vidéos
       </button>
-
     </div>
 
     <!-- Dropdown durée (visible seulement quand filtre = Vidéos) -->
@@ -261,8 +291,108 @@
 </footer>
 
 <!-- ════════════════════════
-     SCRIPT
+     SCRIPT MODULE — Note Firestore + Auth pour save vidéo
+     Chargé EN PREMIER pour que les fonctions soient
+     disponibles quand tutoriel-outil.js s'initialise
      ════════════════════════ -->
+<script type="module">
+  import { getRatingSummary } from './js/reviews.js';
+  import { auth }             from './js/firebase-config.js';
+  import { saveVideo, unsaveVideo, getSavedVideos } from './js/firestore.js';
+  import { onAuthStateChanged } from './js/firebase-config.js';
+
+  /* ── État utilisateur courant ── */
+  let _currentUser     = null;
+  let _savedVideoIds   = new Set();
+
+  onAuthStateChanged(auth, async (user) => {
+    _currentUser = user;
+    if (user) {
+      const saved = await getSavedVideos(user.uid);
+      _savedVideoIds = new Set(saved.map(v => v.videoId));
+    } else {
+      _savedVideoIds = new Set();
+    }
+    /* Rafraîchir l'état des boutons save si la grille est déjà rendue */
+    window._refreshSaveBtns?.();
+  });
+
+  /* ── Note réelle depuis Firestore ──
+     Appelée par tutoriel-outil.js via window._chargerNoteReelle()
+     après renderIdentite() */
+  window._chargerNoteReelle = async function(toolSlug) {
+    try {
+      const { ratingAverage, ratingCount } = await getRatingSummary(toolSlug);
+      const noteEl = document.getElementById('outil-note');
+      if (!noteEl) return;
+      if (!ratingCount || ratingCount === 0) {
+        /* Aucun avis → on n'affiche rien */
+        noteEl.innerHTML = '';
+        return;
+      }
+      const plein = Math.floor(ratingAverage);
+      const demi  = (ratingAverage % 1) >= 0.5 ? 1 : 0;
+      const vide  = 5 - plein - demi;
+      const etoiles = '★'.repeat(plein) + (demi ? '½' : '') + '☆'.repeat(vide);
+      noteEl.innerHTML = `${etoiles} <strong>${ratingAverage}</strong> <span>(${ratingCount} avis)</span>`;
+    } catch (e) {
+      /* En cas d'erreur Firestore, on masque silencieusement */
+      const noteEl = document.getElementById('outil-note');
+      if (noteEl) noteEl.innerHTML = '';
+    }
+  };
+
+  /* ── Toggle save vidéo ──
+     Appelé depuis chaque bouton 🔖 dans carteVideoHTML() */
+  window._toggleSaveVideo = async function(btn, videoData) {
+    if (!_currentUser) {
+      /* Rediriger vers profil pour connexion */
+      window.location.href = 'profil.html';
+      return;
+    }
+    const uid     = _currentUser.uid;
+    const videoId = videoData.videoId;
+    const saving  = !_savedVideoIds.has(videoId);
+
+    btn.disabled = true;
+    try {
+      if (saving) {
+        await saveVideo(uid, videoData);
+        _savedVideoIds.add(videoId);
+        btn.classList.add('saved');
+        btn.title = 'Retirer des vidéos sauvegardées';
+        btn.setAttribute('aria-label', 'Retirer des vidéos sauvegardées');
+      } else {
+        await unsaveVideo(uid, videoId);
+        _savedVideoIds.delete(videoId);
+        btn.classList.remove('saved');
+        btn.title = 'Sauvegarder cette vidéo';
+        btn.setAttribute('aria-label', 'Sauvegarder cette vidéo');
+      }
+    } catch (e) {
+      console.error('[Albexia] Erreur save vidéo :', e);
+    }
+    btn.disabled = false;
+  };
+
+  /* ── Rafraîchir l'état saved de tous les boutons ──
+     Utile quand la grille est rendue avant que onAuthStateChanged réponde */
+  window._refreshSaveBtns = function() {
+    document.querySelectorAll('.btn-save-video[data-video-id]').forEach(btn => {
+      const isSaved = _savedVideoIds.has(btn.dataset.videoId);
+      btn.classList.toggle('saved', isSaved);
+      btn.title = isSaved ? 'Retirer des vidéos sauvegardées' : 'Sauvegarder cette vidéo';
+    });
+  };
+
+  /* ── Exposer l'état user pour tutoriel-outil.js ──
+     Permet de savoir si l'user est connecté au moment du render */
+  window._getAuthState = function() {
+    return { user: _currentUser, savedIds: _savedVideoIds };
+  };
+</script>
+
+<!-- Script principal (classic — chargé après le module) -->
 <script src="js/tutoriel-outil.js"></script>
 
 </body>
