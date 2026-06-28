@@ -2455,8 +2455,8 @@
       return `
         <div class="saved-video-card">
           <div class="saved-video-thumb"
-               onclick="window.open('https://www.youtube.com/watch?v=${escHtml(v.youtubeId)}','_blank')"
-               title="Regarder sur YouTube">
+               onclick="ouvrirPlayerProfil('${escHtml(v.youtubeId)}','${escHtml(v.titre).replace(/'/g,"&#39;")}')"
+               title="Regarder la vidéo">
             <img src="https://img.youtube.com/vi/${escHtml(v.youtubeId)}/mqdefault.jpg"
                  alt="${escHtml(v.titre)}"
                  loading="lazy"
@@ -2468,7 +2468,7 @@
           </div>
           <div class="saved-video-info">
             <p class="saved-video-titre"
-               onclick="window.open('https://www.youtube.com/watch?v=${escHtml(v.youtubeId)}','_blank')">
+               onclick="ouvrirPlayerProfil('${escHtml(v.youtubeId)}','${escHtml(v.titre).replace(/'/g,"&#39;")}')">
               ${escHtml(v.titre)}
             </p>
             <p class="saved-video-meta">
@@ -2558,12 +2558,71 @@
 
   document.addEventListener('keydown', e => {
     if (e.key === 'Escape') {
+      /* Fermer le player vidéo s'il est ouvert */
+      const playerModal = document.getElementById('profil-player-modal');
+      if (playerModal?.classList.contains('open')) {
+        fermerPlayerProfil();
+        return;
+      }
       document.querySelectorAll('.modal-overlay').forEach(o => o.classList.remove('open'));
       document.body.style.overflow = '';
       renameTargetId = null;
     }
   });
+
+  /* ── Player modal vidéo dans le profil ── */
+  window.ouvrirPlayerProfil = function(youtubeId, titre) {
+    const modal   = document.getElementById('profil-player-modal');
+    const iframe  = document.getElementById('profil-player-iframe');
+    const titreEl = document.getElementById('profil-player-titre');
+    if (!modal || !iframe) return;
+    iframe.src = `https://www.youtube.com/embed/${youtubeId}?autoplay=1&rel=0`;
+    if (titreEl) titreEl.textContent = titre;
+    modal.classList.add('open');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.fermerPlayerProfil = function() {
+    const modal  = document.getElementById('profil-player-modal');
+    const iframe = document.getElementById('profil-player-iframe');
+    if (!modal) return;
+    modal.classList.remove('open');
+    if (iframe) iframe.src = '';
+    document.body.style.overflow = '';
+  };
+
+  /* Clic sur le backdrop pour fermer */
+  document.getElementById('profil-player-modal')?.addEventListener('click', e => {
+    if (e.target.id === 'profil-player-modal') fermerPlayerProfil();
+  });
 </script>
+
+<!-- ── MODAL PLAYER VIDÉO (profil) ── -->
+<div id="profil-player-modal"
+     class="tuto-player-modal"
+     role="dialog" aria-modal="true" aria-label="Lecteur vidéo">
+  <div class="tuto-player-inner">
+    <div class="tuto-player-top">
+      <p id="profil-player-titre" class="tuto-player-titre"></p>
+      <button class="tuto-player-close"
+              onclick="fermerPlayerProfil()"
+              aria-label="Fermer le lecteur">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+          <line x1="18" y1="6" x2="6" y2="18"/>
+          <line x1="6" y1="6" x2="18" y2="18"/>
+        </svg>
+      </button>
+    </div>
+    <div class="tuto-player-frame">
+      <iframe id="profil-player-iframe"
+        src=""
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen
+        title="Tutoriel vidéo">
+      </iframe>
+    </div>
+  </div>
+</div>
 
 </body>
 </html>

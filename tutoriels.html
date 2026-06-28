@@ -57,7 +57,19 @@
      ════════════════════════════ -->
 <nav>
   <a href="index.html" class="logo" style="text-decoration:none;color:inherit;">
-    Albex<span class="dot">ia</span>
+    <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" height="32" aria-label="Albexia">
+      <style>
+        .tl-poly { animation: tlBuild 1.2s ease-out forwards; opacity:0; }
+        .tl-text { animation: tlFade  1s ease-out 0.8s forwards; opacity:0; }
+        @keyframes tlBuild { 0%{opacity:0;transform:translateY(10px) scale(.8)} 100%{opacity:1;transform:translateY(0) scale(1)} }
+        @keyframes tlFade  { 0%{opacity:0;transform:translateX(-5px)} 100%{opacity:1;transform:translateX(0)} }
+        .tl-p1{animation-delay:.1s} .tl-p2{animation-delay:.3s} .tl-p3{animation-delay:.5s}
+      </style>
+      <polygon class="tl-poly tl-p1" points="2,10 14,32 10,32" fill="#ff6b9d"/>
+      <polygon class="tl-poly tl-p2" points="14,2 18,12 10,12" fill="#ff6b9d" opacity="0.6"/>
+      <polygon class="tl-poly tl-p3" points="26,10 14,32 18,32" fill="#ff6b9d"/>
+      <text class="tl-text" x="36" y="26" font-family="Georgia,serif" font-size="20" font-weight="700" fill="#f0f0f5" letter-spacing="-0.5">Albe<tspan fill="#ff6b9d">x</tspan>ia</text>
+    </svg>
   </a>
   <div class="nav-links">
     <a href="index.html" class="nav-link" style="text-decoration:none;">Outils</a>
@@ -254,6 +266,85 @@
 <!-- ════════════════════════════
      SCRIPTS
      ════════════════════════════ -->
+<!-- ════════════════════════════
+     SCRIPT MODULE — Firestore note réelle + auth save vidéo
+     ════════════════════════════ -->
+<script type="module">
+  import { getRatingSummary } from './js/reviews.js';
+  import { auth }             from './js/firebase-config.js';
+  import { saveVideo, unsaveVideo, getSavedVideos } from './js/firestore.js';
+  import { onAuthStateChanged } from './js/firebase-config.js';
+
+  let _currentUser   = null;
+  let _savedVideoIds = new Set();
+
+  onAuthStateChanged(auth, async (user) => {
+    _currentUser = user;
+    if (user) {
+      const saved = await getSavedVideos(user.uid);
+      _savedVideoIds = new Set(saved.map(v => v.videoId));
+    } else {
+      _savedVideoIds = new Set();
+    }
+    window._refreshSaveBtnsTuto?.();
+  });
+
+  /* Charger la note réelle pour un outil — appelé depuis tutoriels.js */
+  window._chargerNoteOutil = async function(outilId, noteEl, avisEl) {
+    try {
+      const { ratingAverage, ratingCount } = await getRatingSummary(outilId);
+      if (!ratingCount) {
+        /* Pas d'avis réels → masquer les deux éléments */
+        if (noteEl) noteEl.style.display = 'none';
+        if (avisEl) avisEl.style.display = 'none';
+        return;
+      }
+      const plein   = Math.floor(ratingAverage);
+      const demi    = (ratingAverage % 1) >= 0.5 ? 1 : 0;
+      const vide    = 5 - plein - demi;
+      const etoiles = '★'.repeat(plein) + (demi ? '½' : '') + '☆'.repeat(vide);
+      if (noteEl) noteEl.innerHTML = `${etoiles} <span>${ratingAverage}</span>`;
+      if (avisEl) avisEl.textContent = `${ratingCount} avis`;
+    } catch {
+      if (noteEl) noteEl.style.display = 'none';
+      if (avisEl) avisEl.style.display = 'none';
+    }
+  };
+
+  /* Toggle save vidéo */
+  window._toggleSaveVideo = async function(btn, videoData) {
+    if (!_currentUser) { window.location.href = 'profil.html'; return; }
+    const uid     = _currentUser.uid;
+    const videoId = videoData.videoId;
+    const saving  = !_savedVideoIds.has(videoId);
+    btn.disabled  = true;
+    try {
+      if (saving) {
+        await saveVideo(uid, videoData);
+        _savedVideoIds.add(videoId);
+        btn.classList.add('saved');
+        btn.title = 'Retirer des vidéos sauvegardées';
+      } else {
+        await unsaveVideo(uid, videoId);
+        _savedVideoIds.delete(videoId);
+        btn.classList.remove('saved');
+        btn.title = 'Sauvegarder cette vidéo';
+      }
+    } catch(e) { console.error('[Albexia] save vidéo :', e); }
+    btn.disabled = false;
+  };
+
+  window._refreshSaveBtnsTuto = function() {
+    document.querySelectorAll('.btn-save-video[data-video-id]').forEach(btn => {
+      const saved = _savedVideoIds.has(btn.dataset.videoId);
+      btn.classList.toggle('saved', saved);
+      btn.title = saved ? 'Retirer des vidéos sauvegardées' : 'Sauvegarder cette vidéo';
+    });
+  };
+
+  window._getAuthStateTuto = () => ({ user: _currentUser, savedIds: _savedVideoIds });
+</script>
+
 <script src="js/tutoriels.js"></script>
 
 </body>
