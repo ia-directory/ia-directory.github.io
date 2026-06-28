@@ -62,11 +62,19 @@ function renderCartes() {
   container.querySelectorAll('.tuto-card-btn').forEach(btn => {
     btn.addEventListener('click', () => toggleCarte(btn.dataset.id));
   });
+
+  /* Charger les vraies notes Firestore pour chaque outil */
+  TUTO.data.outils.forEach(outil => {
+    const noteEl = document.getElementById(`note-${outil.id}`);
+    const avisEl = document.getElementById(`avis-${outil.id}`);
+    if (typeof window._chargerNoteOutil === 'function') {
+      window._chargerNoteOutil(outil.id, noteEl, avisEl);
+    }
+  });
 }
 
 /* ─── CARTE HTML ─── */
 function carteHTML(outil) {
-  const etoiles = genEtoiles(outil.note);
   const videosPrev = outil.videos.slice(0, 5);
   return `
   <article class="tuto-card" id="carte-${outil.id}" data-id="${outil.id}">
@@ -79,8 +87,9 @@ function carteHTML(outil) {
         </div>
       </div>
       <div class="tuto-card-meta">
-        <div class="tuto-card-note">${etoiles} <span>${outil.note}</span></div>
-        <span class="tuto-card-avis">${outil.avis} avis</span>
+        <!-- Note et avis : peuplés par Firestore, masqués si aucun avis réel -->
+        <div class="tuto-card-note" id="note-${outil.id}"></div>
+        <span class="tuto-card-avis" id="avis-${outil.id}"></span>
         <span class="tuto-card-badge-count">${outil.videos.length} vidéos</span>
       </div>
     </div>
@@ -126,9 +135,19 @@ function carteHTML(outil) {
 
 /* ─── MINIATURE VIDÉO ─── */
 function miniatureHTML(video, outil) {
+  const videoDataAttr = escHTML(JSON.stringify({
+    videoId:   video.id,
+    outilId:   outil.id,
+    titre:     video.titre,
+    canal:     video.canal,
+    duree:     video.duree,
+    youtubeId: video.youtubeId,
+  }));
+
   return `
-  <div class="tuto-thumb" onclick="ouvrirPlayer('${video.youtubeId}','${escHTML(video.titre)}')" title="${escHTML(video.titre)}">
-    <div class="tuto-thumb-img">
+  <div class="tuto-thumb" title="${escHTML(video.titre)}">
+    <div class="tuto-thumb-img"
+         onclick="ouvrirPlayer('${video.youtubeId}','${escHTML(video.titre).replace(/'/g,"&#39;")}')">
       <img src="https://img.youtube.com/vi/${video.youtubeId}/mqdefault.jpg"
            alt="${escHTML(video.titre)}"
            loading="lazy"
@@ -139,8 +158,23 @@ function miniatureHTML(video, outil) {
       <span class="thumb-badge badge-video">▶ Vidéo</span>
       <span class="thumb-duree">${video.duree}</span>
     </div>
-    <p class="thumb-titre">${escHTML(video.titre)}</p>
-    <p class="thumb-canal">${escHTML(video.canal)}</p>
+    <div class="tuto-thumb-footer">
+      <div onclick="ouvrirPlayer('${video.youtubeId}','${escHTML(video.titre).replace(/'/g,"&#39;")}')">
+        <p class="thumb-titre">${escHTML(video.titre)}</p>
+        <p class="thumb-canal">${escHTML(video.canal)}</p>
+      </div>
+      <button
+        class="btn-save-video"
+        data-video-id="${escHTML(video.id)}"
+        title="Sauvegarder cette vidéo"
+        aria-label="Sauvegarder cette vidéo"
+        onclick="event.stopPropagation(); window._toggleSaveVideo(this, JSON.parse(this.dataset.videoData));"
+        data-video-data="${videoDataAttr}">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"/>
+        </svg>
+      </button>
+    </div>
   </div>`;
 }
 
