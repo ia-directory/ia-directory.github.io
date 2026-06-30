@@ -12,14 +12,12 @@ import {
 // COLLECTIONS D'OUTILS
 // ══════════════════════════════════════
 
-// Lire toutes les collections de l'utilisateur
 export async function getCollections(uid) {
   const ref  = collection(db, 'users', uid, 'collections');
   const snap = await getDocs(query(ref, orderBy('createdAt', 'desc')));
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-// Créer une nouvelle collection
 export async function createCollection(uid, name) {
   const ref = collection(db, 'users', uid, 'collections');
   const doc = await addDoc(ref, {
@@ -30,19 +28,16 @@ export async function createCollection(uid, name) {
   return doc.id;
 }
 
-// Renommer une collection
 export async function renameCollection(uid, colId, newName) {
   const ref = doc(db, 'users', uid, 'collections', colId);
   await updateDoc(ref, { name: newName });
 }
 
-// Supprimer une collection
 export async function deleteCollection(uid, colId) {
   const ref = doc(db, 'users', uid, 'collections', colId);
   await deleteDoc(ref);
 }
 
-// Ajouter un outil à une collection existante
 export async function addToolToCollection(uid, colId, tool) {
   const ref  = doc(db, 'users', uid, 'collections', colId);
   const snap = await getDoc(ref);
@@ -66,7 +61,6 @@ export async function addToolToCollection(uid, colId, tool) {
   await updateDoc(ref, { tools });
 }
 
-// Retirer un outil d'une collection
 export async function removeToolFromCollection(uid, colId, toolId) {
   const ref  = doc(db, 'users', uid, 'collections', colId);
   const snap = await getDoc(ref);
@@ -80,11 +74,10 @@ export async function removeToolFromCollection(uid, colId, toolId) {
 // HISTORIQUE QUIZ
 // ══════════════════════════════════════
 
-// Sauvegarder une session quiz
 export async function saveQuizSession(uid, answers, results) {
   const ref = collection(db, 'users', uid, 'quizHistory');
   await addDoc(ref, {
-    answers,              // { metier, objectif, budget, connexion, niveau }
+    answers,
     results: results.map(t => ({
       id:       t.id,
       name:     t.name,
@@ -99,14 +92,12 @@ export async function saveQuizSession(uid, answers, results) {
   });
 }
 
-// Lire tout l'historique quiz
 export async function getQuizHistory(uid) {
   const ref  = collection(db, 'users', uid, 'quizHistory');
   const snap = await getDocs(query(ref, orderBy('createdAt', 'desc')));
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
 }
 
-// Supprimer une session quiz
 export async function deleteQuizSession(uid, sessionId) {
   const ref = doc(db, 'users', uid, 'quizHistory', sessionId);
   await deleteDoc(ref);
@@ -116,67 +107,80 @@ export async function deleteQuizSession(uid, sessionId) {
 // PROFIL UTILISATEUR
 // ══════════════════════════════════════
 
-// Lire le profil
 export async function getUserProfile(uid) {
   const ref  = doc(db, 'users', uid);
   const snap = await getDoc(ref);
   return snap.exists() ? snap.data() : null;
 }
 
-// Mettre à jour le displayName
 export async function updateDisplayName(uid, displayName) {
   const ref = doc(db, 'users', uid);
   await updateDoc(ref, { displayName });
 }
 
-// Mettre à jour la langue préférée
 export async function updateLangue(uid, langue) {
   const ref = doc(db, 'users', uid);
   await updateDoc(ref, { langue });
 }
 
-// Mettre à jour la préférence newsletter
 export async function updateNewsletter(uid, newsletterOk) {
   const ref = doc(db, 'users', uid);
   await updateDoc(ref, { newsletterOk });
 }
 
-// Mettre à jour la photo de profil (base64 ou URL)
 export async function updatePhotoURL(uid, photoURL) {
   const ref = doc(db, 'users', uid);
   await updateDoc(ref, { photoURL });
 }
 
-// Mettre à jour la préférence modale de sortie
 export async function updateSkipExitModal(uid, value) {
   const ref = doc(db, 'users', uid);
   await updateDoc(ref, { skipExitModal: value });
+}
+
+// ── NOUVEAU : Champs profil public ────────────────
+// Sauvegarde bio, role/titre, liens sociaux en une seule opération
+
+export async function updatePublicProfile(uid, { bio, role, linkedin, twitter, website }) {
+  const ref = doc(db, 'users', uid);
+  const payload = {};
+  if (bio      !== undefined) payload.bio      = bio;
+  if (role     !== undefined) payload.role     = role;
+  if (linkedin !== undefined) payload.linkedin = linkedin;
+  if (twitter  !== undefined) payload.twitter  = twitter;
+  if (website  !== undefined) payload.website  = website;
+  await updateDoc(ref, payload);
 }
 
 // ══════════════════════════════════════
 // PROFIL PUBLIC
 // ══════════════════════════════════════
 
-// Rendre une collection publique ou privée
 export async function setCollectionPublic(uid, colId, isPublic) {
   const ref = doc(db, 'users', uid, 'collections', colId);
   await updateDoc(ref, { isPublic });
 }
 
-// Lire le profil public d'un utilisateur (sans auth)
 export async function getPublicProfile(uid) {
   const ref  = doc(db, 'users', uid);
   const snap = await getDoc(ref);
   if (!snap.exists()) return null;
   const data = snap.data();
-  // On n'expose que les champs publics
+  // Champs exposés publiquement
   return {
     displayName: data.displayName || 'Utilisateur Albexia',
     photoURL:    data.photoURL    || null,
+    bio:         data.bio         || null,
+    role:        data.role        || null,
+    linkedin:    data.linkedin    || null,
+    twitter:     data.twitter     || null,
+    website:     data.website     || null,
+    isPionnier:  data.isPionnier  || false,
+    isVerified:  data.isVerified  || false,
+    reviewCount: data.reviewCount || 0,
   };
 }
 
-// Lire les collections publiques d'un utilisateur (sans auth)
 export async function getPublicCollections(uid) {
   const ref  = collection(db, 'users', uid, 'collections');
   const snap = await getDocs(query(ref, orderBy('createdAt', 'desc')));
@@ -187,11 +191,8 @@ export async function getPublicCollections(uid) {
 
 // ══════════════════════════════════════
 // VIDÉOS SAUVEGARDÉES
-// Stockées dans users/{uid}/savedVideos (sous-collection)
-// Chaque doc : { videoId, outilId, titre, canal, duree, youtubeId, savedAt }
 // ══════════════════════════════════════
 
-// Sauvegarder une vidéo (idempotent : pas de doublon si déjà présente)
 export async function saveVideo(uid, videoData) {
   const ref = doc(db, 'users', uid, 'savedVideos', videoData.videoId);
   await setDoc(ref, {
@@ -205,13 +206,11 @@ export async function saveVideo(uid, videoData) {
   });
 }
 
-// Retirer une vidéo sauvegardée
 export async function unsaveVideo(uid, videoId) {
   const ref = doc(db, 'users', uid, 'savedVideos', videoId);
   await deleteDoc(ref);
 }
 
-// Lire toutes les vidéos sauvegardées d'un utilisateur (les plus récentes en premier)
 export async function getSavedVideos(uid) {
   const ref  = collection(db, 'users', uid, 'savedVideos');
   const snap = await getDocs(query(ref, orderBy('savedAt', 'desc')));
