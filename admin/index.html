@@ -1,0 +1,532 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Admin — Albexia</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:           #0a0a0f;
+    --bg2:          #12121a;
+    --bg3:          #1a1a26;
+    --border:       rgba(255,255,255,0.07);
+    --border-hover: rgba(255,255,255,0.15);
+    --text:         #f0f0f5;
+    --text-muted:   #7a7a9a;
+    --text-dim:     #4a4a6a;
+    --accent:       #6c63ff;
+    --accent2:      #ff6b9d;
+    --accent3:      #00d4aa;
+    --accent-amber: #f5a623;
+  }
+  * { box-sizing:border-box; margin:0; padding:0; }
+  body {
+    background:var(--bg); color:var(--text);
+    font-family:'DM Sans',sans-serif; min-height:100vh;
+  }
+  body::before {
+    content:''; position:fixed; inset:0; pointer-events:none; z-index:0; opacity:0.4;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+  }
+
+  /* ── Header ── */
+  .admin-header {
+    position:sticky; top:0; z-index:100;
+    background:rgba(10,10,15,0.9); backdrop-filter:blur(12px);
+    border-bottom:1px solid var(--border);
+    padding:14px 24px; display:flex; align-items:center; justify-content:space-between;
+  }
+  .admin-header h1 { font-family:'Syne',sans-serif; font-size:18px; font-weight:800; letter-spacing:-0.03em; }
+  .admin-header h1 span { color:var(--accent2); }
+  .admin-badge { font-size:11px; background:rgba(0,212,170,0.12); color:var(--accent3);
+    border:1px solid rgba(0,212,170,0.3); padding:4px 10px; border-radius:20px; font-weight:600; }
+
+  /* ── Gate ── */
+  #gate { text-align:center; padding:80px 24px; position:relative; z-index:1; }
+  #gate p { color:var(--text-muted); font-size:15px; }
+  #gate a { color:var(--accent2); }
+
+  /* ── App ── */
+  #app { display:none; position:relative; z-index:1; padding:24px; max-width:1100px; margin:0 auto; }
+
+  /* ── Onglets ── */
+  .tabs { display:flex; gap:8px; margin-bottom:24px; border-bottom:1px solid var(--border); padding-bottom:0; }
+  .tab-btn {
+    background:none; border:none; color:var(--text-muted); font-family:'DM Sans',sans-serif;
+    font-size:14px; font-weight:500; padding:10px 20px; cursor:pointer; border-bottom:2px solid transparent;
+    margin-bottom:-1px; transition:color .2s, border-color .2s;
+  }
+  .tab-btn.active { color:var(--text); border-bottom-color:var(--accent2); }
+  .tab-panel { display:none; }
+  .tab-panel.active { display:block; }
+
+  /* ── Layout formulaire + aperçu ── */
+  .form-layout { display:flex; gap:24px; flex-wrap:wrap; }
+  .form-col { flex:1; min-width:300px; }
+  .preview-col { flex:1; min-width:280px; position:sticky; top:80px; align-self:flex-start; }
+
+  /* ── Champs ── */
+  fieldset { border:1px solid var(--border); border-radius:12px; padding:16px; margin-bottom:16px; }
+  legend { padding:0 8px; font-weight:600; font-size:12px; color:var(--accent2); letter-spacing:0.05em; text-transform:uppercase; }
+  label { display:block; font-size:12px; color:var(--text-muted); margin:10px 0 4px; }
+  input, select, textarea {
+    width:100%; background:var(--bg2); border:1px solid var(--border); border-radius:8px;
+    color:var(--text); padding:10px 12px; font-size:14px; font-family:'DM Sans',sans-serif;
+    transition:border-color .2s;
+  }
+  input:focus, select:focus, textarea:focus { outline:none; border-color:rgba(108,99,255,0.5); }
+  textarea { min-height:72px; resize:vertical; }
+  .row { display:flex; gap:12px; }
+  .row > div { flex:1; }
+
+  /* ── Accordéons EN/ES ── */
+  .accordion-toggle {
+    background:var(--bg2); border:1px solid var(--border); border-radius:8px;
+    color:var(--text-muted); padding:10px 14px; cursor:pointer; font-size:13px;
+    font-family:'DM Sans',sans-serif; width:100%; text-align:left; margin-bottom:8px;
+    transition:border-color .2s, color .2s;
+  }
+  .accordion-toggle:hover { border-color:var(--border-hover); color:var(--text); }
+  .accordion-body { display:none; }
+  .accordion-body.open { display:block; }
+
+  /* ── Bouton submit ── */
+  .btn-submit {
+    background:var(--accent); color:#fff; border:none; padding:14px;
+    border-radius:10px; font-size:15px; font-weight:600; cursor:pointer;
+    width:100%; margin-top:8px; font-family:'DM Sans',sans-serif;
+    transition:opacity .2s;
+  }
+  .btn-submit:disabled { opacity:0.5; cursor:not-allowed; }
+  .btn-submit.galerie { background:var(--accent2); }
+
+  /* ── Messages ── */
+  .msg { padding:12px 16px; border-radius:10px; font-size:13px; margin-bottom:16px; display:none; }
+  .msg-warn { background:rgba(255,107,157,0.1); border:1px solid rgba(255,107,157,0.3); color:var(--accent2); }
+  .msg-ok   { background:rgba(0,212,170,0.1);   border:1px solid rgba(0,212,170,0.3);   color:var(--accent3); }
+
+  /* ── Aperçu carte outil ── */
+  .preview-card {
+    background:var(--bg2); border:1px solid var(--border); border-radius:14px; padding:16px;
+  }
+  .preview-label { font-size:11px; color:var(--text-dim); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.05em; }
+  .preview-top { display:flex; align-items:center; gap:10px; margin-bottom:10px; }
+  .preview-emoji { font-size:22px; }
+  .preview-name { font-family:'Syne',sans-serif; font-weight:700; font-size:15px; letter-spacing:-0.02em; }
+  .preview-cat { font-size:11px; color:var(--text-muted); margin-top:2px; }
+  .preview-desc { font-size:13px; color:#c8c8d0; line-height:1.5; margin-bottom:10px; }
+  .preview-tags { display:flex; flex-wrap:wrap; gap:6px; }
+  .preview-tag { font-size:10px; background:rgba(108,99,255,0.15); color:#a8a3ff;
+    border:1px solid rgba(108,99,255,0.2); padding:3px 8px; border-radius:6px; }
+
+  /* ── Aperçu carte galerie ── */
+  .gallery-preview {
+    background:var(--bg2); border:1px solid var(--border); border-radius:14px; overflow:hidden;
+  }
+  .gallery-preview-img {
+    width:100%; aspect-ratio:16/9; object-fit:cover;
+    background:var(--bg3); display:block;
+  }
+  .gallery-preview-body { padding:12px; }
+  .gallery-preview-title { font-family:'Syne',sans-serif; font-weight:700; font-size:14px; margin-bottom:4px; }
+  .gallery-preview-meta { font-size:11px; color:var(--text-muted); }
+
+  /* ── Skeleton ── */
+  .skeleton-block {
+    height:80px; border-radius:10px;
+    background:linear-gradient(90deg,var(--bg2) 25%,var(--bg3) 50%,var(--bg2) 75%);
+    background-size:200% 100%; animation:shimmer 1.5s infinite;
+  }
+  @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
+
+  @media(max-width:700px) { .form-layout { flex-direction:column; } .preview-col { position:static; } }
+</style>
+</head>
+<body>
+
+<div class="admin-header">
+  <h1>Albexia <span>Admin</span></h1>
+  <span class="admin-badge" id="admin-badge">Vérification…</span>
+</div>
+
+<!-- Gate accès -->
+<div id="gate">
+  <p>Vérification de l'accès…</p>
+</div>
+
+<!-- App principale -->
+<div id="app">
+
+  <div class="tabs">
+    <button class="tab-btn active" data-tab="outils">🛠 Outils</button>
+    <button class="tab-btn" data-tab="galerie">🖼 Galerie</button>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ONGLET OUTILS
+  ══════════════════════════════════════ -->
+  <div class="tab-panel active" id="tab-outils">
+    <div class="msg msg-warn" id="warn-outils"></div>
+    <div class="msg msg-ok"   id="ok-outils"></div>
+    <div class="form-layout">
+      <div class="form-col">
+        <form id="form-outils">
+
+          <fieldset>
+            <legend>Champs communs</legend>
+            <label>URL de l'outil *</label>
+            <input type="url" id="o-url" placeholder="https://exemple.com" required>
+            <div class="row">
+              <div>
+                <label>Catégorie *</label>
+                <select id="o-cat" required>
+                  <option value="">— Choisir —</option>
+                  <option>Texte</option><option>Image</option><option>Vidéo</option>
+                  <option>Musique</option><option>Code</option><option>Productivité</option>
+                </select>
+              </div>
+              <div>
+                <label>Emoji</label>
+                <input type="text" id="o-emoji" placeholder="🤖" maxlength="4">
+              </div>
+            </div>
+            <div class="row">
+              <div>
+                <label>Prix</label>
+                <select id="o-price">
+                  <option value="gratuit">Gratuit</option>
+                  <option value="freemium" selected>Freemium</option>
+                  <option value="payant">Payant</option>
+                </select>
+              </div>
+              <div>
+                <label>Plan</label>
+                <select id="o-plan">
+                  <option value="">Standard</option>
+                  <option value="starter">Starter</option>
+                  <option value="featured">Featured</option>
+                </select>
+              </div>
+            </div>
+            <label>Tags (séparés par virgules)</label>
+            <input type="text" id="o-tags" placeholder="rédaction, code, analyse">
+            <div class="row">
+              <div>
+                <label>Essai gratuit</label>
+                <select id="o-essai">
+                  <option value="true">Oui</option>
+                  <option value="false">Non</option>
+                </select>
+              </div>
+              <div>
+                <label>Durée essai</label>
+                <input type="text" id="o-duree" placeholder="14 jours">
+              </div>
+            </div>
+          </fieldset>
+
+          <fieldset>
+            <legend>Contenu FR (obligatoire)</legend>
+            <label>Nom *</label>
+            <input type="text" id="o-name-fr" required>
+            <label>Description *</label>
+            <textarea id="o-desc-fr" required placeholder="150-200 caractères recommandés"></textarea>
+            <label>Idéal pour</label>
+            <input type="text" id="o-ideal-fr" placeholder="Tous publics">
+          </fieldset>
+
+          <button type="button" class="accordion-toggle" data-target="acc-en">+ Ajouter EN (optionnel)</button>
+          <div class="accordion-body" id="acc-en">
+            <fieldset>
+              <legend>Contenu EN</legend>
+              <label>Nom</label><input type="text" id="o-name-en">
+              <label>Description</label><textarea id="o-desc-en"></textarea>
+              <label>Idéal pour</label><input type="text" id="o-ideal-en">
+            </fieldset>
+          </div>
+
+          <button type="button" class="accordion-toggle" data-target="acc-es">+ Ajouter ES (optionnel)</button>
+          <div class="accordion-body" id="acc-es">
+            <fieldset>
+              <legend>Contenu ES</legend>
+              <label>Nom</label><input type="text" id="o-name-es">
+              <label>Description</label><textarea id="o-desc-es"></textarea>
+              <label>Idéal pour</label><input type="text" id="o-ideal-es">
+            </fieldset>
+          </div>
+
+          <button type="submit" class="btn-submit">Créer l'outil</button>
+        </form>
+      </div>
+
+      <div class="preview-col">
+        <div class="preview-label">Aperçu carte (FR)</div>
+        <div class="preview-card">
+          <div class="preview-top">
+            <span class="preview-emoji" id="p-emoji">🤖</span>
+            <div>
+              <div class="preview-name" id="p-name">Nom de l'outil</div>
+              <div class="preview-cat"  id="p-cat">Catégorie</div>
+            </div>
+          </div>
+          <p class="preview-desc" id="p-desc">La description apparaîtra ici.</p>
+          <div class="preview-tags" id="p-tags"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════
+       ONGLET GALERIE
+  ══════════════════════════════════════ -->
+  <div class="tab-panel" id="tab-galerie">
+    <div class="msg msg-warn" id="warn-galerie"></div>
+    <div class="msg msg-ok"   id="ok-galerie"></div>
+    <div class="form-layout">
+      <div class="form-col">
+        <form id="form-galerie">
+          <fieldset>
+            <legend>Informations de l'œuvre</legend>
+            <label>Titre *</label>
+            <input type="text" id="g-title" required placeholder="Cité futuriste au coucher du soleil">
+            <div class="row">
+              <div>
+                <label>Outil IA utilisé *</label>
+                <input type="text" id="g-tool" required placeholder="Midjourney">
+              </div>
+              <div>
+                <label>Type *</label>
+                <select id="g-type" required>
+                  <option value="">— Choisir —</option>
+                  <option value="image">Image</option>
+                  <option value="vidéo">Vidéo</option>
+                  <option value="musique">Musique</option>
+                </select>
+              </div>
+            </div>
+            <label>URL image (src) *</label>
+            <input type="url" id="g-src" required placeholder="https://..." oninput="updateGalleryPreview()">
+            <label>URL miniature (thumb)</label>
+            <input type="url" id="g-thumb" placeholder="https://... (optionnel, sinon = src)">
+            <label>Prompt utilisé</label>
+            <textarea id="g-prompt" placeholder="Décrivez le prompt ayant généré cette œuvre…"></textarea>
+            <label>Auteur</label>
+            <input type="text" id="g-author" placeholder="Communauté" value="Communauté">
+          </fieldset>
+          <button type="submit" class="btn-submit galerie">Ajouter à la galerie</button>
+        </form>
+      </div>
+
+      <div class="preview-col">
+        <div class="preview-label">Aperçu carte galerie</div>
+        <div class="gallery-preview">
+          <img id="gp-img" class="gallery-preview-img" src="" alt="" onerror="this.style.background='var(--bg3)'">
+          <div class="gallery-preview-body">
+            <div class="gallery-preview-title" id="gp-title">Titre de l'œuvre</div>
+            <div class="gallery-preview-meta"  id="gp-meta">Outil · Type</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /app -->
+
+<script type="module">
+  import { auth, db, onAuthStateChanged, collection, getDocs, doc, setDoc }
+    from '../js/firebase-config.js';
+
+  const ADMIN_UID = "e9Hvx3qHcIOlTPkTnqCWRAVnt042";
+
+  // ── Auth ──
+  onAuthStateChanged(auth, (user) => {
+    if (user && user.uid === ADMIN_UID) {
+      document.getElementById('gate').style.display = 'none';
+      document.getElementById('app').style.display  = 'block';
+      document.getElementById('admin-badge').textContent = '✓ Admin connecté';
+    } else {
+      document.getElementById('gate').innerHTML =
+        '<p>Accès refusé. Connectez-vous avec le compte admin sur <a href="../profil.html">profil.html</a>.</p>';
+      document.getElementById('admin-badge').textContent = 'Non connecté';
+    }
+  });
+
+  // ── Onglets ──
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  });
+
+  // ── Accordéons ──
+  document.querySelectorAll('.accordion-toggle').forEach(btn => {
+    btn.addEventListener('click', () => {
+      const target = document.getElementById(btn.dataset.target);
+      const open = target.classList.toggle('open');
+      btn.textContent = (open ? '− ' : '+ ') + btn.textContent.slice(2);
+    });
+  });
+
+  // ── Helpers messages ──
+  function showMsg(idWarn, idOk, type, msg) {
+    const warn = document.getElementById(idWarn);
+    const ok   = document.getElementById(idOk);
+    warn.style.display = 'none'; ok.style.display = 'none';
+    if (type === 'warn') { warn.textContent = msg; warn.style.display = 'block'; }
+    if (type === 'ok')   { ok.textContent   = msg; ok.style.display   = 'block'; }
+  }
+
+  function slugify(str) {
+    return str.toLowerCase()
+      .normalize('NFD').replace(/[\u0300-\u036f]/g,'')
+      .replace(/[^a-z0-9]+/g,'-').replace(/(^-|-$)/g,'');
+  }
+
+  // ── Aperçu live outils ──
+  function updateToolPreview() {
+    document.getElementById('p-emoji').textContent = document.getElementById('o-emoji').value || '🤖';
+    document.getElementById('p-name').textContent  = document.getElementById('o-name-fr').value || 'Nom de l\'outil';
+    document.getElementById('p-cat').textContent   = document.getElementById('o-cat').value || 'Catégorie';
+    document.getElementById('p-desc').textContent  = document.getElementById('o-desc-fr').value || 'La description apparaîtra ici.';
+    const tags = document.getElementById('o-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+    document.getElementById('p-tags').innerHTML = tags.map(t=>`<span class="preview-tag">${t}</span>`).join('');
+  }
+  ['o-emoji','o-name-fr','o-cat','o-desc-fr','o-tags'].forEach(id => {
+    document.getElementById(id).addEventListener('input', updateToolPreview);
+  });
+
+  // ── Aperçu live galerie ──
+  window.updateGalleryPreview = function() {
+    const src   = document.getElementById('g-src').value;
+    const thumb = document.getElementById('g-thumb').value;
+    const title = document.getElementById('g-title').value || 'Titre de l\'œuvre';
+    const tool  = document.getElementById('g-tool').value || 'Outil';
+    const type  = document.getElementById('g-type').value || 'Type';
+    document.getElementById('gp-img').src         = thumb || src || '';
+    document.getElementById('gp-title').textContent = title;
+    document.getElementById('gp-meta').textContent  = `${tool} · ${type}`;
+  };
+  ['g-title','g-tool','g-type','g-thumb'].forEach(id => {
+    document.getElementById(id).addEventListener('input', window.updateGalleryPreview);
+  });
+
+  // ══════════════════════════════════════
+  // SUBMIT — OUTILS
+  // ══════════════════════════════════════
+  document.getElementById('form-outils').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('.btn-submit');
+    btn.disabled = true;
+
+    try {
+      const url = document.getElementById('o-url').value.trim();
+      if (!url.startsWith('http')) { showMsg('warn-outils','ok-outils','warn','L\'URL doit commencer par http(s)://'); btn.disabled=false; return; }
+
+      const nameFr = document.getElementById('o-name-fr').value.trim();
+      const descFr = document.getElementById('o-desc-fr').value.trim();
+      const cat    = document.getElementById('o-cat').value;
+      if (!nameFr || !descFr || !cat) { showMsg('warn-outils','ok-outils','warn','Nom, description et catégorie sont obligatoires.'); btn.disabled=false; return; }
+
+      // Doublon par URL
+      const allDocs = await getDocs(collection(db, 'outils'));
+      const existing = allDocs.docs.map(d => d.data());
+      const dup = existing.find(t => (t.url||'').replace(/\/$/,'') === url.replace(/\/$/,''));
+      if (dup && !confirm(`Un outil avec cette URL existe déjà ("${dup.name}"). Continuer ?`)) { btn.disabled=false; return; }
+
+      // ID séquentiel
+      const numIds = existing.map(t=>Number(t.id)).filter(n=>Number.isInteger(n)&&!isNaN(n));
+      const nextId = numIds.length ? Math.max(...numIds)+1 : 1;
+
+      const emoji   = document.getElementById('o-emoji').value.trim() || '🤖';
+      const favicon = `https://www.google.com/s2/favicons?sz=64&domain=${new URL(url).hostname}`;
+      const price   = document.getElementById('o-price').value;
+      const plan    = document.getElementById('o-plan').value;
+      const tags    = document.getElementById('o-tags').value.split(',').map(t=>t.trim()).filter(Boolean);
+      const essai   = document.getElementById('o-essai').value === 'true';
+      const duree   = document.getElementById('o-duree').value.trim();
+      const idealFr = document.getElementById('o-ideal-fr').value.trim();
+      const slug    = slugify(nameFr);
+      const folder  = plan === 'featured' ? 'featured' : 'standard';
+
+      const traductions = {};
+      const toWrite = [];
+
+      const nameEn = document.getElementById('o-name-en').value.trim();
+      const descEn = document.getElementById('o-desc-en').value.trim();
+      if (nameEn && descEn) {
+        traductions.en = `${nextId}-en`;
+        toWrite.push({ id:`${nextId}-en`, name:nameEn, category:cat, emoji, favicon, description:descEn,
+          price, rating:0, url, tags, page:`tools/en/${slug}.html`, plan, langue:'en',
+          traductions:{ fr:nextId }, ideal_pour:document.getElementById('o-ideal-en').value.trim() });
+      }
+      const nameEs = document.getElementById('o-name-es').value.trim();
+      const descEs = document.getElementById('o-desc-es').value.trim();
+      if (nameEs && descEs) {
+        traductions.es = `${nextId}-es`;
+        toWrite.push({ id:`${nextId}-es`, name:nameEs, category:cat, emoji, favicon, description:descEs,
+          price, rating:0, url, tags, page:`tools/es/${slug}.html`, plan, langue:'es',
+          traductions:{ fr:nextId }, ideal_pour:document.getElementById('o-ideal-es').value.trim() });
+      }
+
+      const base = { id:nextId, name:nameFr, category:cat, emoji, favicon, description:descFr,
+        price, rating:0, url, tags, page:`tools/${folder}/${slug}.html`,
+        plan, langue:'fr', essai_gratuit:essai, duree_essai:duree, ideal_pour:idealFr, traductions };
+      toWrite.unshift(base);
+
+      for (const d of toWrite) await setDoc(doc(db,'outils',String(d.id)), d);
+
+      showMsg('warn-outils','ok-outils','ok',
+        `✓ Outil créé (ID ${nextId}) — ${toWrite.length} document(s) écrits. Pensez à générer la fiche détaillée tools/${folder}/${slug}.html si nécessaire.`);
+      e.target.reset();
+      updateToolPreview();
+
+    } catch (err) { showMsg('warn-outils','ok-outils','warn',`Erreur : ${err.message}`); }
+    btn.disabled = false;
+  });
+
+  // ══════════════════════════════════════
+  // SUBMIT — GALERIE
+  // ══════════════════════════════════════
+  document.getElementById('form-galerie').addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const btn = e.target.querySelector('.btn-submit');
+    btn.disabled = true;
+
+    try {
+      const title  = document.getElementById('g-title').value.trim();
+      const tool   = document.getElementById('g-tool').value.trim();
+      const type   = document.getElementById('g-type').value;
+      const src    = document.getElementById('g-src').value.trim();
+      if (!title || !tool || !type || !src) {
+        showMsg('warn-galerie','ok-galerie','warn','Titre, outil, type et URL image sont obligatoires.');
+        btn.disabled = false; return;
+      }
+
+      const allG   = await getDocs(collection(db,'galerie'));
+      const ids    = allG.docs.map(d => Number(d.data().id)).filter(n=>!isNaN(n));
+      const nextId = ids.length ? Math.max(...ids)+1 : 1;
+
+      const thumb  = document.getElementById('g-thumb').value.trim() || src;
+      const prompt = document.getElementById('g-prompt').value.trim();
+      const author = document.getElementById('g-author').value.trim() || 'Communauté';
+
+      await setDoc(doc(db,'galerie',String(nextId)), {
+        id:nextId, title, tool, type, src, thumb, prompt, author,
+        likes:0, date:new Date().toISOString().split('T')[0]
+      });
+
+      showMsg('warn-galerie','ok-galerie','ok',`✓ Œuvre ajoutée (ID ${nextId}) — visible immédiatement dans la galerie.`);
+      e.target.reset();
+      window.updateGalleryPreview();
+
+    } catch (err) { showMsg('warn-galerie','ok-galerie','warn',`Erreur : ${err.message}`); }
+    btn.disabled = false;
+  });
+</script>
+</body>
+</html>
