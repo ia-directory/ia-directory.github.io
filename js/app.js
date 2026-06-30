@@ -196,14 +196,19 @@ async function loadJSON(path) {
 
 async function loadAllData() {
   try {
-    const [tools, blog, gallery] = await Promise.all([
-      loadJSON('data/tools.json').catch(() => []),
+    // Outils et galerie viennent de Firestore (mise à jour sans redéploiement),
+    // le blog reste un index JSON statique (les articles eux-mêmes sont en HTML statique pour le SEO).
+    const { db, collection, getDocs } = await import('./firebase-config.js');
+
+    const [toolsSnap, blog, gallerySnap] = await Promise.all([
+      getDocs(collection(db, 'outils')).catch(() => ({ docs: [] })),
       loadJSON('data/blog.json').catch(() => []),
-      loadJSON('data/gallery.json').catch(() => []),
+      getDocs(collection(db, 'galerie')).catch(() => ({ docs: [] })),
     ]);
-    state.tools   = tools;
+
+    state.tools   = toolsSnap.docs.map(d => d.data());
     state.blog    = blog;
-    state.gallery = gallery;
+    state.gallery = gallerySnap.docs.map(d => d.data());
     renderTools();
     renderBlog();
     renderGallery();
