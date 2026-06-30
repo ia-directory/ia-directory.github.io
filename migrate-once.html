@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Migration Firestore — Albexia (À SUPPRIMER APRÈS USAGE)</title>
+<style>
+  body { background:#0a0a0f; color:#f0f0f5; font-family:monospace; padding:24px; }
+  #log { white-space:pre-wrap; line-height:1.6; }
+  .ok   { color:#00d4aa; }
+  .err  { color:#ff6b9d; }
+  .info { color:#a8a3ff; }
+  button { background:#6c63ff; color:#fff; border:0; padding:12px 24px; border-radius:8px;
+           font-size:15px; cursor:pointer; margin-bottom:20px; }
+  button:disabled { opacity:0.5; cursor:not-allowed; }
+</style>
+</head>
+<body>
+  <h2>⚠️ Migration unique — tools.json + gallery.json → Firestore</h2>
+  <p>Cette page écrit dans les collections <code>outils</code> et <code>galerie</code>.
+     À utiliser UNE SEULE FOIS, puis supprimer ce fichier du repo.</p>
+  <button id="run-tools">1. Migrer les outils (633 docs)</button>
+  <button id="run-gallery">2. Migrer la galerie (12 docs)</button>
+  <div id="log"></div>
+
+  <script type="module">
+    import { db, collection, doc, writeBatch }
+      from './js/firebase-config.js';
+
+    const logEl = document.getElementById('log');
+    function log(msg, cls = 'info') {
+      const line = document.createElement('div');
+      line.className = cls;
+      line.textContent = msg;
+      logEl.appendChild(line);
+    }
+
+    // Firestore limite un batch à 500 opérations max
+    async function migrateCollection(jsonPath, collectionName, idField = 'id') {
+      log(`Chargement de ${jsonPath}...`);
+      const res = await fetch(jsonPath);
+      if (!res.ok) { log(`Erreur: impossible de charger ${jsonPath}`, 'err'); return; }
+      const items = await res.json();
+      log(`${items.length} entrées trouvées. Écriture en cours...`);
+
+      const chunkSize = 450; // marge de sécurité sous la limite de 500
+      let written = 0;
+
+      for (let i = 0; i < items.length; i += chunkSize) {
+        const chunk = items.slice(i, i + chunkSize);
+        const batch = writeBatch(db);
+        chunk.forEach(item => {
+          const docId = String(item[idField]);
+          const ref = doc(db, collectionName, docId);
+          batch.set(ref, item);
+        });
+        await batch.commit();
+        written += chunk.length;
+        log(`  → ${written}/${items.length} écrits`, 'ok');
+      }
+
+      log(`✓ Migration de "${collectionName}" terminée (${written} documents).`, 'ok');
+    }
+
+    document.getElementById('run-tools').addEventListener('click', async (e) => {
+      e.target.disabled = true;
+      try {
+        await migrateCollection('data/tools.json', 'outils');
+      } catch (err) {
+        log(`Erreur: ${err.message}`, 'err');
+      }
+      e.target.disabled = false;
+    });
+
+    document.getElementById('run-gallery').addEventListener('click', async (e) => {
+      e.target.disabled = true;
+      try {
+        await migrateCollection('data/gallery.json', 'galerie');
+      } catch (err) {
+        log(`Erreur: ${err.message}`, 'err');
+      }
+      e.target.disabled = false;
+    });
+  </script>
+</body>
+</html>
