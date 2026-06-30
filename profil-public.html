@@ -181,7 +181,117 @@
     /* Pills badges inline */
     .hero-badges {
       display: flex; flex-wrap: wrap; gap: 7px;
-      margin-bottom: 18px;
+      margin-bottom: 10px;
+    }
+
+    .badges-view-all {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: none; border: none; cursor: pointer;
+      color: var(--text-dim); font-family: 'DM Sans', sans-serif;
+      font-size: .78rem; padding: 0 0 18px; transition: color .15s;
+    }
+    .badges-view-all:hover { color: var(--text-muted); }
+
+    /* ── BADGES MODAL ───────────────────────────── */
+    .badges-modal-overlay {
+      display: none;
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(5,5,8,0.78);
+      backdrop-filter: blur(6px);
+      align-items: center; justify-content: center;
+      padding: 20px;
+    }
+    .badges-modal-overlay.show { display: flex; }
+
+    .badges-modal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      max-width: 560px; width: 100%;
+      max-height: 86vh; overflow-y: auto;
+      padding: 28px 24px 24px;
+      position: relative;
+      animation: modalIn .22s ease;
+    }
+    @keyframes modalIn {
+      from { opacity: 0; transform: translateY(12px) scale(.98); }
+      to   { opacity: 1; transform: translateY(0) scale(1); }
+    }
+
+    .badges-modal-close {
+      position: absolute; top: 18px; right: 18px;
+      width: 30px; height: 30px; border-radius: 8px;
+      background: var(--bg3); border: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text-muted);
+      transition: color .15s, border-color .15s;
+    }
+    .badges-modal-close:hover { color: var(--text); border-color: var(--border-hover); }
+
+    .badges-modal-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.15rem; font-weight: 800;
+      margin-bottom: 4px;
+    }
+    .badges-modal-sub {
+      font-size: .82rem; color: var(--text-muted);
+      margin-bottom: 24px; line-height: 1.5;
+      padding-right: 30px;
+    }
+
+    .badges-modal-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 12px;
+    }
+    @media (max-width: 480px) {
+      .badges-modal-grid { grid-template-columns: 1fr; }
+    }
+
+    .bm-card {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 20px 14px 16px;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 10px; text-align: center;
+      position: relative;
+      transition: border-color .2s;
+    }
+    .bm-card.earned { border-color: var(--bm-color, var(--border)); }
+
+    .bm-img-wrap { width: 76px; height: 76px; display: flex; align-items: center; justify-content: center; }
+    .bm-card img {
+      width: 72px; height: 72px; object-fit: contain;
+      filter: drop-shadow(0 6px 14px rgba(0,0,0,0.5));
+    }
+    .bm-card.locked img { filter: grayscale(1) brightness(.55) drop-shadow(0 4px 10px rgba(0,0,0,0.4)); }
+
+    .bm-name {
+      font-family: 'Syne', sans-serif;
+      font-size: .85rem; font-weight: 700;
+    }
+    .bm-card.earned .bm-name { color: var(--bm-color, var(--text)); }
+    .bm-card.locked .bm-name { color: var(--text-dim); }
+
+    .bm-condition {
+      font-size: .73rem; color: var(--text-muted);
+      line-height: 1.45;
+    }
+
+    .bm-status {
+      font-family: 'Syne', sans-serif;
+      font-size: 9px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase;
+      padding: 3px 9px; border-radius: 5px;
+      margin-top: 2px;
+    }
+    .bm-status.earned-tag { background: var(--bm-color, var(--accent)); color: #0a0a0f; opacity: .9; }
+    .bm-status.locked-tag { background: rgba(255,255,255,0.05); color: var(--text-dim); border: 1px solid var(--border); }
+
+    .bm-lock-icon {
+      position: absolute; top: 10px; right: 10px;
+      width: 20px; height: 20px; color: var(--text-dim); opacity: .6;
     }
     .badge-pill {
       display: inline-flex; align-items: center; gap: 6px;
@@ -541,6 +651,10 @@
 
         <!-- Badges pills -->
         <div class="hero-badges" id="hero-badges" style="display:none"></div>
+        <button class="badges-view-all" id="badges-view-all" style="display:none" onclick="openBadgesModal()">
+          <svg viewBox="0 0 16 16" fill="none" width="13" height="13"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.3"/><path d="M8 7.3V11M8 5.2V5.3" stroke="currentColor" stroke-width="1.3" stroke-linecap="round"/></svg>
+          Voir tous les badges
+        </button>
 
         <!-- Actions -->
         <div class="hero-actions">
@@ -616,6 +730,18 @@
     Créé avec <a href="./index.html">Albexia</a> · L'annuaire des outils IA en français
   </footer>
 
+</div>
+
+<!-- BADGES MODAL -->
+<div class="badges-modal-overlay" id="badges-modal-overlay" onclick="if(event.target===this) closeBadgesModal()">
+  <div class="badges-modal">
+    <button class="badges-modal-close" onclick="closeBadgesModal()" aria-label="Fermer">
+      <svg viewBox="0 0 16 16" fill="none" width="14" height="14"><path d="M3 3L13 13M13 3L3 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    </button>
+    <div class="badges-modal-title">Badges Albexia</div>
+    <div class="badges-modal-sub">Les badges récompensent la curation, la fiabilité des avis et l'ancienneté sur la plateforme. Certains sont automatiques, d'autres attribués manuellement.</div>
+    <div class="badges-modal-grid" id="badges-modal-grid"><!-- injecté par JS --></div>
+  </div>
 </div>
 
 <!-- TOAST -->
@@ -699,7 +825,10 @@ const BADGE_META = [
     return earned;
   }
 
+  let CURRENT_EARNED_BADGES = [];
+
   function renderBadges(earnedKeys) {
+    CURRENT_EARNED_BADGES = earnedKeys || [];
     if (!earnedKeys.length) return;
     const container = $('hero-badges');
     container.style.display = 'flex';
@@ -707,13 +836,40 @@ const BADGE_META = [
       const meta = BADGE_META.find(b => b.key === key);
       if (!meta) return '';
       const img  = BADGE_IMGS[key] || '';
-      return `<span class="badge-pill" style="background:${meta.glow};border:1px solid ${meta.color}33;color:${meta.color};">
+      return `<span class="badge-pill" style="background:${meta.glow};border:1px solid ${meta.color}33;color:${meta.color};" onclick="openBadgesModal()">
         <img src="${img}" alt="${esc(meta.label)}" />
         ${esc(meta.label)}
         <span class="badge-tooltip">${esc(meta.condition)}</span>
       </span>`;
     }).join('');
+    $('badges-view-all').style.display = 'inline-flex';
   }
+
+  window.openBadgesModal = function() {
+    const grid = $('badges-modal-grid');
+    grid.innerHTML = BADGE_META.map(b => {
+      const earned = CURRENT_EARNED_BADGES.includes(b.key);
+      const img = BADGE_IMGS[b.key] || '';
+      return `<div class="bm-card ${earned ? 'earned' : 'locked'}" style="--bm-color:${b.color}">
+        ${!earned ? `<svg class="bm-lock-icon" viewBox="0 0 16 16" fill="none"><rect x="4" y="7" width="8" height="6" rx="1.2" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 7V5C5.5 3.6 6.6 2.5 8 2.5C9.4 2.5 10.5 3.6 10.5 5V7" stroke="currentColor" stroke-width="1.2"/></svg>` : ''}
+        <div class="bm-img-wrap"><img src="${img}" alt="${esc(b.label)}" /></div>
+        <div class="bm-name">${esc(b.label)}</div>
+        <div class="bm-condition">${esc(b.condition)}</div>
+        <span class="bm-status ${earned ? 'earned-tag' : 'locked-tag'}">${earned ? 'Débloqué' : 'À débloquer'}</span>
+      </div>`;
+    }).join('');
+    $('badges-modal-overlay').classList.add('show');
+    document.body.style.overflow = 'hidden';
+  };
+
+  window.closeBadgesModal = function() {
+    $('badges-modal-overlay').classList.remove('show');
+    document.body.style.overflow = '';
+  };
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') closeBadgesModal();
+  });
 
   // ── WORKFLOW VISUEL ──────────────────────────
   // Rôles connus pour les outils communs

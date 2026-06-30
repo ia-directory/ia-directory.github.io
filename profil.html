@@ -1190,14 +1190,45 @@
     .pub-field textarea { resize: vertical; min-height: 80px; line-height: 1.5; }
     .social-fields { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
     @media (max-width: 600px) { .social-fields { grid-template-columns: 1fr; } }
-    .badges-earned-preview { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 8px; }
-    .bep-item {
-      display: flex; align-items: center; gap: 6px;
-      padding: 4px 10px 4px 4px; border-radius: 7px;
-      font-size: .8rem; font-weight: 600;
+    .badges-modal-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 12px;
     }
-    .bep-item img { width: 28px; height: 28px; object-fit: contain; filter: drop-shadow(0 1px 4px rgba(0,0,0,0.4)); }
-    .bep-locked { opacity: .3; filter: grayscale(1); }
+    @media (max-width: 600px) {
+      .badges-modal-grid { grid-template-columns: repeat(2,1fr) !important; }
+    }
+    .bm-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      padding: 18px 12px 14px;
+      display: flex; flex-direction: column; align-items: center;
+      gap: 8px; text-align: center;
+      position: relative;
+      transition: border-color .2s, transform .2s;
+      cursor: default;
+    }
+    .bm-card.earned { border-color: var(--bm-color, var(--border)); }
+    .bm-card.earned:hover { transform: translateY(-2px); }
+    .bm-img-wrap { width: 60px; height: 60px; display: flex; align-items: center; justify-content: center; }
+    .bm-card img {
+      width: 56px; height: 56px; object-fit: contain;
+      filter: drop-shadow(0 5px 12px rgba(0,0,0,0.5));
+    }
+    .bm-card.locked img { filter: grayscale(1) brightness(.55) drop-shadow(0 4px 10px rgba(0,0,0,0.4)); }
+    .bm-name { font-family: 'Syne', sans-serif; font-size: .78rem; font-weight: 700; }
+    .bm-card.earned .bm-name { color: var(--bm-color, var(--text)); }
+    .bm-card.locked .bm-name { color: var(--muted); }
+    .bm-condition { font-size: .68rem; color: var(--muted); line-height: 1.4; }
+    .bm-status {
+      font-family: 'Syne', sans-serif; font-size: 8px; font-weight: 700;
+      letter-spacing: .07em; text-transform: uppercase;
+      padding: 2px 8px; border-radius: 5px; margin-top: 2px;
+    }
+    .bm-status.earned-tag { background: var(--bm-color, var(--accent)); color: #0a0a0f; opacity: .9; }
+    .bm-status.locked-tag { background: rgba(255,255,255,0.05); color: var(--muted); border: 1px solid var(--border); }
+    .bm-lock-icon { position: absolute; top: 8px; right: 8px; width: 16px; height: 16px; color: var(--muted); opacity: .5; }
 
     /* ── VIDÉOS SAUVEGARDÉES ───────────────────── */
     .saved-videos-grid {
@@ -1562,13 +1593,27 @@
 
         <!-- Badges gagnés -->
         <div style="margin-top:24px">
-          <div class="section-title" style="font-size:.95rem;margin-bottom:12px">
+          <div class="section-title" style="font-size:.95rem;margin-bottom:4px;display:flex;align-items:center;gap:8px">
             Mes badges
+            <span style="position:relative;display:inline-flex" id="badges-info-wrap">
+              <button onclick="toggleBadgesInfo()" aria-label="Comment gagner les badges ?"
+                style="width:18px;height:18px;border-radius:50%;border:1px solid var(--border);
+                       background:var(--surface);color:var(--muted);font-size:11px;font-weight:700;
+                       display:flex;align-items:center;justify-content:center;cursor:pointer;
+                       font-family:inherit;padding:0">i</button>
+              <div id="badges-info-tip"
+                style="display:none;position:absolute;top:calc(100% + 8px);left:0;z-index:60;
+                       background:var(--surface2);border:1px solid var(--border);border-radius:10px;
+                       padding:12px 14px;font-size:.78rem;color:var(--muted);line-height:1.5;
+                       width:240px;font-weight:400;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
+                Les badges récompensent ta curation, tes avis et ton ancienneté. La plupart se débloquent automatiquement — survole ou clique un badge pour voir sa condition exacte.
+              </div>
+            </span>
           </div>
-          <div style="font-size:.8rem;color:var(--muted);margin-bottom:14px">
-            Les badges sont calculés automatiquement selon ton activité. Les badges grisés ne sont pas encore débloqués.
+          <div style="font-size:.8rem;color:var(--muted);margin-bottom:16px">
+            Les badges grisés ne sont pas encore débloqués.
           </div>
-          <div class="badges-earned-preview" id="badges-preview-container">
+          <div class="badges-modal-grid" id="badges-preview-container" style="grid-template-columns:repeat(3,1fr)">
             <!-- injecté par JS -->
           </div>
         </div>
@@ -1772,7 +1817,7 @@
     zone.innerHTML = earnedKeys.map(key => {
       const meta = BADGE_META.find(b => b.key === key);
       if (!meta) return '';
-      return `<span class="sb-badge">
+      return `<span class="sb-badge" onclick="switchSection('profil-public')" style="cursor:pointer">
         <img src="${BADGE_IMGS[key]}" alt="${meta.label}" />
         <span class="sb-badge-tip">${meta.label}</span>
       </span>`;
@@ -1789,14 +1834,31 @@
 
     container.innerHTML = BADGE_META.map(b => {
       const earned = earnedKeys.includes(b.key);
-      return `<div class="${earned ? '' : 'bep-locked'}" title="${b.condition}">
-        <div class="bep-item" style="background:${b.color}18; border:1px solid ${b.color}30; color:${b.color}">
-          <img src="${BADGE_IMGS[b.key]}" alt="${b.label}" />
-          ${b.label}
-        </div>
+      return `<div class="bm-card ${earned ? 'earned' : 'locked'}" style="--bm-color:${b.color}">
+        ${!earned ? `<svg class="bm-lock-icon" viewBox="0 0 16 16" fill="none"><rect x="4" y="7" width="8" height="6" rx="1.2" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 7V5C5.5 3.6 6.6 2.5 8 2.5C9.4 2.5 10.5 3.6 10.5 5V7" stroke="currentColor" stroke-width="1.2"/></svg>` : ''}
+        <div class="bm-img-wrap"><img src="${BADGE_IMGS[b.key]}" alt="${b.label}" /></div>
+        <div class="bm-name">${b.label}</div>
+        <div class="bm-condition">${b.condition}</div>
+        <span class="bm-status ${earned ? 'earned-tag' : 'locked-tag'}">${earned ? 'Débloqué' : 'À débloquer'}</span>
       </div>`;
     }).join('');
   }
+
+  window.toggleBadgesInfo = function() {
+    const tip = document.getElementById('badges-info-tip');
+    if (!tip) return;
+    const isOpen = tip.style.display === 'block';
+    tip.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) {
+      const close = (e) => {
+        if (!document.getElementById('badges-info-wrap').contains(e.target)) {
+          tip.style.display = 'none';
+          document.removeEventListener('click', close);
+        }
+      };
+      setTimeout(() => document.addEventListener('click', close), 10);
+    }
+  };
 
 
 
@@ -2175,8 +2237,9 @@
       await loadQuizHistory();
       await loadAvis();
       await loadSavedVideos();
-      // Badges
-      const earnedBadges = computeEarnedBadges(userProfile, await getCollections(user.uid), userAvis.length || 0);
+      // Badges — calculés UNIQUEMENT sur les collections publiques (cohérent avec profil-public.html)
+      const publicCols = collections.filter(c => c.isPublic === true);
+      const earnedBadges = computeEarnedBadges(userProfile, publicCols, userAvis.length || 0);
       renderSidebarBadges(earnedBadges);
       initPrefs(earnedBadges);
       // Lancer le quiz si redirigé depuis index.html
@@ -2362,8 +2425,17 @@
     const col = collections.find(c => c.id === colId);
     if (col) col.isPublic = newVal;
     renderCollections();
+    refreshBadges();
     showToast(newVal ? '🌐 Collection rendue publique !' : '🔒 Collection rendue privée.');
   };
+
+  // Recalcule et réaffiche les badges (sidebar + section Profil public)
+  function refreshBadges() {
+    const publicCols = collections.filter(c => c.isPublic === true);
+    const earned = computeEarnedBadges(userProfile, publicCols, userAvis.length || 0);
+    renderSidebarBadges(earned);
+    renderBadgesInParams(earned, publicCols, userAvis.length || 0);
+  }
 
   // ── PARTAGER LE PROFIL PUBLIC ─────────────────
   window.sharePublicProfile = function() {
