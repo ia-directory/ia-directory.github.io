@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<title>Migration Deals — Albexia (À SUPPRIMER)</title>
+<style>
+  body{background:#0a0a0f;color:#f0f0f5;font-family:monospace;padding:24px;}
+  #log{white-space:pre-wrap;line-height:1.8;}
+  .ok{color:#00d4aa;} .err{color:#ff6b9d;} .info{color:#a8a3ff;}
+  button{background:#ff6b9d;color:#fff;border:0;padding:12px 24px;border-radius:8px;font-size:15px;cursor:pointer;margin-bottom:20px;}
+  button:disabled{opacity:0.5;cursor:not-allowed;}
+</style>
+</head>
+<body>
+  <h2>⚠️ Migration unique — deals.json → Firestore collection "deals"</h2>
+  <p>À utiliser UNE SEULE FOIS, puis supprimer ce fichier du repo.</p>
+  <button id="run">Migrer les deals</button>
+  <div id="log"></div>
+  <script type="module">
+    import { db, collection, doc, writeBatch }
+      from './js/firebase-config.js';
+    const logEl = document.getElementById('log');
+    function log(msg, cls='info') {
+      const line = document.createElement('div');
+      line.className = cls; line.textContent = msg;
+      logEl.appendChild(line);
+    }
+    document.getElementById('run').addEventListener('click', async (e) => {
+      e.target.disabled = true;
+      try {
+        log('Chargement de deals.json...');
+        const res = await fetch('data/deals.json');
+        if (!res.ok) throw new Error('Fichier introuvable — vérifiez le chemin data/deals.json');
+        const items = await res.json();
+        log(`${items.length} deals trouvés. Écriture en cours...`);
+        const batch = writeBatch(db);
+        items.forEach(item => {
+          const ref = doc(db, 'deals', String(item.id));
+          batch.set(ref, item);
+        });
+        await batch.commit();
+        log(`✓ Migration terminée — ${items.length} deals dans Firestore.`, 'ok');
+        log('Pensez à supprimer ce fichier du repo.', 'info');
+      } catch(err) {
+        log('Erreur : ' + err.message, 'err');
+      }
+      e.target.disabled = false;
+    });
+  </script>
+</body>
+</html>
