@@ -29,7 +29,7 @@
       e.target.disabled = true;
       try {
         log('Chargement de deals.json...');
-        const res = await fetch('data/deals.json');
+        const res = await fetch('deals.json');
         if (!res.ok) throw new Error('Fichier introuvable — vérifiez le chemin data/deals.json');
         const items = await res.json();
         log(`${items.length} deals trouvés. Écriture en cours...`);
