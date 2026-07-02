@@ -1,4 +1,4 @@
- #!/usr/bin/env node
+#!/usr/bin/env node
 /* ═══════════════════════════════════════════════════════
    gen-fiches.js — Générateur de fiches outils Albexia
    Source : Firestore collection "outils"
