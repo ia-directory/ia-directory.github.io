@@ -121,6 +121,68 @@
     ]
   },
 
+    "notebooklm": {
+    "articles": [
+      {
+        "id": "ntbk-001",
+        "titre": "Débuter avec NotebookLM : créez votre second cerveau IA",
+        "soustitre": "Guide complet pour importer vos sources, documents et générer des synthèses intelligentes",
+        "image": "https://images.unsplash.com/photo-1677442135703-1787eea5ce01?w=600&q=80",
+        "lien": "blog/debuter-notebooklm-second-cerveau.html",
+        "featured": true
+      },
+      {
+        "id": "ntbk-002",
+        "titre": "NotebookLM Pro vs Gratuit : quelles fonctionnalités choisir ?",
+        "soustitre": "Analyse des limites de stockage, des modèles disponibles et des options avancées",
+        "image": "https://images.unsplash.com/photo-1620712943543-bcc4688e7485?w=600&q=80",
+        "lien": "blog/notebooklm-pro-vs-gratuit-comparatif.html",
+        "featured": true
+      },
+      {
+        "id": "ntbk-003",
+        "titre": "Comment générer des podcasts audio bluffants avec NotebookLM",
+        "soustitre": "Maîtrisez la fonctionnalité Audio Overview pour transformer vos notes en discussions animées",
+        "image": "https://images.unsplash.com/photo-1682687982501-1e58ab814714?w=600&q=80",
+        "lien": "blog/generer-podcast-audio-notebooklm.html",
+        "featured": true
+      },
+      {
+        "id": "ntbk-004",
+        "titre": "NotebookLM pour les étudiants : optimiser vos révisions",
+        "soustitre": "Fiches de lecture, quiz automatiques et résumés de cours — boostez votre productivité",
+        "image": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=600&q=80",
+        "lien": "blog/notebooklm-etudiants-revisions-ia.html",
+        "featured": false
+      },
+      {
+        "id": "ntbk-005",
+        "titre": "Sécurité des données et NotebookLM : vos documents sont-ils privés ?",
+        "soustitre": "Le point complet sur la confidentialité, l'entraînement des modèles et l'usage professionnel",
+        "image": "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?w=600&q=80",
+        "lien": "blog/securite-confidentialite-donnees-notebooklm.html",
+        "featured": false
+      },
+      {
+        "id": "ntbk-006",
+        "titre": "10 cas d'usage de NotebookLM pour booster votre entreprise",
+        "soustitre": "Analyses de marché, onboarding de collaborateurs et gestion des bases de connaissances",
+        "image": "https://images.unsplash.com/photo-1686191128892-3b37add4c844?w=600&q=80",
+        "lien": "blog/cas-dusage-notebooklm-entreprise.html",
+        "featured": false
+      },
+      {
+        "id": "ntbk-007",
+        "titre": "NotebookLM vs ChatGPT My Spaces : le match de la gestion des connaissances",
+        "soustitre": "Comparatif approfondi pour choisir le meilleur outil d'organisation de vos informations",
+        "image": "https://images.unsplash.com/photo-1618005198919-d3d4b5a92ead?w=600&q=80",
+        "lien": "blog/notebooklm-vs-chatgpt-spaces-comparatif.html",
+        "featured": false
+      }
+    ]
+    },
+      
+
   "claude": {
     "articles": [
       {
