@@ -18,7 +18,15 @@ import {
 // ──────────────────────────────────────────
 
 export function getToolSlugFromPath(pathname) {
-  return pathname.split('/').pop().replace(/\.html?$/, '').toLowerCase().trim();
+  // Supporte les deux formats :
+  //  - /tools/{plan}/{langue}/{slug}/          (format dossier, actuel)
+  //  - /tools/{plan}/{slug}.html               (ancien format plat)
+  const segments = pathname.split('/').filter(Boolean); // retire les segments vides (slash final, double slash)
+  let last = segments[segments.length - 1] || '';
+  if (last === 'index.html' || last === 'index') {
+    last = segments[segments.length - 2] || '';
+  }
+  return last.replace(/\.html?$/, '').toLowerCase().trim();
 }
 
 export function getToolSlug(tool) {

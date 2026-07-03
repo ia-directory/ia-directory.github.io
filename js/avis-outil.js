@@ -5,7 +5,7 @@
    ═══════════════════════════════════════ */
 
 import { auth, onAuthStateChanged }
-  from '../../js/firebase-config.js';
+  from '/js/firebase-config.js';
 
 import {
   getToolReviews,
@@ -16,7 +16,7 @@ import {
   reportReview,
   getUserVote,
   voteReview,
-} from '../../js/reviews.js';
+} from '/js/reviews.js';
 
 // ── Config depuis URL ─────────────────────────
 const params   = new URLSearchParams(window.location.search);
@@ -109,7 +109,7 @@ function renderAll() {
 
 function renderHeader() {
   const el = document.getElementById('avo-header');
-  const backUrl = toolMeta.page || `../../tools/${TOOL_SLUG}.html`;
+  const backUrl = toolMeta.page || `/tools/standard/fr/${TOOL_SLUG}/`;
   el.innerHTML = `
     <div class="avo-header-inner">
       <a class="avo-back" href="${backUrl}">← Retour à la fiche</a>
