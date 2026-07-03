@@ -45,8 +45,8 @@ function stars(note) {
   ).join('') + `<span class="star-label">${note ? note+'/5' : 'Nouveau'}</span>`;
 }
 
-// r = chemin relatif vers la racine (3 niveaux : plan/langue/slug/)
-const R = '../../../';
+// R = chemin absolu vers la racine du site (site servi à la racine du domaine)
+const R = '/';
 
 function navHTML(langue) {
   const homeLabel = { fr:'Accueil', en:'Home',  es:'Inicio' }[langue] || 'Accueil';
