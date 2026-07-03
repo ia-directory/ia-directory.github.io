@@ -9,6 +9,25 @@
 // LS_KEY favoris supprimé → remplacé par Firebase collections
 const LS_LANG_KEY = 'albexia_langue';
 
+// ─── SLUG / URL FICHE ────────────────────
+// Identique à la logique de gen-fiches.js — garantit que les URLs
+// reconstruites ici correspondent toujours aux fichiers réellement générés,
+// sans dépendre du champ "page" stocké en Firestore (qui peut être obsolète).
+function slugify(str) {
+  return (str || '').toLowerCase()
+    .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+}
+
+function buildToolPageUrl(t) {
+  if (t.generer_fiche === false) return null; // pas de fiche générée pour cet outil
+  const slug = slugify(t.name);
+  if (!slug) return null;
+  const folder = t.plan === 'featured' ? 'featured' : t.plan === 'starter' ? 'starter' : 'standard';
+  const langue = t.langue || 'fr';
+  return `/tools/${folder}/${langue}/${slug}/`;
+}
+
 // ─── LANGUE ──────────────────────────────
 const LANGUES_SUPPORTEES = ['fr', 'en', 'es'];
 
@@ -264,7 +283,8 @@ function showEmpty(containerId, msg = 'Aucun résultat trouvé.') {
 function buildToolCard(t) {
   const priceLabel = { free: 'Gratuit', freemium: 'Freemium', paid: 'Payant' };
   const col  = catColors[t.category] || { bg: 'rgba(255,255,255,0.08)' };
-  const plan = t.plan || (t.page ? 'gratuit' : null);
+  const pageUrl = buildToolPageUrl(t);
+  const plan = t.plan || (pageUrl ? 'gratuit' : null);
 
   const iconHtml = t.favicon
     ? `<img src="${t.favicon}" alt="${t.name}" class="tool-favicon"
@@ -273,8 +293,8 @@ function buildToolCard(t) {
        <span class="tool-ico-fallback" style="display:none">${t.emoji}</span>`
     : `<span class="tool-ico-fallback">${t.emoji}</span>`;
 
-  const cardAction = t.page
-    ? `onclick="window.location.href='${t.page}'"`
+  const cardAction = pageUrl
+    ? `onclick="window.location.href='${pageUrl}'"`
     : `onclick="window.open('${t.url}','_blank')"`;
 
   let planBadge = '';
@@ -288,16 +308,14 @@ function buildToolCard(t) {
     cardClass = 'tool-card tool-card-plan-gratuit';
   }
 
-  if (t.page) {
+  if (pageUrl) {
     planBadge = `<span class="tool-plan-badge tool-plan-badge-gratuit">Guide complet →</span>`;
   }
 
   const toolJson = JSON.stringify(t).replace(/'/g, "\'").replace(/"/g, '&quot;');
 
-  // Slug pour Firestore — même logique que les pages outils
-  const slug = t.page
-    ? t.page.split('/').pop().replace(/\.html?$/, '').toLowerCase()
-    : String(t.id);
+  // Slug pour Firestore ratings — même logique que gen-fiches.js
+  const slug = slugify(t.name) || String(t.id);
 
   return `
     <article class="${cardClass}" ${cardAction} data-tool-slug="${slug}">
@@ -851,8 +869,9 @@ function scoreOutil(tool, answers) {
   if (answers.budget === 'freemium' && tool.price !== 'paid') score += 2;
   if (answers.budget === 'paid')                               score += 1;
   if (answers.connexion === 'lente' && CATS_LOURDES.includes(tool.category)) score -= 3;
-  if (answers.niveau === 'debutant' && !tool.page) score += 1;
-  if (answers.niveau === 'avance'   && tool.page)  score += 1;
+  const hasPage = !!buildToolPageUrl(tool);
+  if (answers.niveau === 'debutant' && !hasPage) score += 1;
+  if (answers.niveau === 'avance'   && hasPage)  score += 1;
   score += (tool.rating || 3) * 0.3;
   return score;
 }
@@ -883,8 +902,9 @@ function showQuizResults() {
 
   const priceLabel = { free: 'Gratuit', freemium: 'Freemium', paid: 'Payant' };
   document.getElementById('quiz-results-grid').innerHTML = selected.map(t => {
-    const action = t.page
-      ? `onclick="closeQuiz();window.location.href='${t.page}'"`
+    const quizPageUrl = buildToolPageUrl(t);
+    const action = quizPageUrl
+      ? `onclick="closeQuiz();window.location.href='${quizPageUrl}'"`
       : `onclick="closeQuiz();window.open('${t.url}','_blank')"`;
     const iconHtml = t.favicon
       ? `<img src="${t.favicon}" alt="${t.name}" style="width:32px;height:32px;border-radius:6px;" onerror="this.style.display='none'">`
