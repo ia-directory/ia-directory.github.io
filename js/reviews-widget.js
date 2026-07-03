@@ -5,7 +5,7 @@
    ═══════════════════════════════════════ */
 
 import { auth, onAuthStateChanged }
-  from '../../js/firebase-config.js';
+  from '/js/firebase-config.js';
 
 import {
   getToolSlugFromPath,
@@ -17,7 +17,7 @@ import {
   reportReview,
   getUserVote,
   voteReview,
-} from '../../js/reviews.js';
+} from '/js/reviews.js';
 
 // ── Config ────────────────────────────────────
 const TOOL_SLUG    = getToolSlugFromPath(window.location.pathname);
@@ -76,7 +76,8 @@ async function refreshWidget() {
       userVotes = {};
       results.forEach(({ id, vote }) => { userVotes[id] = vote; });
     }
-  } catch {
+  } catch (err) {
+    console.error('reviews-widget: échec chargement avis', err);
     container.innerHTML = '';
     return;
   }
@@ -282,7 +283,8 @@ async function handleSubmit() {
     rvToast('✅ Avis publié, merci !');
     await refreshWidget();
     await refreshHeroStars();
-  } catch {
+  } catch (err) {
+    console.error('reviews-widget: échec submitReview', err);
     errorEl.textContent = 'Erreur lors de la publication. Réessayez.';
     errorEl.style.display = 'block';
     submitBtn.disabled    = false;

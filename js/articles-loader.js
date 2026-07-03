@@ -18,10 +18,8 @@
 
   if (!outil || plan === 'gratuit') return;
 
-  // Chemin relatif vers articles.json depuis n'importe quel niveau de dossier
-  const depth = (window.location.pathname.match(/\//g) || []).length - 1;
-  const prefix = '../'.repeat(Math.max(depth - 1, 0));
-  const jsonPath = prefix + 'data/articles.json';
+  // Chemin absolu vers articles.json (site servi à la racine du domaine)
+  const jsonPath = '/data/articles.json';
 
   fetch(jsonPath)
     .then(r => r.json())
