@@ -47,6 +47,7 @@ function stars(note) {
 
 // R = chemin absolu vers la racine du site (site servi à la racine du domaine)
 const R = '/';
+const SITE_ORIGIN = 'https://albexia.com';
 
 function navHTML(langue) {
   const homeLabel = { fr:'Accueil', en:'Home',  es:'Inicio' }[langue] || 'Accueil';
@@ -555,10 +556,171 @@ ${articlesScript}
 }
 
 // ════════════════════════════════════════════════════════════
+// GÉNÉRATEUR ARTICLES (blog)
+// Source : Firestore collection "articles"
+// Sortie : articles/{langue}/{slug}/index.html
+// ════════════════════════════════════════════════════════════
+function articleNavHTML(langue) {
+  // Nav identique à navHTML() mais depuis un fichier à 3 niveaux de profondeur
+  // (articles/{langue}/{slug}/index.html) — on réutilise navHTML() telle quelle
+  // car R est un chemin absolu ('/'), donc la profondeur du fichier n'a aucune
+  // incidence sur les liens : c'est tout l'intérêt des chemins absolus.
+  return navHTML(langue);
+}
+
+function generateArticle(article, allArticles) {
+  const {
+    title, category='', emoji='📝', date='', readTime='', excerpt='',
+    author='Équipe Albexia', tags=[], slug, langue='fr',
+    traductions={}, corps_html='', meta_description='', og_image=''
+  } = article;
+
+  if (!slug) return null; // sécurité : jamais générer sans slug (URL invalide)
+
+  const canonicalUrl = `${SITE_ORIGIN}/articles/${langue}/${slug}/index.html`;
+
+  // Construit dynamiquement le bloc hreflang : uniquement pour les langues qui
+  // existent RÉELLEMENT (article FR lui-même + traductions renseignées dans
+  // Firestore). On ne référence jamais une langue absente pour éviter un
+  // hreflang pointant vers une page 404 — c'est ce qui pénalise le plus en SEO.
+  const langueUrls = { [langue]: canonicalUrl };
+  for (const [langCode, relId] of Object.entries(traductions || {})) {
+    const rel = allArticles.find(a => String(a.id) === String(relId));
+    if (rel && rel.slug) {
+      langueUrls[langCode] = `${SITE_ORIGIN}/articles/${langCode}/${rel.slug}/index.html`;
+    }
+  }
+  // Le x-default pointe toujours vers la version FR si elle existe, sinon
+  // vers la langue courante (cas d'un article publié directement en EN/ES
+  // sans version FR — rare mais possible).
+  const xDefaultUrl = langueUrls.fr || canonicalUrl;
+
+  const hreflangTags = Object.entries(langueUrls)
+    .map(([langCode, u]) => `  <link rel="alternate" hreflang="${langCode}" href="${u}" />`)
+    .join('\n') + `\n  <link rel="alternate" hreflang="x-default" href="${xDefaultUrl}" />`;
+
+  const ogLocales = { fr: 'fr_FR', en: 'en_US', es: 'es_ES' };
+  const ogLocale = ogLocales[langue] || 'fr_FR';
+  const ogLocaleAlternates = Object.keys(langueUrls)
+    .filter(l => l !== langue)
+    .map(l => `  <meta property="og:locale:alternate" content="${ogLocales[l] || l}" />`)
+    .join('\n');
+
+  const metaDesc = meta_description || excerpt.slice(0, 155);
+  const ogImageTag = og_image ? `  <meta property="og:image" content="${og_image}" />\n  <meta name="twitter:image" content="${og_image}" />\n` : '';
+  const ogImageJsonLd = og_image ? `,\n    "image": "${og_image}"` : '';
+
+  const workTranslations = Object.entries(langueUrls)
+    .filter(([l]) => l !== langue)
+    .map(([l, u]) => `      { "@type": "Article", "inLanguage": "${l}", "url": "${u}" }`)
+    .join(',\n');
+
+  const titleTag = `${title} | Albexia`;
+
+  // Navigation article précédent/suivant : dans la même langue uniquement,
+  // en se basant sur l'ordre des articles de cette langue triés par date brute
+  // Firestore (le champ "date" est une chaîne d'affichage, donc on trie sur
+  // l'ID à défaut d'un champ date ISO dédié — voir note dans le README du repo).
+  const sameLang = allArticles.filter(a => (a.langue || 'fr') === langue && a.slug).sort((a,b) => Number(String(a.id).split('-')[0]) - Number(String(b.id).split('-')[0]));
+  const idx = sameLang.findIndex(a => String(a.id) === String(article.id));
+  const prevArticle = idx > 0 ? sameLang[idx - 1] : null;
+  const nextArticle = (idx >= 0 && idx < sameLang.length - 1) ? sameLang[idx + 1] : null;
+
+  const navBottomHTML = (prevArticle || nextArticle) ? `
+  <nav class="article-nav-bottom" aria-label="Navigation articles">
+    ${prevArticle ? `<a href="${R}articles/${langue}/${prevArticle.slug}/index.html" class="article-nav-btn">← ${prevArticle.title}</a>` : ''}
+    ${nextArticle ? `<a href="${R}articles/${langue}/${nextArticle.slug}/index.html" class="article-nav-btn">${nextArticle.title} →</a>` : ''}
+  </nav>` : '';
+
+  const tagsHTML = (tags || []).map(t => `<a href="#" class="article-tag">#${t}</a>`).join('\n      ');
+
+  return `<!DOCTYPE html>
+<html lang="${langue}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${titleTag}</title>
+  <meta name="description" content="${metaDesc}" />
+  <meta name="robots" content="index, follow" />
+
+  <link rel="canonical" href="${canonicalUrl}" />
+
+${hreflangTags}
+
+  <meta property="og:title"       content="${title} | Albexia" />
+  <meta property="og:description" content="${metaDesc}" />
+  <meta property="og:type"        content="article" />
+  <meta property="og:url"         content="${canonicalUrl}" />
+${ogImageTag}  <meta property="og:locale"           content="${ogLocale}" />
+${ogLocaleAlternates}
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="${title} | Albexia" />
+  <meta name="twitter:description" content="${metaDesc}" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": "${title}",
+    "description": "${metaDesc}",
+    "inLanguage": "${langue}",
+    "datePublished": "${date}",
+    "dateModified": "${date}",
+    "author": { "@type": "Organization", "name": "Albexia" },
+    "publisher": { "@type": "Organization", "name": "Albexia", "url": "${SITE_ORIGIN}" }${ogImageJsonLd},
+    "mainEntityOfPage": { "@type": "WebPage", "@id": "${canonicalUrl}" }${workTranslations ? `,
+    "workTranslation": [
+${workTranslations}
+    ]` : ''}
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="${R}css/style.css" />
+  <link rel="stylesheet" href="${R}css/article.css" />
+</head>
+<body>
+
+${articleNavHTML(langue)}
+
+<main class="article-main">
+<div class="article-container">
+
+  <header class="article-header">
+    <div class="article-meta-top">
+      <span class="article-cat fond">${category}</span>
+      <span class="dot"></span>
+      <span class="article-date">${date}</span>
+      <span class="dot"></span>
+      <span class="article-read-time">⏱ ${readTime}</span>
+    </div>
+    <h1 class="article-title">${title}</h1>
+    <p class="article-intro">${excerpt}</p>
+  </header>
+
+  <div class="article-body">
+${corps_html}
+    <div class="article-tags">
+      ${tagsHTML}
+    </div>
+
+  </div>
+${navBottomHTML}
+
+</div>
+</main>
+
+${footerHTML()}
+${sharedJS()}
+</body>
+</html>`;
+}
+
+// ════════════════════════════════════════════════════════════
 // MAIN
 // ════════════════════════════════════════════════════════════
 async function main() {
-  console.log('📥 Lecture de Firestore...');
+  console.log('📥 Lecture de Firestore (outils)...');
   const snap  = await db.collection('outils').get();
   const tools = snap.docs.map(d => d.data());
   console.log(`✓ ${tools.length} documents trouvés`);
@@ -594,7 +756,7 @@ async function main() {
     if (generated % 50 === 0) console.log(`  → ${generated} fiches générées...`);
   }
 
-  console.log(`\n✅ Terminé — ${generated} fiches générées, ${noFiche} ignorées (generer_fiche=false), ${skipped} slug vides.`);
+  console.log(`\n✅ Outils — ${generated} fiches générées, ${noFiche} ignorées (generer_fiche=false), ${skipped} slug vides.`);
   console.log(`\nStructure :`);
   console.log(`  tools/featured/fr/{slug}/index.html`);
   console.log(`  tools/featured/en/{slug}/index.html`);
@@ -602,24 +764,20 @@ async function main() {
   console.log(`  tools/starter/{langue}/{slug}/index.html`);
   console.log(`  tools/standard/{langue}/{slug}/index.html`);
 
-  // ─── NETTOYAGE DES FICHES ORPHELINES ───
-  // Supprime les dossiers de fiches qui ne correspondent plus à aucun
-  // document Firestore valide (ex: outil passé de starter à featured,
-  // outil supprimé, ou generer_fiche mis à false).
-  console.log(`\n🧹 Nettoyage des fiches orphelines...`);
+  // ─── NETTOYAGE DES FICHES OUTILS ORPHELINES ───
+  console.log(`\n🧹 Nettoyage des fiches outils orphelines...`);
 
-  // Construit l'ensemble des chemins valides d'après Firestore (état actuel)
-  const validPaths = new Set();
+  const validToolPaths = new Set();
   for (const tool of tools) {
     if (tool.generer_fiche === false) continue;
     const plan   = tool.plan === 'featured' ? 'featured' : tool.plan === 'starter' ? 'starter' : 'standard';
     const langue = tool.langue || 'fr';
     const slug   = slugify(tool.name);
     if (!slug) continue;
-    validPaths.add(path.join('tools', plan, langue, slug));
+    validToolPaths.add(path.join('tools', plan, langue, slug));
   }
 
-  let removed = 0;
+  let removedTools = 0;
   for (const plan of ['featured', 'starter', 'standard']) {
     const planDir = path.join('tools', plan);
     if (!fs.existsSync(planDir)) continue;
@@ -629,15 +787,79 @@ async function main() {
       for (const slugDir of fs.readdirSync(langueDir)) {
         const fullPath = path.join(langueDir, slugDir);
         if (!fs.statSync(fullPath).isDirectory()) continue;
-        if (!validPaths.has(fullPath)) {
+        if (!validToolPaths.has(fullPath)) {
           fs.rmSync(fullPath, { recursive: true, force: true });
           console.log(`  🗑️  Supprimé : ${fullPath}`);
-          removed++;
+          removedTools++;
         }
       }
     }
   }
-  console.log(`✓ ${removed} dossier(s) orphelin(s) supprimé(s).`);
+  console.log(`✓ ${removedTools} dossier(s) outil orphelin(s) supprimé(s).`);
+
+  // ════════════════════════════════════════════════════════════
+  // ARTICLES (blog)
+  // ════════════════════════════════════════════════════════════
+  console.log(`\n📥 Lecture de Firestore (articles)...`);
+  const articlesSnap = await db.collection('articles').get();
+  const articles = articlesSnap.docs.map(d => d.data());
+  console.log(`✓ ${articles.length} documents trouvés`);
+
+  let articlesGenerated = 0, articlesSkippedNoSlug = 0, articlesSkippedNoCorps = 0;
+
+  for (const article of articles) {
+    const langue = article.langue || 'fr';
+    const slug   = article.slug || slugify(article.title);
+
+    if (!slug) { articlesSkippedNoSlug++; continue; }
+    // Un article sans corps_html ne doit jamais être publié : ça produirait
+    // une page quasi vide, mauvaise pour le SEO et l'expérience utilisateur.
+    // (C'est le cas typique juste après la migration depuis blog.json.)
+    if (!article.corps_html || !article.corps_html.trim()) { articlesSkippedNoCorps++; continue; }
+
+    const html = generateArticle(article, articles);
+    if (!html) { articlesSkippedNoSlug++; continue; }
+
+    const folder = path.join('articles', langue, slug);
+    fs.mkdirSync(folder, { recursive: true });
+    fs.writeFileSync(path.join(folder, 'index.html'), html, 'utf8');
+    articlesGenerated++;
+  }
+
+  console.log(`\n✅ Articles — ${articlesGenerated} fiches générées, ${articlesSkippedNoCorps} ignorées (corps_html vide), ${articlesSkippedNoSlug} slug vide.`);
+  console.log(`\nStructure :`);
+  console.log(`  articles/fr/{slug}/index.html`);
+  console.log(`  articles/en/{slug}/index.html`);
+  console.log(`  articles/es/{slug}/index.html`);
+
+  // ─── NETTOYAGE DES ARTICLES ORPHELINS ───
+  console.log(`\n🧹 Nettoyage des articles orphelins...`);
+
+  const validArticlePaths = new Set();
+  for (const article of articles) {
+    const langue = article.langue || 'fr';
+    const slug   = article.slug || slugify(article.title);
+    if (!slug || !article.corps_html || !article.corps_html.trim()) continue;
+    validArticlePaths.add(path.join('articles', langue, slug));
+  }
+
+  let removedArticles = 0;
+  if (fs.existsSync('articles')) {
+    for (const langue of fs.readdirSync('articles')) {
+      const langueDir = path.join('articles', langue);
+      if (!fs.statSync(langueDir).isDirectory()) continue;
+      for (const slugDir of fs.readdirSync(langueDir)) {
+        const fullPath = path.join(langueDir, slugDir);
+        if (!fs.statSync(fullPath).isDirectory()) continue;
+        if (!validArticlePaths.has(fullPath)) {
+          fs.rmSync(fullPath, { recursive: true, force: true });
+          console.log(`  🗑️  Supprimé : ${fullPath}`);
+          removedArticles++;
+        }
+      }
+    }
+  }
+  console.log(`✓ ${removedArticles} dossier(s) article orphelin(s) supprimé(s).`);
 }
 
 main().catch(err => { console.error('❌ Erreur:', err); process.exit(1); });
