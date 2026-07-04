@@ -2,7 +2,7 @@
   {
     "id": 1,
     "title": "Comment utiliser ChatGPT pour apprendre une nouvelle langue",
-    "category": "Guide",
+    "category": "Tutoriel",
     "emoji": "💬",
     "image": "medias/blog/chatgpt-apprendre-langue.jpg",
     "date": "15 mars 2025",
@@ -15,7 +15,7 @@
   {
     "id": 2,
     "title": "Top 10 des outils IA pour les créatifs en 2025",
-    "category": "Sélection",
+    "category": "Comparatif",
     "emoji": "🎨",
     "image": "medias/blog/top-10-outils-creatifs-2025.jpg",
     "date": "10 mars 2025",
@@ -28,7 +28,7 @@
   {
     "id": 3,
     "title": "L'IA générative expliquée simplement, sans jargon",
-    "category": "Débutant",
+    "category": "Tutoriel",
     "emoji": "🤖",
     "image": "medias/blog/ia-generative-expliquee-simplement.jpg",
     "date": "5 mars 2025",
