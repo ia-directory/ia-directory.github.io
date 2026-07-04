@@ -1,4 +1,4 @@
-/* ═══════════════════════════════════════
+ /* ═══════════════════════════════════════
    Albexia — app.js
    Fonctionnalités : navigation, JSON,
    collections Firebase, soumission d'outil
