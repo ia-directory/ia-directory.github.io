@@ -51,7 +51,8 @@ window.buildToolCard = function(t) {
     (c.tools || []).some(tool => String(tool.id) === String(t.id))
   );
 
-  const plan     = t.plan || (t.page ? 'gratuit' : null);
+  const pageUrl  = (typeof window.buildToolPageUrl === 'function') ? window.buildToolPageUrl(t) : null;
+  const plan     = t.plan || (pageUrl ? 'gratuit' : null);
   let cardClass  = 'tool-card';
   let planBadge  = '';
 
@@ -59,10 +60,10 @@ window.buildToolCard = function(t) {
   else if (plan === 'starter') cardClass = 'tool-card tool-card-featured tool-card-plan-starter';
   else if (plan === 'gratuit') cardClass = 'tool-card tool-card-plan-gratuit';
 
-  if (t.page) planBadge = `<span class="tool-plan-badge tool-plan-badge-gratuit">Guide complet →</span>`;
+  if (pageUrl) planBadge = `<span class="tool-plan-badge tool-plan-badge-gratuit">Guide complet →</span>`;
 
-  const cardAction = t.page
-    ? `onclick="window.location.href='${t.page}'"`
+  const cardAction = pageUrl
+    ? `onclick="window.location.href='${pageUrl}'"`
     : `onclick="window.open('${t.url}','_blank')"`;
 
   const iconHtml = t.favicon
@@ -73,9 +74,7 @@ window.buildToolCard = function(t) {
     : `<span class="tool-ico-fallback">${t.emoji}</span>`;
 
   // Slug identique à buildToolCard dans app.js
-  const slug = t.page
-    ? t.page.split('/').pop().replace(/\.html?$/, '').toLowerCase()
-    : String(t.id);
+  const slug = (typeof window.slugify === 'function' ? window.slugify(t.name) : '') || String(t.id);
 
   return `
     <article class="${cardClass}" ${cardAction} data-tool-slug="${slug}">

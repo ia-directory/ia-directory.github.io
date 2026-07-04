@@ -1,4 +1,4 @@
- /* ═══════════════════════════════════════
+/* ═══════════════════════════════════════
    Albexia — app.js
    Fonctionnalités : navigation, JSON,
    collections Firebase, soumission d'outil
@@ -27,6 +27,8 @@ function buildToolPageUrl(t) {
   const langue = t.langue || 'fr';
   return `/tools/${folder}/${langue}/${slug}/`;
 }
+window.slugify = slugify;
+window.buildToolPageUrl = buildToolPageUrl;
 
 // ─── LANGUE ──────────────────────────────
 const LANGUES_SUPPORTEES = ['fr', 'en', 'es'];
@@ -340,6 +342,7 @@ function buildToolCard(t) {
       ${planBadge}
     </article>`;
 }
+window.buildToolCard = buildToolCard;
 
 // ════════════════════════════════════════
 // RATINGS FIRESTORE — enrichir les cartes
