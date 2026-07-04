@@ -10,8 +10,41 @@
     "excerpt": "Découvrez les meilleures techniques pour pratiquer une langue étrangère avec l'IA comme partenaire de conversation personnalisé.",
     "author": "Équipe Velixia",
     "tags": ["ChatGPT", "langues", "apprentissage"],
-    "url": "articles/chatgpt-apprendre-langue.html"
+    "url": "articles/fr/chatgpt-apprendre-langue/index.html",
+    "langue": "fr",
+    "traductions": {"en": "1-en", "es": "1-es"}
   },
+  {
+    "id": "1-en",
+    "title": "How to Use ChatGPT to Learn a New Language",
+    "category": "Tutorial",
+    "emoji": "💬",
+    "image": "medias/blog/chatgpt-apprendre-langue.jpg",
+    "date": "March 15, 2025",
+    "readTime": "5 min",
+    "excerpt": "Discover the best techniques for practicing a foreign language with AI as your personalized conversation partner.",
+    "author": "Velixia Team",
+    "tags": ["ChatGPT", "languages", "learning"],
+    "url": "articles/en/chatgpt-apprendre-langue/index.html",
+    "langue": "en",
+    "traductions": {"fr": 1, "es": "1-es"}
+  },
+  {
+    "id": "1-es",
+    "title": "Cómo usar ChatGPT para aprender un nuevo idioma",
+    "category": "Tutorial",
+    "emoji": "💬",
+    "image": "medias/blog/chatgpt-apprendre-langue.jpg",
+    "date": "15 de marzo de 2025",
+    "readTime": "5 min",
+    "excerpt": "Descubre las mejores técnicas para practicar un idioma extranjero con la IA como compañero de conversación personalizado.",
+    "author": "Equipo Velixia",
+    "tags": ["ChatGPT", "idiomas", "aprendizaje"],
+    "url": "articles/es/chatgpt-apprendre-langue/index.html",
+    "langue": "es",
+    "traductions": {"fr": 1, "en": "1-en"}
+  },
+
   {
     "id": 2,
     "title": "Top 10 des outils IA pour les créatifs en 2025",
@@ -23,8 +56,41 @@
     "excerpt": "Des générateurs d'images aux compositeurs musicaux, voici les outils IA qui révolutionnent la création artistique cette année.",
     "author": "Équipe Velixia",
     "tags": ["créatif", "outils", "sélection"],
-    "url": "articles/top-10-outils-creatifs-2025.html"
+    "url": "articles/fr/top-10-outils-creatifs-2025/index.html",
+    "langue": "fr",
+    "traductions": {"en": "2-en", "es": "2-es"}
   },
+  {
+    "id": "2-en",
+    "title": "Top 10 AI Tools for Creatives in 2025",
+    "category": "Comparison",
+    "emoji": "🎨",
+    "image": "medias/blog/top-10-outils-creatifs-2025.jpg",
+    "date": "March 10, 2025",
+    "readTime": "8 min",
+    "excerpt": "From image generators to music composers, here are the AI tools revolutionizing artistic creation this year.",
+    "author": "Velixia Team",
+    "tags": ["creative", "tools", "selection"],
+    "url": "articles/en/top-10-outils-creatifs-2025/index.html",
+    "langue": "en",
+    "traductions": {"fr": 2, "es": "2-es"}
+  },
+  {
+    "id": "2-es",
+    "title": "Los 10 mejores herramientas de IA para creativos en 2025",
+    "category": "Comparativa",
+    "emoji": "🎨",
+    "image": "medias/blog/top-10-outils-creatifs-2025.jpg",
+    "date": "10 de marzo de 2025",
+    "readTime": "8 min",
+    "excerpt": "Desde generadores de imágenes hasta compositores musicales, estas son las herramientas de IA que están revolucionando la creación artística este año.",
+    "author": "Equipo Velixia",
+    "tags": ["creativo", "herramientas", "selección"],
+    "url": "articles/es/top-10-outils-creatifs-2025/index.html",
+    "langue": "es",
+    "traductions": {"fr": 2, "en": "2-en"}
+  },
+
   {
     "id": 3,
     "title": "L'IA générative expliquée simplement, sans jargon",
@@ -36,8 +102,41 @@
     "excerpt": "Comprendre comment fonctionne l'intelligence artificielle générative sans connaissances techniques préalables. Pour tout le monde.",
     "author": "Équipe Velixia",
     "tags": ["débutant", "explication", "générative"],
-    "url": "articles/ia-generative-expliquee-simplement.html"
+    "url": "articles/fr/ia-generative-expliquee-simplement/index.html",
+    "langue": "fr",
+    "traductions": {"en": "3-en", "es": "3-es"}
   },
+  {
+    "id": "3-en",
+    "title": "Generative AI Explained Simply, No Jargon",
+    "category": "Tutorial",
+    "emoji": "🤖",
+    "image": "medias/blog/ia-generative-expliquee-simplement.jpg",
+    "date": "March 5, 2025",
+    "readTime": "6 min",
+    "excerpt": "Understand how generative artificial intelligence works with no prior technical knowledge required. For everyone.",
+    "author": "Velixia Team",
+    "tags": ["beginner", "explanation", "generative"],
+    "url": "articles/en/ia-generative-expliquee-simplement/index.html",
+    "langue": "en",
+    "traductions": {"fr": 3, "es": "3-es"}
+  },
+  {
+    "id": "3-es",
+    "title": "La IA generativa explicada de forma simple, sin jerga",
+    "category": "Tutorial",
+    "emoji": "🤖",
+    "image": "medias/blog/ia-generative-expliquee-simplement.jpg",
+    "date": "5 de marzo de 2025",
+    "readTime": "6 min",
+    "excerpt": "Comprende cómo funciona la inteligencia artificial generativa sin conocimientos técnicos previos. Para todo el mundo.",
+    "author": "Equipo Velixia",
+    "tags": ["principiante", "explicación", "generativa"],
+    "url": "articles/es/ia-generative-expliquee-simplement/index.html",
+    "langue": "es",
+    "traductions": {"fr": 3, "en": "3-en"}
+  },
+
   {
     "id": 4,
     "title": "Midjourney vs DALL·E 3 vs Stable Diffusion : lequel choisir ?",
@@ -49,8 +148,41 @@
     "excerpt": "Nous avons testé les trois grands générateurs d'images IA côte à côte pour vous aider à choisir celui adapté à vos besoins.",
     "author": "Équipe Velixia",
     "tags": ["images", "comparatif", "test"],
-    "url": "articles/midjourney-vs-dalle3-vs-stablediffusion.html"
+    "url": "articles/fr/midjourney-vs-dalle3-vs-stablediffusion/index.html",
+    "langue": "fr",
+    "traductions": {"en": "4-en", "es": "4-es"}
   },
+  {
+    "id": "4-en",
+    "title": "Midjourney vs DALL·E 3 vs Stable Diffusion: Which One to Choose?",
+    "category": "Comparison",
+    "emoji": "🖼️",
+    "image": "medias/blog/midjourney-vs-dalle3-vs-stablediffusion.jpg",
+    "date": "February 28, 2025",
+    "readTime": "10 min",
+    "excerpt": "We tested the three major AI image generators side by side to help you choose the one that fits your needs.",
+    "author": "Velixia Team",
+    "tags": ["images", "comparison", "test"],
+    "url": "articles/en/midjourney-vs-dalle3-vs-stablediffusion/index.html",
+    "langue": "en",
+    "traductions": {"fr": 4, "es": "4-es"}
+  },
+  {
+    "id": "4-es",
+    "title": "Midjourney vs DALL·E 3 vs Stable Diffusion: ¿cuál elegir?",
+    "category": "Comparativa",
+    "emoji": "🖼️",
+    "image": "medias/blog/midjourney-vs-dalle3-vs-stablediffusion.jpg",
+    "date": "28 de febrero de 2025",
+    "readTime": "10 min",
+    "excerpt": "Probamos los tres grandes generadores de imágenes con IA lado a lado para ayudarte a elegir el que mejor se adapte a tus necesidades.",
+    "author": "Equipo Velixia",
+    "tags": ["imágenes", "comparativa", "prueba"],
+    "url": "articles/es/midjourney-vs-dalle3-vs-stablediffusion/index.html",
+    "langue": "es",
+    "traductions": {"fr": 4, "en": "4-en"}
+  },
+
   {
     "id": 5,
     "title": "Créer de la musique avec Suno AI : guide complet pas à pas",
@@ -62,8 +194,41 @@
     "excerpt": "De la description textuelle à la chanson complète, apprenez à composer avec Suno AI sans aucune connaissance musicale.",
     "author": "Équipe Velixia",
     "tags": ["musique", "Suno", "tutoriel"],
-    "url": "articles/creer-musique-suno-ai.html"
+    "url": "articles/fr/creer-musique-suno-ai/index.html",
+    "langue": "fr",
+    "traductions": {"en": "5-en", "es": "5-es"}
   },
+  {
+    "id": "5-en",
+    "title": "Creating Music with Suno AI: Complete Step-by-Step Guide",
+    "category": "Tutorial",
+    "emoji": "🎵",
+    "image": "medias/blog/creer-musique-suno-ai.jpg",
+    "date": "February 20, 2025",
+    "readTime": "7 min",
+    "excerpt": "From a simple text description to a full song, learn how to compose with Suno AI with no musical knowledge required.",
+    "author": "Velixia Team",
+    "tags": ["music", "Suno", "tutorial"],
+    "url": "articles/en/creer-musique-suno-ai/index.html",
+    "langue": "en",
+    "traductions": {"fr": 5, "es": "5-es"}
+  },
+  {
+    "id": "5-es",
+    "title": "Crear música con Suno AI: guía completa paso a paso",
+    "category": "Tutorial",
+    "emoji": "🎵",
+    "image": "medias/blog/creer-musique-suno-ai.jpg",
+    "date": "20 de febrero de 2025",
+    "readTime": "7 min",
+    "excerpt": "Desde la descripción de texto hasta la canción completa, aprende a componer con Suno AI sin ningún conocimiento musical.",
+    "author": "Equipo Velixia",
+    "tags": ["música", "Suno", "tutorial"],
+    "url": "articles/es/creer-musique-suno-ai/index.html",
+    "langue": "es",
+    "traductions": {"fr": 5, "en": "5-en"}
+  },
+
   {
     "id": 6,
     "title": "L'IA dans l'éducation : révolution ou simple outil ?",
@@ -75,8 +240,41 @@
     "excerpt": "Exploration approfondie de l'impact de l'intelligence artificielle sur les systèmes éducatifs à travers le monde.",
     "author": "Équipe Velixia",
     "tags": ["éducation", "impact", "analyse"],
-    "url": "articles/ia-dans-education.html"
+    "url": "articles/fr/ia-dans-education/index.html",
+    "langue": "fr",
+    "traductions": {"en": "6-en", "es": "6-es"}
   },
+  {
+    "id": "6-en",
+    "title": "AI in Education: Revolution or Just a Tool?",
+    "category": "Analysis",
+    "emoji": "📚",
+    "image": "medias/blog/ia-dans-education.jpg",
+    "date": "February 12, 2025",
+    "readTime": "9 min",
+    "excerpt": "An in-depth look at the impact of artificial intelligence on education systems around the world.",
+    "author": "Velixia Team",
+    "tags": ["education", "impact", "analysis"],
+    "url": "articles/en/ia-dans-education/index.html",
+    "langue": "en",
+    "traductions": {"fr": 6, "es": "6-es"}
+  },
+  {
+    "id": "6-es",
+    "title": "La IA en la educación: ¿revolución o simple herramienta?",
+    "category": "Análisis",
+    "emoji": "📚",
+    "image": "medias/blog/ia-dans-education.jpg",
+    "date": "12 de febrero de 2025",
+    "readTime": "9 min",
+    "excerpt": "Una exploración profunda del impacto de la inteligencia artificial en los sistemas educativos de todo el mundo.",
+    "author": "Equipo Velixia",
+    "tags": ["educación", "impacto", "análisis"],
+    "url": "articles/es/ia-dans-education/index.html",
+    "langue": "es",
+    "traductions": {"fr": 6, "en": "6-en"}
+  },
+
   {
     "id": 7,
     "title": "L'IA rend-elle vraiment les petits plus forts… ou simplement plus dépendants ?",
@@ -88,6 +286,38 @@
     "excerpt": "L'IA offre aux petites structures une puissance inédite, mais les enferme dans une dépendance structurelle aux géants du Cloud. Force ou laisse dorée ?",
     "author": "Équipe Velixia",
     "tags": ["Stratégie Business", "IA Verticale", "Économie de la Donnée"],
-    "url": "articles/ia-petits-plus-forts.html"
+    "url": "articles/fr/ia-petits-plus-forts/index.html",
+    "langue": "fr",
+    "traductions": {"en": "7-en", "es": "7-es"}
+  },
+  {
+    "id": "7-en",
+    "title": "Does AI Really Make Small Players Stronger… or Just More Dependent?",
+    "category": "Analysis",
+    "emoji": "📚",
+    "image": "medias/blog/ia-petits-plus-forts.jpg",
+    "date": "February 12, 2025",
+    "readTime": "9 min",
+    "excerpt": "AI gives small businesses unprecedented power, but locks them into structural dependency on the Cloud giants. Strength or gilded cage?",
+    "author": "Velixia Team",
+    "tags": ["Business Strategy", "Vertical AI", "Data Economy"],
+    "url": "articles/en/ia-petits-plus-forts/index.html",
+    "langue": "en",
+    "traductions": {"fr": 7, "es": "7-es"}
+  },
+  {
+    "id": "7-es",
+    "title": "¿La IA realmente hace más fuertes a los pequeños... o simplemente más dependientes?",
+    "category": "Análisis",
+    "emoji": "📚",
+    "image": "medias/blog/ia-petits-plus-forts.jpg",
+    "date": "12 de febrero de 2025",
+    "readTime": "9 min",
+    "excerpt": "La IA ofrece a las pequeñas estructuras un poder inédito, pero las encierra en una dependencia estructural de los gigantes del Cloud. ¿Fuerza o jaula dorada?",
+    "author": "Equipo Velixia",
+    "tags": ["Estrategia Empresarial", "IA Vertical", "Economía de Datos"],
+    "url": "articles/es/ia-petits-plus-forts/index.html",
+    "langue": "es",
+    "traductions": {"fr": 7, "en": "7-en"}
   }
 ]
