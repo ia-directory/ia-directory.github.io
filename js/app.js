@@ -27,8 +27,26 @@ function buildToolPageUrl(t) {
   const langue = t.langue || 'fr';
   return `/tools/${folder}/${langue}/${slug}/`;
 }
+
+// Identique en esprit à buildToolPageUrl : reconstruit toujours l'URL de la fiche
+// article à partir du slug + de la langue, sans dépendre du champ "url" stocké
+// dans blog.json (qui peut être obsolète après un renommage/migration).
+function buildBlogPageUrl(p) {
+  // On dérive le slug depuis l'URL existante si possible (garde le slug FR
+  // d'origine même pour les traductions EN/ES), sinon on retombe sur le titre.
+  let slug = null;
+  if (p.url) {
+    const m = p.url.match(/articles\/[a-z]{2}\/([^/]+)\//);
+    if (m) slug = m[1];
+  }
+  if (!slug) slug = slugify(p.title);
+  if (!slug) return '#';
+  const langue = p.langue || 'fr';
+  return `articles/${langue}/${slug}/index.html`;
+}
 window.slugify = slugify;
 window.buildToolPageUrl = buildToolPageUrl;
+window.buildBlogPageUrl = buildBlogPageUrl;
 
 // ─── LANGUE ──────────────────────────────
 const LANGUES_SUPPORTEES = ['fr', 'en', 'es'];
@@ -499,7 +517,7 @@ function renderBlog() {
 
   document.getElementById('blog-list').innerHTML = paged.map(p => {
     const col = getColor(blogColors, p.category, { bg: 'rgba(255,255,255,0.08)', tagBg: 'rgba(255,255,255,0.08)', tagColor: '#aaa' });
-    const href = p.url ? p.url : '#';
+    const href = buildBlogPageUrl(p);
     const thumbContent = p.image
       ? `<img src="${p.image}" alt="${p.title}" loading="lazy"
              onerror="this.style.display='none';this.parentElement.innerHTML='<span style=font-size:48px>${p.emoji || '📝'}</span>'">`
