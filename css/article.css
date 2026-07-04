@@ -530,4 +530,53 @@ figure.article-image figcaption {
 @media (max-width: 380px) {
   .analyse-profils { grid-template-columns: 1fr; }
    }
+
+/* ═══════════════════════════════════════════════
+   Images dans le corps d'article (figure.article-image)
+   ═══════════════════════════════════════════════ */
+.article-image {
+  margin: 28px 0;
+  text-align: center;
+}
+
+.article-image img {
+  max-width: 100%;
+  height: auto;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  display: block;
+  margin: 0 auto;
+}
+
+.article-image figcaption {
+  margin-top: 10px;
+  font-size: 13px;
+  color: #7a7a9a;
+  font-style: italic;
+  line-height: 1.4;
+}
+
+/* Évite un cadre vide disgracieux si une image placeholder
+   n'a pas encore été remplacée par le vrai fichier */
+.article-image img:not([src]),
+.article-image img[src=""] {
+  display: none;
+}
+
+/* Empêche un décalage de mise en page pendant le chargement
+   de l'image (bonne pratique Core Web Vitals / CLS) */
+.article-image img {
+  aspect-ratio: 16 / 9;
+  object-fit: cover;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+@media (max-width: 640px) {
+  .article-image {
+    margin: 20px 0;
+  }
+  .article-image figcaption {
+    font-size: 12px;
+  }
+}
    
