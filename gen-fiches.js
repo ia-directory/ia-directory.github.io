@@ -572,7 +572,7 @@ function generateArticle(article, allArticles) {
   const {
     title, category='', emoji='📝', date='', readTime='', excerpt='',
     author='Équipe Albexia', tags=[], slug, langue='fr',
-    traductions={}, corps_html='', meta_description='', og_image=''
+    traductions={}, corps_html='', meta_description='', og_image='', cta=null
   } = article;
 
   if (!slug) return null; // sécurité : jamais générer sans slug (URL invalide)
@@ -633,6 +633,18 @@ function generateArticle(article, allArticles) {
   </nav>` : '';
 
   const tagsHTML = (tags || []).map(t => `<a href="#" class="article-tag">#${t}</a>`).join('\n      ');
+
+  // Bloc CTA de fin d'article : entièrement optionnel, personnalisable par
+  // article depuis l'admin. Absent si "cta" n'est pas renseigné en Firestore
+  // (pas de bloc générique par défaut, pour éviter un CTA hors-sujet).
+  const ctaHTML = (cta && cta.texte && cta.lien_principal_url && cta.lien_principal_label) ? `
+    <div class="analyse-cta">
+      <p>${cta.texte}</p>
+      <div class="analyse-cta-links">
+        <a href="${cta.lien_principal_url}" class="btn-cta-primary">${cta.lien_principal_label}</a>
+        ${cta.lien_secondaire_url && cta.lien_secondaire_label ? `<a href="${cta.lien_secondaire_url}" class="btn-cta-secondary">${cta.lien_secondaire_label}</a>` : ''}
+      </div>
+    </div>` : '';
 
   return `<!DOCTYPE html>
 <html lang="${langue}">
@@ -703,7 +715,7 @@ ${corps_html}
     <div class="article-tags">
       ${tagsHTML}
     </div>
-
+${ctaHTML}
   </div>
 ${navBottomHTML}
 
