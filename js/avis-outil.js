@@ -286,12 +286,20 @@ function buildCardHTML(r) {
   const yesCount = r.helpful_yes || 0;
   const noCount  = r.helpful_no  || 0;
 
+  const profileUrl = r.uid ? `/profil-public.html?id=${encodeURIComponent(r.uid)}` : null;
+
   return `
     <div class="rv-card" data-review-id="${r.id}">
       <div class="rv-card-head">
-        <div class="rv-avatar">${avatar}</div>
+        ${profileUrl
+          ? `<a class="rv-avatar" href="${profileUrl}" aria-label="Voir le profil de ${esc(r.displayName)}">${avatar}</a>`
+          : `<div class="rv-avatar">${avatar}</div>`
+        }
         <div class="rv-meta">
-          <div class="rv-author">${esc(r.displayName)}</div>
+          ${profileUrl
+            ? `<a class="rv-author" href="${profileUrl}">${esc(r.displayName)}</a>`
+            : `<div class="rv-author">${esc(r.displayName)}</div>`
+          }
           <div class="rv-date">${date}</div>
         </div>
         <div class="rv-stars-display">${stars}</div>
