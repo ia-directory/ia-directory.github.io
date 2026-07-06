@@ -692,6 +692,7 @@
 
     /* ── RESPONSIVE ──────────────────────────────── */
     @media (max-width: 768px) {
+    }
     @media (max-width: 600px) {
       .auth-card { padding: 28px 20px; }
       .collections-grid { grid-template-columns: 1fr; }
@@ -2232,6 +2233,20 @@
       document.getElementById('auth-wall').style.display    = 'none';
       document.getElementById('profile-page').style.display = 'block';
       userProfile = await getUserProfile(user.uid);
+
+      // Sync auto de la photo Google → Firestore, pour qu'elle soit
+      // visible sur le profil public (profil-public.html ne peut lire
+      // que le champ Firestore, pas l'objet Auth de l'utilisateur).
+      if (!userProfile?.photoURL && user.photoURL) {
+        try {
+          await updatePhotoURL(user.uid, user.photoURL);
+          if (!userProfile) userProfile = {};
+          userProfile.photoURL = user.photoURL;
+        } catch (err) {
+          console.error('Sync photo Google → Firestore échouée', err);
+        }
+      }
+
       renderHero();
       await loadCollections();
       await loadQuizHistory();
