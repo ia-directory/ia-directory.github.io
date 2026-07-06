@@ -296,7 +296,7 @@ function showEmpty(containerId, msg = 'Aucun résultat trouvé.') {
 // CARTE OUTIL — source unique de vérité
 // ═══════════════════════════════════════
 
-function buildToolCard(t) {
+function buildToolCard(t, direct = false) {
   const priceLabel = { free: 'Gratuit', freemium: 'Freemium', paid: 'Payant' };
   const col  = catColors[t.category] || { bg: 'rgba(255,255,255,0.08)' };
   const pageUrl = buildToolPageUrl(t);
@@ -309,9 +309,15 @@ function buildToolCard(t) {
        <span class="tool-ico-fallback" style="display:none">${t.emoji}</span>`
     : `<span class="tool-ico-fallback">${t.emoji}</span>`;
 
-  const cardAction = pageUrl
-    ? `onclick="window.location.href='${pageUrl}'"`
-    : `onclick="window.open('${t.url}','_blank')"`;
+  // direct=true : l'utilisateur vient d'un CTA article (?tools=... via
+  // checkToolsParam → renderSpotlight). L'article a déjà convaincu — on
+  // saute la fiche et on envoie directement vers le site officiel de l'outil.
+  // direct=false (défaut) : comportement habituel, fiche → site officiel.
+  const cardAction = (direct && t.url)
+    ? `onclick="window.open('${t.url}','_blank')"`
+    : pageUrl
+      ? `onclick="window.location.href='${pageUrl}'"`
+      : `onclick="window.open('${t.url}','_blank')"`;
 
   let planBadge = '';
   let cardClass = 'tool-card';
@@ -324,7 +330,9 @@ function buildToolCard(t) {
     cardClass = 'tool-card tool-card-plan-gratuit';
   }
 
-  if (pageUrl) {
+  if (direct && t.url) {
+    planBadge = `<span class="tool-plan-badge tool-plan-badge-direct">Aller sur le site officiel →</span>`;
+  } else if (pageUrl) {
     planBadge = `<span class="tool-plan-badge tool-plan-badge-gratuit">Guide complet →</span>`;
   }
 
@@ -1004,20 +1012,29 @@ function checkToolsParam() {
     .map(id => state.tools.find(t => String(t.id) === id))
     .filter(Boolean);
   if (!found.length) return;
-  renderSpotlight(found);
+  // Ce paramètre ?tools= vient toujours d'un CTA article (voir reveal
+  // du bouton "Voir l'outil / ces outils" dans les pages d'article) —
+  // donc on active systématiquement le lien direct vers le site officiel.
+  renderSpotlight(found, true);
 }
 
-function renderSpotlight(outils) {
+function renderSpotlight(outils, fromArticle = false) {
   const old = document.getElementById('notif-spotlight');
   if (old) old.remove();
-  const cardsHTML = outils.map(t => buildToolCard(t)).join('');
+  // direct=true : ces cards viennent d'un CTA article, on saute la fiche
+  // et on va tout droit au site officiel (voir buildToolCard).
+  const cardsHTML = outils.map(t => buildToolCard(t, fromArticle)).join('');
   const panel = document.createElement('div');
   panel.id = 'notif-spotlight';
+  if (fromArticle) panel.classList.add('spotlight-highlight');
+  const label = fromArticle
+    ? (outils.length > 1 ? 'Outils mentionnés dans l\'article' : 'Outil mentionné dans l\'article')
+    : 'Outils sélectionnés cette semaine';
   panel.innerHTML = `
     <div class="spotlight-header">
       <div class="spotlight-label">
         <span class="spotlight-dot"></span>
-        Outils sélectionnés cette semaine
+        ${label}
       </div>
       <button class="spotlight-close" onclick="closeSpotlight()" aria-label="Fermer">✕</button>
     </div>
