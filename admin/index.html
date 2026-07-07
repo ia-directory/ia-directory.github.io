@@ -154,6 +154,7 @@
     <button class="tab-btn" data-tab="galerie">🖼 Galerie</button>
     <button class="tab-btn" data-tab="deals">🏷 Deals</button>
     <button class="tab-btn" data-tab="articles">📝 Articles</button>
+    <button class="tab-btn" data-tab="comparateur">⚖️ Comparateur</button>
   </div>
 
   <div class="tab-panel active" id="tab-outils">
@@ -751,6 +752,147 @@
         <iframe class="article-preview-frame" id="ap-body-frame-fr"></iframe>
         <iframe class="article-preview-frame" id="ap-body-frame-en" style="display:none;"></iframe>
         <iframe class="article-preview-frame" id="ap-body-frame-es" style="display:none;"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <div class="tab-panel" id="tab-comparateur">
+    <div class="msg msg-warn" id="warn-comparateur"></div>
+    <div class="msg msg-ok"   id="ok-comparateur"></div>
+
+    <div class="search-wrap">
+      <label>Rechercher une comparaison existante (slug ou outils)</label>
+      <input type="text" id="cp-search" placeholder="Tapez « chatgpt » ou « chatgpt-vs-gemini »…" autocomplete="off">
+      <div class="search-results" id="cp-search-results"></div>
+    </div>
+
+    <div class="editing-banner" id="cp-editing-banner">
+      <span id="cp-editing-banner-text">Édition en cours</span>
+      <button type="button" id="cp-editing-cancel">Annuler / Créer une nouvelle comparaison</button>
+    </div>
+
+    <div class="form-layout">
+      <div class="form-col">
+        <form id="form-comparateur">
+          <fieldset>
+            <legend>Outils comparés</legend>
+            <p class="field-hint">Tapez un nom pour piocher dans les outils déjà indexés (note, prix, logo tirés automatiquement de la fiche). Si l'outil n'est pas encore indexé, laissez le champ de recherche vide et remplissez les champs de secours.</p>
+
+            <div class="row">
+              <div>
+                <label>Outil A — rechercher dans le catalogue</label>
+                <input type="text" id="cp-a-search" placeholder="Tapez le nom…" autocomplete="off">
+                <div class="search-results" id="cp-a-search-results"></div>
+                <div class="field-hint" id="cp-a-resolved-hint" style="display:none;color:var(--accent3);">✓ Outil trouvé dans le catalogue — note/logo/lien synchronisés automatiquement au prochain build.</div>
+              </div>
+              <div>
+                <label>Outil B — rechercher dans le catalogue</label>
+                <input type="text" id="cp-b-search" placeholder="Tapez le nom…" autocomplete="off">
+                <div class="search-results" id="cp-b-search-results"></div>
+                <div class="field-hint" id="cp-b-resolved-hint" style="display:none;color:var(--accent3);">✓ Outil trouvé dans le catalogue — note/logo/lien synchronisés automatiquement au prochain build.</div>
+              </div>
+            </div>
+
+            <button type="button" class="accordion-toggle" data-target="cp-acc-fallback">+ Renseigner un outil non indexé (secours)</button>
+            <div class="accordion-body" id="cp-acc-fallback">
+              <div class="row">
+                <div>
+                  <label>Outil A — nom (secours)</label>
+                  <input type="text" id="cp-a-nom-fallback" placeholder="Nom si non indexé">
+                  <label>Emoji</label>
+                  <input type="text" id="cp-a-emoji-fallback" maxlength="4" placeholder="🤖">
+                  <label>Catégorie</label>
+                  <input type="text" id="cp-a-categorie-fallback" placeholder="Assistant IA">
+                  <label>Note (/5)</label>
+                  <input type="number" id="cp-a-note-fallback" step="0.1" min="0" max="5" placeholder="4.5">
+                  <label>Lien du site</label>
+                  <input type="url" id="cp-a-lien-fallback" placeholder="https://exemple.com">
+                  <label>Prix affiché</label>
+                  <input type="text" id="cp-a-prix-fallback" placeholder="Freemium">
+                </div>
+                <div>
+                  <label>Outil B — nom (secours)</label>
+                  <input type="text" id="cp-b-nom-fallback" placeholder="Nom si non indexé">
+                  <label>Emoji</label>
+                  <input type="text" id="cp-b-emoji-fallback" maxlength="4" placeholder="🤖">
+                  <label>Catégorie</label>
+                  <input type="text" id="cp-b-categorie-fallback" placeholder="Assistant IA">
+                  <label>Note (/5)</label>
+                  <input type="number" id="cp-b-note-fallback" step="0.1" min="0" max="5" placeholder="4.5">
+                  <label>Lien du site</label>
+                  <input type="url" id="cp-b-lien-fallback" placeholder="https://exemple.com">
+                  <label>Prix affiché</label>
+                  <input type="text" id="cp-b-prix-fallback" placeholder="Freemium">
+                </div>
+              </div>
+            </div>
+
+            <label>Outil gagnant</label>
+            <select id="cp-gagnant">
+              <option value="a">Outil A</option>
+              <option value="b">Outil B</option>
+            </select>
+          </fieldset>
+
+          <fieldset>
+            <legend>Champs communs</legend>
+            <label>Slug (URL) — laisser vide pour générer depuis les deux outils</label>
+            <input type="text" id="cp-slug" placeholder="chatgpt-vs-gemini">
+            <p class="field-hint">La comparaison sera publiée à <code>/comparateur/{slug}/index.html</code>.</p>
+            <label>Titre SEO (meta title — optionnel)</label>
+            <input type="text" id="cp-meta-title" placeholder="ChatGPT vs Gemini — Comparaison complète | Albexia">
+            <label>Meta description SEO (155 car. max)</label>
+            <input type="text" id="cp-meta-description" maxlength="155">
+          </fieldset>
+
+          <fieldset>
+            <legend>Contenu FR (obligatoire)</legend>
+            <label>Résumé (affiché dans le hero) *</label>
+            <textarea id="cp-resume" required placeholder="150-250 caractères recommandés"></textarea>
+
+            <label>Critères de comparaison (un par ligne)</label>
+            <p class="field-hint">Format : <code>label|valeur_a|valeur_b|type</code> — <code>type</code> vaut <code>bool</code> (affiche ✓/✗, utiliser <code>oui</code>/<code>non</code>/<code>-</code>) ou <code>texte</code> (affiche la valeur telle quelle). Exemple : <code>Essai gratuit|oui|non|bool</code> ou <code>Prix de base|Freemium|$10/mois|texte</code>.</p>
+            <textarea id="cp-criteres" style="min-height:120px;" placeholder="Prix de base|Freemium|Freemium|texte
+Essai gratuit|oui|oui|bool
+Support français|oui|non|bool"></textarea>
+
+            <label>Points forts Outil A (un par ligne)</label>
+            <textarea id="cp-avantages-a" style="min-height:80px;"></textarea>
+            <label>Points forts Outil B (un par ligne)</label>
+            <textarea id="cp-avantages-b" style="min-height:80px;"></textarea>
+            <label>Limites Outil A (un par ligne)</label>
+            <textarea id="cp-inconvenients-a" style="min-height:80px;"></textarea>
+            <label>Limites Outil B (un par ligne)</label>
+            <textarea id="cp-inconvenients-b" style="min-height:80px;"></textarea>
+
+            <label>Cas d'usage — Choisir Outil A</label>
+            <textarea id="cp-cas-a" placeholder="Choisissez [Outil A] si…"></textarea>
+            <label>Cas d'usage — Choisir Outil B</label>
+            <textarea id="cp-cas-b" placeholder="Choisissez [Outil B] si…"></textarea>
+
+            <label>Texte du verdict</label>
+            <textarea id="cp-verdict-texte" placeholder="Verdict final Albexia…"></textarea>
+
+            <label>FAQ (format : question||réponse, une par ligne)</label>
+            <textarea id="cp-faq" style="min-height:100px;"></textarea>
+          </fieldset>
+
+          <button type="submit" class="btn-submit" id="cp-submit-btn" style="background:var(--accent2);">Publier la comparaison</button>
+          <button type="button" class="btn-danger" id="cp-delete-btn" style="display:none;">🗑 Supprimer cette comparaison</button>
+        </form>
+      </div>
+      <div class="preview-col">
+        <div class="preview-label">Aperçu</div>
+        <div class="preview-card">
+          <div class="preview-top">
+            <span class="preview-emoji" id="cpp-emoji-a">🤖</span>
+            <div>
+              <div class="preview-name" id="cpp-titre">Outil A vs Outil B</div>
+              <div class="preview-cat" id="cpp-gagnant">Gagnant : —</div>
+            </div>
+          </div>
+          <p class="preview-desc" id="cpp-resume">Le résumé apparaîtra ici.</p>
+        </div>
       </div>
     </div>
   </div>
@@ -1937,6 +2079,356 @@
         `✓ Article ${action} (ID ${mainId}) — ${toWrite.length} doc(s). Relancez gen-fiches.js pour publier/nettoyer les fichiers HTML.`);
       exitArticleEditMode();
     } catch(err) { showMsg('warn-articles','ok-articles','warn','Erreur : '+err.message); }
+    btn.disabled=false;
+  });
+
+  // ══════════════════════════════════════
+  // COMPARATEUR (X vs Y)
+  // ══════════════════════════════════════
+  // Réutilise fetchAllTools() (déjà défini plus haut dans ce fichier)
+  // pour l'autocomplete outil A / outil B — même cache, pas de requête
+  // Firestore supplémentaire si l'onglet Outils a déjà été ouvert.
+
+  let cpResolvedA = null; // { slug, name, ... } si un outil du catalogue est sélectionné
+  let cpResolvedB = null;
+  let editingComparaison = null;
+  let allComparaisonsCache = null;
+
+  async function fetchAllComparaisons() {
+    if (allComparaisonsCache) return allComparaisonsCache;
+    const snap = await getDocs(collection(db, 'comparaisons'));
+    allComparaisonsCache = snap.docs.map(d => d.data());
+    return allComparaisonsCache;
+  }
+  function invalidateComparaisonsCache() { allComparaisonsCache = null; }
+
+  // ── Autocomplete outil A / outil B ──
+  function setupToolPicker(side) {
+    const input   = document.getElementById(`cp-${side}-search`);
+    const results = document.getElementById(`cp-${side}-search-results`);
+    const hint    = document.getElementById(`cp-${side}-resolved-hint`);
+    let debounce = null;
+
+    input.addEventListener('input', () => {
+      clearTimeout(debounce);
+      if (side === 'a') cpResolvedA = null; else cpResolvedB = null;
+      hint.style.display = 'none';
+      const q = input.value.trim();
+      if (!q) { results.classList.remove('open'); results.innerHTML=''; return; }
+      debounce = setTimeout(async () => {
+        const tools = await fetchAllTools();
+        const qNorm = q.toLowerCase();
+        const matches = tools
+          .filter(t => (t.name||'').toLowerCase().includes(qNorm))
+          .filter(t => !t.langue || t.langue === 'fr')
+          .slice(0, 8);
+        if (!matches.length) {
+          results.innerHTML = `<div class="search-result-item" style="cursor:default;color:var(--text-dim);">Aucun outil trouvé — utilisez les champs de secours ci-dessous.</div>`;
+          results.classList.add('open');
+          return;
+        }
+        results.innerHTML = matches.map(t => `
+          <div class="search-result-item" data-slug="${slugify(t.name)}">
+            <span class="search-result-name">${t.emoji||'🤖'} ${t.name}</span>
+            <span class="search-result-meta">${t.note ? t.note+'/5' : ''}</span>
+          </div>
+        `).join('');
+        results.classList.add('open');
+        results.querySelectorAll('.search-result-item[data-slug]').forEach(el => {
+          el.addEventListener('click', () => {
+            const tool = matches.find(t => slugify(t.name) === el.dataset.slug);
+            if (!tool) return;
+            if (side === 'a') cpResolvedA = tool; else cpResolvedB = tool;
+            input.value = tool.name;
+            hint.style.display = 'block';
+            results.classList.remove('open');
+            updateComparaisonPreview();
+          });
+        });
+      }, 200);
+    });
+  }
+  setupToolPicker('a');
+  setupToolPicker('b');
+
+  document.addEventListener('click', e => {
+    ['cp-a-search-results','cp-b-search-results'].forEach(id => {
+      const el = document.getElementById(id);
+      const input = document.getElementById(id.replace('-results',''));
+      if (!input.contains(e.target) && !el.contains(e.target)) el.classList.remove('open');
+    });
+  });
+
+  // ── Preview live ──
+  function nomOutilCP(side) {
+    const resolved = side === 'a' ? cpResolvedA : cpResolvedB;
+    if (resolved) return resolved.name;
+    const fallback = document.getElementById(`cp-${side}-nom-fallback`).value.trim();
+    return fallback || (side === 'a' ? 'Outil A' : 'Outil B');
+  }
+  function updateComparaisonPreview() {
+    const nomA = nomOutilCP('a'), nomB = nomOutilCP('b');
+    document.getElementById('cpp-titre').textContent = `${nomA} vs ${nomB}`;
+    document.getElementById('cpp-emoji-a').textContent = cpResolvedA?.emoji || document.getElementById('cp-a-emoji-fallback').value || '🤖';
+    const gagnant = document.getElementById('cp-gagnant').value === 'b' ? nomB : nomA;
+    document.getElementById('cpp-gagnant').textContent = `Gagnant : ${gagnant}`;
+    document.getElementById('cpp-resume').textContent = document.getElementById('cp-resume').value || 'Le résumé apparaîtra ici.';
+  }
+  ['cp-a-nom-fallback','cp-b-nom-fallback','cp-a-emoji-fallback','cp-resume','cp-gagnant'].forEach(id =>
+    document.getElementById(id).addEventListener('input', updateComparaisonPreview));
+  document.getElementById('cp-gagnant').addEventListener('change', updateComparaisonPreview);
+
+  // ── Parsing des textareas structurées ──
+  // "label|valeur_a|valeur_b|type" -> {label, a, b, bool}
+  function parseCriteres(text) {
+    return (text||'').split('\n').map(l => l.trim()).filter(Boolean).map(line => {
+      const [label, a, b, type] = line.split('|').map(s => (s||'').trim());
+      const bool = (type||'').toLowerCase() === 'bool';
+      const toVal = v => {
+        if (!bool) return v;
+        const vNorm = (v||'').toLowerCase();
+        if (['oui','yes','true','✓'].includes(vNorm)) return true;
+        if (['non','no','false','✗'].includes(vNorm)) return false;
+        return null; // "-" ou vide -> non applicable
+      };
+      return { label, a: toVal(a), b: toVal(b), bool };
+    }).filter(c => c.label);
+  }
+  function critereToLine(c) {
+    const fromVal = v => {
+      if (!c.bool) return v;
+      if (v === true) return 'oui';
+      if (v === false) return 'non';
+      return '-';
+    };
+    return `${c.label}|${fromVal(c.a)}|${fromVal(c.b)}|${c.bool ? 'bool' : 'texte'}`;
+  }
+  function parseLines(text) { return (text||'').split('\n').map(l=>l.trim()).filter(Boolean); }
+  function parseFAQ(text) {
+    return (text||'').split('\n').map(l=>l.trim()).filter(Boolean).map(line => {
+      const [question, reponse] = line.split('||').map(s => (s||'').trim());
+      return { question, reponse };
+    }).filter(f => f.question && f.reponse);
+  }
+  function faqToLine(f) { return `${f.question}||${f.reponse}`; }
+
+  // ── Recherche / chargement d'une comparaison existante ──
+  const cpSearchInput   = document.getElementById('cp-search');
+  const cpSearchResults = document.getElementById('cp-search-results');
+  let cpSearchDebounce = null;
+
+  cpSearchInput.addEventListener('input', () => {
+    clearTimeout(cpSearchDebounce);
+    const q = cpSearchInput.value.trim();
+    if (!q) { cpSearchResults.classList.remove('open'); cpSearchResults.innerHTML=''; return; }
+    cpSearchDebounce = setTimeout(async () => {
+      const comparaisons = await fetchAllComparaisons();
+      const qNorm = q.toLowerCase();
+      const matches = comparaisons
+        .filter(c => (c.slug||'').toLowerCase().includes(qNorm))
+        .filter(c => !c.langue || c.langue === 'fr')
+        .slice(0, 8);
+      if (!matches.length) {
+        cpSearchResults.innerHTML = `<div class="search-result-item" style="cursor:default;color:var(--text-dim);">Aucune comparaison trouvée — ce sera une création.</div>`;
+        cpSearchResults.classList.add('open');
+        return;
+      }
+      cpSearchResults.innerHTML = matches.map(c => `
+        <div class="search-result-item" data-slug="${c.slug}">
+          <span class="search-result-name">⚖️ ${c.slug}</span>
+          <span class="search-result-meta">${c.langue||'fr'}</span>
+        </div>
+      `).join('');
+      cpSearchResults.classList.add('open');
+      cpSearchResults.querySelectorAll('.search-result-item[data-slug]').forEach(el => {
+        el.addEventListener('click', () => loadComparaisonForEdit(el.dataset.slug, matches));
+      });
+    }, 200);
+  });
+
+  document.addEventListener('click', e => {
+    if (!cpSearchInput.contains(e.target) && !cpSearchResults.contains(e.target)) {
+      cpSearchResults.classList.remove('open');
+    }
+  });
+
+  async function loadComparaisonForEdit(slug, list) {
+    const comp = list.find(c => c.slug === slug);
+    if (!comp) return;
+    editingComparaison = comp;
+    cpResolvedA = null; cpResolvedB = null;
+
+    // Si le slug référencé existe encore dans outils, on re-résout pour
+    // afficher le bon nom dans le champ de recherche (pas de duplication
+    // de logique : au submit on revalide de toute façon contre outils).
+    const tools = await fetchAllTools();
+    if (comp.outil_a_slug) {
+      const t = tools.find(t => slugify(t.name) === comp.outil_a_slug);
+      if (t) { cpResolvedA = t; document.getElementById('cp-a-search').value = t.name; document.getElementById('cp-a-resolved-hint').style.display='block'; }
+    }
+    if (comp.outil_b_slug) {
+      const t = tools.find(t => slugify(t.name) === comp.outil_b_slug);
+      if (t) { cpResolvedB = t; document.getElementById('cp-b-search').value = t.name; document.getElementById('cp-b-resolved-hint').style.display='block'; }
+    }
+
+    setVal('cp-a-nom-fallback', comp.outil_a_nom_fallback);
+    setVal('cp-a-emoji-fallback', comp.outil_a_emoji_fallback);
+    setVal('cp-a-categorie-fallback', comp.outil_a_categorie_fallback);
+    setVal('cp-a-note-fallback', comp.outil_a_note_fallback);
+    setVal('cp-a-lien-fallback', comp.outil_a_lien_fallback);
+    setVal('cp-a-prix-fallback', comp.outil_a_prix_fallback);
+    setVal('cp-b-nom-fallback', comp.outil_b_nom_fallback);
+    setVal('cp-b-emoji-fallback', comp.outil_b_emoji_fallback);
+    setVal('cp-b-categorie-fallback', comp.outil_b_categorie_fallback);
+    setVal('cp-b-note-fallback', comp.outil_b_note_fallback);
+    setVal('cp-b-lien-fallback', comp.outil_b_lien_fallback);
+    setVal('cp-b-prix-fallback', comp.outil_b_prix_fallback);
+
+    const gagnantSide = comp.gagnant_slug && comp.gagnant_slug === comp.outil_b_slug ? 'b' : 'a';
+    setVal('cp-gagnant', gagnantSide);
+
+    setVal('cp-slug', comp.slug);
+    setVal('cp-meta-title', comp.meta_title);
+    setVal('cp-meta-description', comp.meta_description);
+    setVal('cp-resume', comp.resume);
+    setVal('cp-criteres', (comp.criteres||[]).map(critereToLine).join('\n'));
+    setVal('cp-avantages-a', joinLines(comp.avantages?.a, '\n'));
+    setVal('cp-avantages-b', joinLines(comp.avantages?.b, '\n'));
+    setVal('cp-inconvenients-a', joinLines(comp.inconvenients?.a, '\n'));
+    setVal('cp-inconvenients-b', joinLines(comp.inconvenients?.b, '\n'));
+    setVal('cp-cas-a', comp.cas_usage?.choisir_a);
+    setVal('cp-cas-b', comp.cas_usage?.choisir_b);
+    setVal('cp-verdict-texte', comp.verdict?.texte);
+    setVal('cp-faq', (comp.faq||[]).map(faqToLine).join('\n'));
+
+    updateComparaisonPreview();
+
+    document.getElementById('cp-editing-banner').classList.add('open');
+    document.getElementById('cp-editing-banner-text').textContent = `Édition : ${comp.slug}`;
+    document.getElementById('cp-submit-btn').textContent = 'Mettre à jour la comparaison';
+    document.getElementById('cp-delete-btn').style.display = 'block';
+    cpSearchInput.value = ''; cpSearchResults.classList.remove('open'); cpSearchResults.innerHTML='';
+  }
+
+  function exitComparaisonEditMode() {
+    editingComparaison = null;
+    cpResolvedA = null; cpResolvedB = null;
+    document.getElementById('form-comparateur').reset();
+    document.getElementById('cp-a-resolved-hint').style.display='none';
+    document.getElementById('cp-b-resolved-hint').style.display='none';
+    document.getElementById('cp-editing-banner').classList.remove('open');
+    document.getElementById('cp-submit-btn').textContent = 'Publier la comparaison';
+    document.getElementById('cp-delete-btn').style.display = 'none';
+    updateComparaisonPreview();
+  }
+  document.getElementById('cp-editing-cancel').addEventListener('click', exitComparaisonEditMode);
+
+  document.getElementById('cp-delete-btn').addEventListener('click', async () => {
+    if (!editingComparaison) return;
+    if (!confirm(`Supprimer définitivement la comparaison "${editingComparaison.slug}" ? Cette action est irréversible (la page sera retirée au prochain gen-fiches.js).`)) return;
+    try {
+      await deleteDoc(doc(db, 'comparaisons', String(editingComparaison.id || editingComparaison.slug)));
+      invalidateComparaisonsCache();
+      showMsg('warn-comparateur','ok-comparateur','ok', `✓ Comparaison supprimée. Relancez gen-fiches.js pour retirer la page HTML.`);
+      exitComparaisonEditMode();
+    } catch(err) { showMsg('warn-comparateur','ok-comparateur','warn','Erreur : '+err.message); }
+  });
+
+  // ── Soumission ──
+  document.getElementById('form-comparateur').addEventListener('submit', async e => {
+    e.preventDefault();
+    const btn = document.getElementById('cp-submit-btn');
+    btn.disabled = true;
+    try {
+      const resume = document.getElementById('cp-resume').value.trim();
+      if (!resume) {
+        showMsg('warn-comparateur','ok-comparateur','warn','Le résumé est obligatoire.');
+        btn.disabled=false; return;
+      }
+
+      const outilASlug = cpResolvedA ? slugify(cpResolvedA.name) : '';
+      const outilBSlug = cpResolvedB ? slugify(cpResolvedB.name) : '';
+      const nomFallbackA = document.getElementById('cp-a-nom-fallback').value.trim();
+      const nomFallbackB = document.getElementById('cp-b-nom-fallback').value.trim();
+
+      if (!outilASlug && !nomFallbackA) {
+        showMsg('warn-comparateur','ok-comparateur','warn','Outil A : sélectionnez un outil du catalogue ou renseignez au moins le nom de secours.');
+        btn.disabled=false; return;
+      }
+      if (!outilBSlug && !nomFallbackB) {
+        showMsg('warn-comparateur','ok-comparateur','warn','Outil B : sélectionnez un outil du catalogue ou renseignez au moins le nom de secours.');
+        btn.disabled=false; return;
+      }
+
+      let slug = document.getElementById('cp-slug').value.trim();
+      if (!slug) {
+        const nomA = outilASlug || slugify(nomFallbackA);
+        const nomB = outilBSlug || slugify(nomFallbackB);
+        slug = `${nomA}-vs-${nomB}`;
+      }
+      if (editingComparaison && editingComparaison.slug) slug = editingComparaison.slug;
+
+      const existing = await fetchAllComparaisons();
+      if (!editingComparaison) {
+        const dup = existing.find(c => c.slug === slug);
+        if (dup && !confirm(`Une comparaison avec le slug "${slug}" existe déjà. Voulez-vous vraiment créer un doublon ? (Préférez plutôt la rechercher ci-dessus pour la modifier.)`)) {
+          btn.disabled=false; return;
+        }
+      }
+
+      const gagnantSide = document.getElementById('cp-gagnant').value;
+      const gagnantSlug = gagnantSide === 'b' ? (outilBSlug || slugify(nomFallbackB)) : (outilASlug || slugify(nomFallbackA));
+
+      const id = editingComparaison ? (editingComparaison.id || editingComparaison.slug) : slug;
+
+      const docData = {
+        id, slug, langue: 'fr',
+        outil_a_slug: outilASlug,
+        outil_a_nom_fallback: nomFallbackA,
+        outil_a_emoji_fallback: document.getElementById('cp-a-emoji-fallback').value.trim(),
+        outil_a_categorie_fallback: document.getElementById('cp-a-categorie-fallback').value.trim(),
+        outil_a_note_fallback: document.getElementById('cp-a-note-fallback').value.trim(),
+        outil_a_lien_fallback: document.getElementById('cp-a-lien-fallback').value.trim(),
+        outil_a_prix_fallback: document.getElementById('cp-a-prix-fallback').value.trim(),
+        outil_b_slug: outilBSlug,
+        outil_b_nom_fallback: nomFallbackB,
+        outil_b_emoji_fallback: document.getElementById('cp-b-emoji-fallback').value.trim(),
+        outil_b_categorie_fallback: document.getElementById('cp-b-categorie-fallback').value.trim(),
+        outil_b_note_fallback: document.getElementById('cp-b-note-fallback').value.trim(),
+        outil_b_lien_fallback: document.getElementById('cp-b-lien-fallback').value.trim(),
+        outil_b_prix_fallback: document.getElementById('cp-b-prix-fallback').value.trim(),
+        gagnant_slug: gagnantSlug,
+        meta_title: document.getElementById('cp-meta-title').value.trim(),
+        meta_description: document.getElementById('cp-meta-description').value.trim(),
+        resume,
+        criteres: parseCriteres(document.getElementById('cp-criteres').value),
+        avantages: {
+          a: parseLines(document.getElementById('cp-avantages-a').value),
+          b: parseLines(document.getElementById('cp-avantages-b').value),
+        },
+        inconvenients: {
+          a: parseLines(document.getElementById('cp-inconvenients-a').value),
+          b: parseLines(document.getElementById('cp-inconvenients-b').value),
+        },
+        cas_usage: {
+          choisir_a: document.getElementById('cp-cas-a').value.trim(),
+          choisir_b: document.getElementById('cp-cas-b').value.trim(),
+        },
+        verdict: {
+          gagnant: gagnantSide === 'b' ? nomOutilCP('b') : nomOutilCP('a'),
+          texte: document.getElementById('cp-verdict-texte').value.trim(),
+        },
+        faq: parseFAQ(document.getElementById('cp-faq').value),
+      };
+
+      await setDoc(doc(db, 'comparaisons', String(id)), docData);
+      invalidateComparaisonsCache();
+
+      const action = editingComparaison ? 'mise à jour' : 'publiée';
+      showMsg('warn-comparateur','ok-comparateur','ok',
+        `✓ Comparaison ${action} (slug "${slug}"). Relancez gen-fiches.js pour publier/nettoyer la page HTML.`);
+      exitComparaisonEditMode();
+    } catch(err) { showMsg('warn-comparateur','ok-comparateur','warn','Erreur : '+err.message); }
     btn.disabled=false;
   });
 
