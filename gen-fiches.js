@@ -803,6 +803,352 @@ ${sharedJS()}
 }
 
 // ════════════════════════════════════════════════════════════
+// GÉNÉRATEUR COMPARATEUR (X vs Y)
+// Source : Firestore collection "comparaisons"
+// Sortie : comparateur/{slug}/index.html
+//
+// Chaque doc comparaison référence deux outils par slug
+// (outil_a_slug / outil_b_slug). Au build, on va chercher
+// note/prix/favicon/lien dans la vraie collection "outils"
+// (déjà en mémoire — voir main()) pour rester synchronisé.
+// Si l'outil référencé n'existe pas (pas encore indexé, ou
+// volontairement hors-catalogue), on retombe sur les champs
+// de fallback saisis à la main dans le doc comparaison
+// (nom_fallback, emoji_fallback, lien_fallback, etc.) — la
+// comparaison ne casse jamais silencieusement.
+// ════════════════════════════════════════════════════════════
+
+// Résout un "côté" (a ou b) de la comparaison : cherche l'outil
+// référencé dans la collection outils (même langue si possible,
+// sinon n'importe laquelle), sinon utilise le fallback manuel.
+function resoudreOutilComparaison(side, comp, tools, langue) {
+  const slugRef   = comp[`outil_${side}_slug`] || '';
+  const nomFallback = comp[`outil_${side}_nom_fallback`] || comp[`outil_${side}_nom`] || '';
+  const winnerSlug = comp.gagnant_slug || '';
+
+  let found = null;
+  if (slugRef) {
+    found = tools.find(t => slugify(t.name) === slugRef && (t.langue || 'fr') === langue)
+         || tools.find(t => slugify(t.name) === slugRef);
+  }
+
+  if (found) {
+    const priceLabel = { gratuit:'Freemium', freemium:'Freemium', payant:'Payant', free:'Gratuit', paid:'Payant' }[found.price] || 'Freemium';
+    return {
+      nom: found.name,
+      slug: slugify(found.name),
+      emoji: found.emoji || '🤖',
+      favicon: `https://www.google.com/s2/favicons?sz=64&domain=${(found.url||'').replace(/^https?:\/\//,'').split('/')[0]}`,
+      categorie: found.category || '',
+      note: typeof found.note === 'number' ? found.note : (found.note ? Number(found.note) : 4.5),
+      lien: found.url || comp[`outil_${side}_lien_fallback`] || '#',
+      priceLabel,
+      winner: slugRef === winnerSlug,
+      _resolved: true,
+    };
+  }
+
+  // Fallback manuel (outil pas encore indexé dans "outils")
+  return {
+    nom: nomFallback || (side === 'a' ? 'Outil A' : 'Outil B'),
+    slug: slugRef || slugify(nomFallback),
+    emoji: comp[`outil_${side}_emoji_fallback`] || '🤖',
+    favicon: comp[`outil_${side}_favicon_fallback`] || '',
+    categorie: comp[`outil_${side}_categorie_fallback`] || '',
+    note: comp[`outil_${side}_note_fallback`] ? Number(comp[`outil_${side}_note_fallback`]) : 4.5,
+    lien: comp[`outil_${side}_lien_fallback`] || '#',
+    priceLabel: comp[`outil_${side}_prix_fallback`] || '',
+    winner: slugRef && slugRef === winnerSlug,
+    _resolved: false,
+  };
+}
+
+function noteClasseComp(note) {
+  if (note >= 4.7) return 'note-top';
+  if (note >= 4.4) return 'note-bon';
+  return 'note-ok';
+}
+
+function logoHTMLComp(outil, classeImg, classeFallback) {
+  if (outil.favicon) {
+    return `<img src="${outil.favicon}" alt="${outil.nom}" class="${classeImg}"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+            <span class="${classeFallback}" style="display:none">${outil.emoji}</span>`;
+  }
+  return `<span class="${classeFallback}">${outil.emoji}</span>`;
+}
+
+function logoInlineComp(outil) {
+  return outil.favicon
+    ? `<img src="${outil.favicon}" alt="${outil.nom}" onerror="this.style.display='none'">`
+    : outil.emoji;
+}
+
+function generateComparaison(comp, tools, allComparaisons) {
+  const langue = comp.langue || 'fr';
+  const slug   = comp.slug;
+  if (!slug) return null;
+
+  const a = resoudreOutilComparaison('a', comp, tools, langue);
+  const b = resoudreOutilComparaison('b', comp, tools, langue);
+
+  const canonicalUrl = `${SITE_ORIGIN}/comparateur/${slug}/index.html`;
+  const titleTag = comp.meta_title || `${a.nom} vs ${b.nom} — Comparaison complète | Albexia`;
+  const metaDesc = comp.meta_description || comp.resume?.slice(0, 155) || `${a.nom} ou ${b.nom} ? Comparaison détaillée. Notre verdict Albexia.`;
+
+  // Hreflang : uniquement les langues où une traduction existe réellement
+  const langueUrls = { [langue]: canonicalUrl };
+  for (const [langCode, relSlug] of Object.entries(comp.traductions || {})) {
+    const rel = allComparaisons.find(c => c.slug === relSlug || String(c.id) === String(relSlug));
+    if (rel && rel.slug) {
+      langueUrls[langCode] = `${SITE_ORIGIN}/comparateur/${rel.slug}/index.html`;
+    }
+  }
+  const xDefaultUrl = langueUrls.fr || canonicalUrl;
+  const hreflangTags = Object.entries(langueUrls)
+    .map(([langCode, u]) => `  <link rel="alternate" hreflang="${langCode}" href="${u}" />`)
+    .join('\n') + `\n  <link rel="alternate" hreflang="x-default" href="${xDefaultUrl}" />`;
+
+  const ogLocales = { fr: 'fr_FR', en: 'en_US', es: 'es_ES' };
+  const ogLocale = ogLocales[langue] || 'fr_FR';
+  const ogLocaleAlternates = Object.keys(langueUrls)
+    .filter(l => l !== langue)
+    .map(l => `  <meta property="og:locale:alternate" content="${ogLocales[l] || l}" />`)
+    .join('\n');
+
+  // ── Hero ──
+  const heroHTML = `<section class="cp-hero">
+  <div class="cp-vs-badge">${{fr:'Comparaison',en:'Comparison',es:'Comparación'}[langue]||'Comparaison'}</div>
+  <h1>${a.nom} <span class="vs-sep">vs</span> ${b.nom}</h1>
+  <p class="cp-resume">${comp.resume || ''}</p>
+</section>`;
+
+  // ── Header outils ──
+  const toolsHeaderHTML = `<div class="cp-tools-header">
+  <div class="cp-tool-card${a.winner ? ' winner' : ''}">
+    ${logoHTMLComp(a, 'cp-tool-logo', 'cp-tool-logo-fallback')}
+    <div class="cp-tool-name">${a.nom}</div>
+    <div class="cp-tool-cat">${a.categorie}</div>
+    <span class="cp-tool-note ${noteClasseComp(a.note)}">${a.note} / 5</span>
+  </div>
+  <div class="cp-vs-divider">VS</div>
+  <div class="cp-tool-card${b.winner ? ' winner' : ''}">
+    ${logoHTMLComp(b, 'cp-tool-logo', 'cp-tool-logo-fallback')}
+    <div class="cp-tool-name">${b.nom}</div>
+    <div class="cp-tool-cat">${b.categorie}</div>
+    <span class="cp-tool-note ${noteClasseComp(b.note)}">${b.note} / 5</span>
+  </div>
+</div>`;
+
+  // ── Tableau critères ──
+  const criteres = comp.criteres || [];
+  let lignes = '';
+  criteres.forEach(c => {
+    const cellA = c.bool
+      ? (c.a === true  ? '<span class="check-yes">✓</span>'
+       : c.a === false ? '<span class="check-no">✗</span>'
+       : '<span class="check-na">—</span>')
+      : `<span style="color:var(--text);font-size:13px">${c.a}</span>`;
+    const cellB = c.bool
+      ? (c.b === true  ? '<span class="check-yes">✓</span>'
+       : c.b === false ? '<span class="check-no">✗</span>'
+       : '<span class="check-na">—</span>')
+      : `<span style="color:var(--text);font-size:13px">${c.b}</span>`;
+    lignes += `<tr>
+      <td class="td-label">${c.label}</td>
+      <td>${cellA}</td>
+      <td>${cellB}</td>
+    </tr>`;
+  });
+  const tableauHTML = `<table class="cp-table">
+  <thead>
+    <tr>
+      <th>${{fr:'Critère',en:'Criteria',es:'Criterio'}[langue]||'Critère'}</th>
+      <th class="th-tool">${logoInlineComp(a)} ${a.nom}</th>
+      <th class="th-tool">${logoInlineComp(b)} ${b.nom}</th>
+    </tr>
+  </thead>
+  <tbody>${lignes}</tbody>
+</table>`;
+
+  // ── Avantages / inconvénients ──
+  const avA  = comp.avantages?.a || [];
+  const avB  = comp.avantages?.b || [];
+  const incA = comp.inconvenients?.a || [];
+  const incB = comp.inconvenients?.b || [];
+  const listeHTML = (items, estPros) =>
+    `<ul class="cp-pros-list${estPros ? '' : ' cp-cons-list'}">${(items||[]).map(i => `<li>${i}</li>`).join('')}</ul>`;
+
+  const avantagesHTML = `<div class="cp-pros-cons">
+  <div class="cp-pros-card">
+    <div class="cp-pros-card-title">${logoInlineComp(a)} ${a.nom} — Points forts</div>
+    ${listeHTML(avA, true)}
+  </div>
+  <div class="cp-pros-card">
+    <div class="cp-pros-card-title">${logoInlineComp(b)} ${b.nom} — Points forts</div>
+    ${listeHTML(avB, true)}
+  </div>
+  <div class="cp-pros-card">
+    <div class="cp-pros-card-title" style="color:var(--text-muted)">${a.nom} — Limites</div>
+    ${listeHTML(incA, false)}
+  </div>
+  <div class="cp-pros-card">
+    <div class="cp-pros-card-title" style="color:var(--text-muted)">${b.nom} — Limites</div>
+    ${listeHTML(incB, false)}
+  </div>
+</div>`;
+
+  // ── Cas d'usage ──
+  const casUsageHTML = comp.cas_usage ? `<div class="cp-cas-grid">
+  <div class="cp-cas-card card-a">
+    <div class="cp-cas-label">Choisissez</div>
+    <div class="cp-cas-title">${logoInlineComp(a)} ${a.nom}</div>
+    <p class="cp-cas-text">${comp.cas_usage.choisir_a || ''}</p>
+  </div>
+  <div class="cp-cas-card card-b">
+    <div class="cp-cas-label">Choisissez</div>
+    <div class="cp-cas-title">${logoInlineComp(b)} ${b.nom}</div>
+    <p class="cp-cas-text">${comp.cas_usage.choisir_b || ''}</p>
+  </div>
+</div>` : '';
+
+  // ── Verdict ──
+  const gagnantNom = comp.verdict?.gagnant || a.nom;
+  const gagnantObj = gagnantNom === b.nom ? b : a;
+  const verdictHTML = comp.verdict ? `<div class="cp-verdict-card">
+  <div class="cp-verdict-label">Notre verdict Albexia</div>
+  <div class="cp-verdict-title">${logoInlineComp(gagnantObj)} 🏆 ${gagnantNom} recommandé</div>
+  <p class="cp-verdict-text">${comp.verdict.texte || ''}</p>
+</div>` : '';
+
+  // ── FAQ ──
+  const faqItems = comp.faq || [];
+  const faqHTML = faqItems.length ? `<div class="cp-faq">
+  ${faqItems.map((f, i) => `<div class="cp-faq-item" id="faq-${i}">
+    <button class="cp-faq-question" onclick="toggleFAQ(${i})">
+      <span>${f.question}</span>
+      <span class="cp-faq-arrow">▼</span>
+    </button>
+    <div class="cp-faq-answer">${f.reponse}</div>
+  </div>`).join('')}
+</div>` : '';
+
+  const faqJsonLd = faqItems.length ? `
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+${faqItems.map(f => `      {
+        "@type": "Question",
+        "name": ${JSON.stringify(f.question)},
+        "acceptedAnswer": { "@type": "Answer", "text": ${JSON.stringify(f.reponse.replace(/<[^>]+>/g,''))} }
+      }`).join(',\n')}
+    ]
+  }
+  </script>` : '';
+
+  // ── CTA ──
+  const ctaHTML = `<div class="cp-cta-wrap">
+  <a href="${a.lien}" target="_blank" rel="noopener" class="cp-cta-btn cp-cta-a">
+    ${a.favicon ? `<img src="${a.favicon}" alt="${a.nom}" onerror="this.style.display='none'">` : ''}<span>Essayer ${a.nom}</span><span>→</span>
+  </a>
+  <a href="${b.lien}" target="_blank" rel="noopener" class="cp-cta-btn cp-cta-b">
+    ${b.favicon ? `<img src="${b.favicon}" alt="${b.nom}" onerror="this.style.display='none'">` : ''}<span>Essayer ${b.nom}</span><span>→</span>
+  </a>
+</div>`;
+
+  const comparisonJsonLd = `
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": ${JSON.stringify(`${a.nom} vs ${b.nom}`)},
+    "description": ${JSON.stringify(metaDesc)},
+    "inLanguage": "${langue}",
+    "author": { "@type": "Organization", "name": "Albexia" },
+    "publisher": { "@type": "Organization", "name": "Albexia", "url": "${SITE_ORIGIN}" },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": "${canonicalUrl}" }
+  }
+  </script>`;
+
+  return `<!DOCTYPE html>
+<html lang="${langue}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${titleTag}</title>
+  <meta name="description" content="${metaDesc}" />
+  <meta name="robots" content="index, follow" />
+
+  <link rel="canonical" href="${canonicalUrl}" />
+
+${hreflangTags}
+
+  <meta property="og:title"       content="${titleTag}" />
+  <meta property="og:description" content="${metaDesc}" />
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="${canonicalUrl}" />
+  <meta property="og:locale"      content="${ogLocale}" />
+${ogLocaleAlternates}
+  <meta name="twitter:card"        content="summary_large_image" />
+  <meta name="twitter:title"       content="${titleTag}" />
+  <meta name="twitter:description" content="${metaDesc}" />
+${comparisonJsonLd}
+${faqJsonLd}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="${R}css/style.css" />
+  <link rel="stylesheet" href="${R}css/comparer.css" />
+</head>
+<body>
+
+${navHTML(langue)}
+
+${heroHTML}
+
+${toolsHeaderHTML}
+
+<div class="cp-section">
+  <div class="cp-section-title">${{fr:'Comparaison détaillée',en:'Detailed comparison',es:'Comparación detallada'}[langue]||'Comparaison détaillée'}</div>
+  ${tableauHTML}
+</div>
+
+<div class="cp-section">
+  <div class="cp-section-title">${{fr:'Points forts & limites',en:'Strengths & limitations',es:'Puntos fuertes y límites'}[langue]||'Points forts & limites'}</div>
+  ${avantagesHTML}
+</div>
+
+${casUsageHTML ? `<div class="cp-section">
+  <div class="cp-section-title">${{fr:'Qui devrait choisir quoi ?',en:'Who should choose what?',es:'¿Quién debería elegir qué?'}[langue]||'Qui devrait choisir quoi ?'}</div>
+  ${casUsageHTML}
+</div>` : ''}
+
+${verdictHTML ? `<div class="cp-section">
+  <div class="cp-section-title">${{fr:'Verdict Albexia',en:'Albexia verdict',es:'Veredicto Albexia'}[langue]||'Verdict Albexia'}</div>
+  ${verdictHTML}
+</div>` : ''}
+
+${faqHTML ? `<div class="cp-section">
+  <div class="cp-section-title">${{fr:'Questions fréquentes',en:'FAQ',es:'Preguntas frecuentes'}[langue]||'Questions fréquentes'}</div>
+  ${faqHTML}
+</div>` : ''}
+
+<div class="cp-section">
+  ${ctaHTML}
+</div>
+
+<a href="${R}tools/comparateur.html" class="cp-back">← ${{fr:'Retour au comparateur',en:'Back to comparator',es:'Volver al comparador'}[langue]||'Retour au comparateur'}</a>
+
+${footerHTML()}
+${faqHTML ? '<script>function toggleFAQ(i){document.getElementById("faq-"+i).classList.toggle("open");}</script>' : ''}
+${sharedJS()}
+</body>
+</html>`;
+}
+
+// ════════════════════════════════════════════════════════════
 // MAIN
 // ════════════════════════════════════════════════════════════
 async function main() {
@@ -946,6 +1292,56 @@ async function main() {
     }
   }
   console.log(`✓ ${removedArticles} dossier(s) article orphelin(s) supprimé(s).`);
+
+  // ════════════════════════════════════════════════════════════
+  // COMPARATEUR (X vs Y)
+  // ════════════════════════════════════════════════════════════
+  console.log(`\n📥 Lecture de Firestore (comparaisons)...`);
+  const comparaisonsSnap = await db.collection('comparaisons').get();
+  const comparaisons = comparaisonsSnap.docs.map(d => d.data());
+  console.log(`✓ ${comparaisons.length} documents trouvés`);
+
+  let compGenerated = 0, compSkippedNoSlug = 0;
+
+  for (const comp of comparaisons) {
+    const slug = comp.slug;
+    if (!slug) { compSkippedNoSlug++; continue; }
+
+    const html = generateComparaison(comp, tools, comparaisons);
+    if (!html) { compSkippedNoSlug++; continue; }
+
+    const folder = path.join('comparateur', slug);
+    fs.mkdirSync(folder, { recursive: true });
+    fs.writeFileSync(path.join(folder, 'index.html'), html, 'utf8');
+    compGenerated++;
+  }
+
+  console.log(`\n✅ Comparateur — ${compGenerated} pages générées, ${compSkippedNoSlug} ignorée(s) (slug vide).`);
+  console.log(`\nStructure :`);
+  console.log(`  comparateur/{slug}/index.html`);
+
+  // ─── NETTOYAGE DES COMPARAISONS ORPHELINES ───
+  console.log(`\n🧹 Nettoyage des pages comparateur orphelines...`);
+
+  const validComparaisonPaths = new Set();
+  for (const comp of comparaisons) {
+    if (!comp.slug) continue;
+    validComparaisonPaths.add(path.join('comparateur', comp.slug));
+  }
+
+  let removedComparaisons = 0;
+  if (fs.existsSync('comparateur')) {
+    for (const slugDir of fs.readdirSync('comparateur')) {
+      const fullPath = path.join('comparateur', slugDir);
+      if (!fs.statSync(fullPath).isDirectory()) continue;
+      if (!validComparaisonPaths.has(fullPath)) {
+        fs.rmSync(fullPath, { recursive: true, force: true });
+        console.log(`  🗑️  Supprimé : ${fullPath}`);
+        removedComparaisons++;
+      }
+    }
+  }
+  console.log(`✓ ${removedComparaisons} dossier(s) comparateur orphelin(s) supprimé(s).`);
 }
 
 main().catch(err => { console.error('❌ Erreur:', err); process.exit(1); });
