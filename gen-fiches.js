@@ -1,20 +1,78 @@
 #!/usr/bin/env node
 /* ═══════════════════════════════════════════════════════
    gen-fiches.js — Générateur de fiches outils Albexia
-   Source : Firestore collection "outils"
+   Source : Firestore collections "outils", "articles", "comparaisons"
    Sortie : tools/{plan}/{langue}/{slug}/index.html
+            articles/{langue}/{slug}/index.html
+            comparateur/{slug}/index.html
    Usage  : node gen-fiches.js
+
+   ── Génération incrémentale ──
+   Chaque doc lu est hashé (SHA-256 de son contenu). L'état
+   (hash + updatedAt par doc) est persisté dans .gen-state.json,
+   committé dans le repo avec le reste. Un doc dont le hash n'a
+   pas changé depuis le dernier run n'est PAS réécrit sur disque
+   — ça évite du bruit Git et du travail inutile.
+
+   Important : ceci NE réduit PAS le nombre de lectures Firestore
+   (chaque doc doit être lu pour calculer son hash et détecter les
+   suppressions), seulement le nombre d'écritures fichier/Git.
+   Réduire les lectures elles-mêmes demanderait des requêtes
+   partielles (where updatedAt > lastRun) qui manqueraient les
+   suppressions et les docs jamais resauvegardés — jugé trop
+   fragile pour l'instant.
+
+   Cascade : si un outil référencé par une comparaison a changé
+   (note, prix, etc.), la comparaison est régénérée même si son
+   propre contenu n'a pas bougé, pour rester synchronisée.
    ═══════════════════════════════════════════════════════ */
 
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore }        = require('firebase-admin/firestore');
-const fs   = require('fs');
-const path = require('path');
+const fs     = require('fs');
+const path   = require('path');
+const crypto = require('crypto');
 
 // ── Init Firebase Admin ──────────────────────────────────
 const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
 initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore();
+
+// ── État de génération incrémentale ──────────────────────
+const STATE_PATH = '.gen-state.json';
+
+function loadState() {
+  try {
+    return JSON.parse(fs.readFileSync(STATE_PATH, 'utf8'));
+  } catch {
+    // Premier run, ou fichier absent/corrompu : état vide, tout sera généré.
+    return { outils: {}, articles: {}, comparaisons: {} };
+  }
+}
+
+function saveState(state) {
+  fs.writeFileSync(STATE_PATH, JSON.stringify(state, null, 2), 'utf8');
+}
+
+// Hash stable du contenu d'un doc (indépendant de l'ordre des clés).
+// On exclut updatedAt du hash : c'est un timestamp serveur qui change
+// à chaque save même si le contenu réel est identique (ex: ré-ouverture
+// puis fermeture d'un formulaire sans modif) — l'inclure ferait
+// régénérer inutilement à chaque simple resauvegarde.
+function hashDoc(data) {
+  const { updatedAt, ...rest } = data;
+  const sorted = JSON.stringify(rest, Object.keys(rest).sort());
+  return crypto.createHash('sha256').update(sorted).digest('hex');
+}
+
+function updatedAtMs(data) {
+  const u = data.updatedAt;
+  if (!u) return 0;
+  // Firestore Timestamp (admin SDK) expose toMillis()
+  if (typeof u.toMillis === 'function') return u.toMillis();
+  if (u instanceof Date) return u.getTime();
+  return 0;
+}
 
 // ── Helpers ──────────────────────────────────────────────
 function slugify(str) {
@@ -72,7 +130,7 @@ function navHTML(langue) {
     <button class="kebab-btn" id="kebab-btn" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
     <div class="kebab-menu" id="kebab-menu" role="menu">
       <a href="${R}glossaire.html" class="kebab-item" role="menuitem"><span class="kebab-ico">📖</span><div><div class="kebab-item-name">Glossaire IA</div></div></a>
-      <a href="${R}tools/comparateur.html" class="kebab-item" role="menuitem"><span class="kebab-ico">⚖️</span><div><div class="kebab-item-name">Comparateur</div></div></a>
+      <a href="${R}comparateur/" class="kebab-item" role="menuitem"><span class="kebab-ico">⚖️</span><div><div class="kebab-item-name">Comparateur</div></div></a>
       <a href="${R}deals/" class="kebab-item" role="menuitem"><span class="kebab-ico">🔥</span><div><div class="kebab-item-name">Deals &amp; Promos</div></div></a>
       <div class="kebab-divider"></div>
       <a href="${R}hub.html" class="kebab-item" role="menuitem"><span class="kebab-ico">📂</span><div><div class="kebab-item-name">Toutes les sections →</div></div></a>
@@ -884,6 +942,121 @@ function logoInlineComp(outil) {
     : outil.emoji;
 }
 
+// ── Page listing paginée : comparateur/index.html, comparateur/page/2/index.html, ... ──
+const COMPARATEUR_PAR_PAGE = 12;
+
+function comparateurItemHTML(comp, tools) {
+  const langue = comp.langue || 'fr';
+  const a = resoudreOutilComparaison('a', comp, tools, langue);
+  const b = resoudreOutilComparaison('b', comp, tools, langue);
+  const logo = (outil) => outil.favicon
+    ? `<img src="${outil.favicon}" alt="${outil.nom}" class="cpl-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+       <span class="cpl-logo-fallback" style="display:none">${outil.emoji}</span>`
+    : `<span class="cpl-logo-fallback">${outil.emoji}</span>`;
+  return `<a href="${R}comparateur/${comp.slug}/index.html" class="cpl-item">
+    <div class="cpl-logos">
+      ${logo(a)}
+      <span class="cpl-vs">vs</span>
+      ${logo(b)}
+    </div>
+    <span class="cpl-name">${a.nom} vs ${b.nom}</span>
+    <span class="cpl-arrow">→</span>
+  </a>`;
+}
+
+function paginationHTML(currentPage, totalPages) {
+  if (totalPages <= 1) return '';
+  const pageUrl = (n) => n === 1 ? `${R}comparateur/index.html` : `${R}comparateur/page/${n}/index.html`;
+  let links = '';
+
+  links += currentPage > 1
+    ? `<a href="${pageUrl(currentPage-1)}" class="cpl-page-link">← Précédent</a>`
+    : `<span class="cpl-page-link disabled">← Précédent</span>`;
+
+  for (let n = 1; n <= totalPages; n++) {
+    links += `<a href="${pageUrl(n)}" class="cpl-page-link${n===currentPage?' active':''}">${n}</a>`;
+  }
+
+  links += currentPage < totalPages
+    ? `<a href="${pageUrl(currentPage+1)}" class="cpl-page-link">Suivant →</a>`
+    : `<span class="cpl-page-link disabled">Suivant →</span>`;
+
+  return `<div class="cpl-pagination">${links}</div>`;
+}
+
+// comparaisonsTriees : déjà triées (plus récentes en premier) par l'appelant
+function generateComparateurIndexPage(comparaisonsTriees, tools, pageNum, totalPages) {
+  const langue = 'fr';
+  const start = (pageNum - 1) * COMPARATEUR_PAR_PAGE;
+  const pageItems = comparaisonsTriees.slice(start, start + COMPARATEUR_PAR_PAGE);
+
+  const canonicalUrl = pageNum === 1
+    ? `${SITE_ORIGIN}/comparateur/index.html`
+    : `${SITE_ORIGIN}/comparateur/page/${pageNum}/index.html`;
+
+  const titleTag = pageNum === 1
+    ? `Comparateur d'outils IA — Comparaisons détaillées | Albexia`
+    : `Comparateur d'outils IA — Page ${pageNum} | Albexia`;
+  const metaDesc = `Comparez les meilleurs outils IA côte à côte : fonctionnalités, prix, avis. ${comparaisonsTriees.length} comparaisons détaillées sur Albexia.`;
+
+  const listHTML = pageItems.length
+    ? pageItems.map(c => comparateurItemHTML(c, tools)).join('\n')
+    : `<div class="cpl-empty">Aucune comparaison publiée pour le moment.</div>`;
+
+  // La pagination 2+ est en noindex : évite le contenu quasi-dupliqué en SERP
+  // tout en gardant ces pages crawlables (follow) pour que Google découvre
+  // les comparaisons individuelles au fil des pages suivantes.
+  const robotsTag = pageNum === 1 ? 'index, follow' : 'noindex, follow';
+  const prevUrl = pageNum === 2 ? `${SITE_ORIGIN}/comparateur/index.html` : `${SITE_ORIGIN}/comparateur/page/${pageNum-1}/index.html`;
+  const nextUrl = `${SITE_ORIGIN}/comparateur/page/${pageNum+1}/index.html`;
+
+  return `<!DOCTYPE html>
+<html lang="${langue}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${titleTag}</title>
+  <meta name="description" content="${metaDesc}" />
+  <meta name="robots" content="${robotsTag}" />
+
+  <link rel="canonical" href="${canonicalUrl}" />
+  ${pageNum > 1 ? `<link rel="prev" href="${prevUrl}" />` : ''}
+  ${pageNum < totalPages ? `<link rel="next" href="${nextUrl}" />` : ''}
+
+  <meta property="og:title"       content="${titleTag}" />
+  <meta property="og:description" content="${metaDesc}" />
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="${canonicalUrl}" />
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="${R}css/style.css" />
+  <link rel="stylesheet" href="${R}css/comparer.css" />
+</head>
+<body>
+
+${navHTML(langue)}
+
+<section class="cpl-hero">
+  <h1>Comparateur d'outils IA</h1>
+  <p>Comparez les meilleurs outils d'intelligence artificielle côte à côte : fonctionnalités, prix, avis et verdict Albexia.</p>
+</section>
+
+<div class="cpl-section-title">${pageNum === 1 ? 'Comparaisons' : `Comparaisons — Page ${pageNum}`} (${comparaisonsTriees.length})</div>
+
+<div class="cpl-list">
+${listHTML}
+</div>
+
+${paginationHTML(pageNum, totalPages)}
+
+${footerHTML()}
+${sharedJS()}
+</body>
+</html>`;
+}
+
 function generateComparaison(comp, tools, allComparaisons) {
   const langue = comp.langue || 'fr';
   const slug   = comp.slug;
@@ -1139,7 +1312,7 @@ ${faqHTML ? `<div class="cp-section">
   ${ctaHTML}
 </div>
 
-<a href="${R}tools/comparateur.html" class="cp-back">← ${{fr:'Retour au comparateur',en:'Back to comparator',es:'Volver al comparador'}[langue]||'Retour au comparateur'}</a>
+<a href="${R}comparateur/" class="cp-back">← ${{fr:'Retour au comparateur',en:'Back to comparator',es:'Volver al comparador'}[langue]||'Retour au comparateur'}</a>
 
 ${footerHTML()}
 ${faqHTML ? '<script>function toggleFAQ(i){document.getElementById("faq-"+i).classList.toggle("open");}</script>' : ''}
@@ -1152,14 +1325,26 @@ ${sharedJS()}
 // MAIN
 // ════════════════════════════════════════════════════════════
 async function main() {
+  const state = loadState();
+  const newState = { outils: {}, articles: {}, comparaisons: {} };
+
   console.log('📥 Lecture de Firestore (outils)...');
   const snap  = await db.collection('outils').get();
   const tools = snap.docs.map(d => d.data());
   console.log(`✓ ${tools.length} documents trouvés`);
 
-  let generated = 0, skipped = 0, noFiche = 0;
+  let generated = 0, skipped = 0, noFiche = 0, unchanged = 0;
+  const changedToolIds = new Set(); // pour la cascade vers comparaisons
 
   for (const tool of tools) {
+    const toolHash = hashDoc(tool);
+    const toolId   = String(tool.id || slugify(tool.name));
+    newState.outils[toolId] = { hash: toolHash, updatedAtMs: updatedAtMs(tool) };
+
+    const previousHash = state.outils?.[toolId]?.hash;
+    const hasChanged = previousHash !== toolHash;
+    if (hasChanged) changedToolIds.add(toolId);
+
     // Toggle générer_fiche
     if (tool.generer_fiche === false) { noFiche++; continue; }
 
@@ -1168,27 +1353,30 @@ async function main() {
     const slug   = slugify(tool.name);
     if (!slug) { skipped++; continue; }
 
-    let folder, html;
+    let folder;
+    if (plan === 'featured') folder = path.join('tools', 'featured', langue, slug);
+    else if (plan === 'starter') folder = path.join('tools', 'starter', langue, slug);
+    else folder = path.join('tools', 'standard', langue, slug);
 
-    if (plan === 'featured') {
-      folder = path.join('tools', 'featured', langue, slug);
-      html   = generateFeatured(tool, tools);
-    } else if (plan === 'starter') {
-      folder = path.join('tools', 'starter', langue, slug);
-      html   = generateStarter(tool, tools);
-    } else {
-      folder = path.join('tools', 'standard', langue, slug);
-      html   = generateStandard(tool, tools);
-    }
+    const filePath = path.join(folder, 'index.html');
+
+    // Skip l'écriture si rien n'a changé ET le fichier existe déjà sur disque
+    // (le fichier peut manquer après un nettoyage manuel ou un premier run partiel).
+    if (!hasChanged && fs.existsSync(filePath)) { unchanged++; continue; }
+
+    let html;
+    if (plan === 'featured')      html = generateFeatured(tool, tools);
+    else if (plan === 'starter')  html = generateStarter(tool, tools);
+    else                          html = generateStandard(tool, tools);
 
     fs.mkdirSync(folder, { recursive: true });
-    fs.writeFileSync(path.join(folder, 'index.html'), html, 'utf8');
+    fs.writeFileSync(filePath, html, 'utf8');
     generated++;
 
     if (generated % 50 === 0) console.log(`  → ${generated} fiches générées...`);
   }
 
-  console.log(`\n✅ Outils — ${generated} fiches générées, ${noFiche} ignorées (generer_fiche=false), ${skipped} slug vides.`);
+  console.log(`\n✅ Outils — ${generated} régénérée(s), ${unchanged} inchangée(s) (skip), ${noFiche} ignorée(s) (generer_fiche=false), ${skipped} slug vide(s).`);
   console.log(`\nStructure :`);
   console.log(`  tools/featured/fr/{slug}/index.html`);
   console.log(`  tools/featured/en/{slug}/index.html`);
@@ -1237,9 +1425,14 @@ async function main() {
   const articles = articlesSnap.docs.map(d => d.data());
   console.log(`✓ ${articles.length} documents trouvés`);
 
-  let articlesGenerated = 0, articlesSkippedNoSlug = 0, articlesSkippedNoCorps = 0;
+  let articlesGenerated = 0, articlesSkippedNoSlug = 0, articlesSkippedNoCorps = 0, articlesUnchanged = 0;
 
   for (const article of articles) {
+    const articleHash = hashDoc(article);
+    const articleId    = String(article.id || article.slug);
+    newState.articles[articleId] = { hash: articleHash, updatedAtMs: updatedAtMs(article) };
+    const hasChanged = state.articles?.[articleId]?.hash !== articleHash;
+
     const langue = article.langue || 'fr';
     const slug   = article.slug || slugify(article.title);
 
@@ -1249,16 +1442,20 @@ async function main() {
     // (C'est le cas typique juste après la migration depuis blog.json.)
     if (!article.corps_html || !article.corps_html.trim()) { articlesSkippedNoCorps++; continue; }
 
+    const folder   = path.join('articles', langue, slug);
+    const filePath = path.join(folder, 'index.html');
+
+    if (!hasChanged && fs.existsSync(filePath)) { articlesUnchanged++; continue; }
+
     const html = generateArticle(article, articles);
     if (!html) { articlesSkippedNoSlug++; continue; }
 
-    const folder = path.join('articles', langue, slug);
     fs.mkdirSync(folder, { recursive: true });
-    fs.writeFileSync(path.join(folder, 'index.html'), html, 'utf8');
+    fs.writeFileSync(filePath, html, 'utf8');
     articlesGenerated++;
   }
 
-  console.log(`\n✅ Articles — ${articlesGenerated} fiches générées, ${articlesSkippedNoCorps} ignorées (corps_html vide), ${articlesSkippedNoSlug} slug vide.`);
+  console.log(`\n✅ Articles — ${articlesGenerated} régénéré(s), ${articlesUnchanged} inchangé(s) (skip), ${articlesSkippedNoCorps} ignoré(s) (corps_html vide), ${articlesSkippedNoSlug} slug vide.`);
   console.log(`\nStructure :`);
   console.log(`  articles/fr/{slug}/index.html`);
   console.log(`  articles/en/{slug}/index.html`);
@@ -1301,22 +1498,47 @@ async function main() {
   const comparaisons = comparaisonsSnap.docs.map(d => d.data());
   console.log(`✓ ${comparaisons.length} documents trouvés`);
 
-  let compGenerated = 0, compSkippedNoSlug = 0;
+  let compGenerated = 0, compSkippedNoSlug = 0, compUnchanged = 0, compCascade = 0;
 
   for (const comp of comparaisons) {
+    const compHash = hashDoc(comp);
+    const compId   = String(comp.id || comp.slug);
+    newState.comparaisons[compId] = { hash: compHash, updatedAtMs: updatedAtMs(comp) };
+
+    const ownHasChanged = state.comparaisons?.[compId]?.hash !== compHash;
+
+    // Cascade : régénérer aussi si l'un des deux outils référencés a changé,
+    // pour que note/prix/logo affichés restent synchronisés avec "outils".
+    const refA = comp.outil_a_slug;
+    const refB = comp.outil_b_slug;
+    const referencedToolChanged =
+      (refA && changedToolIds.has(refA)) ||
+      (refB && changedToolIds.has(refB)) ||
+      // Fallback : si les IDs Firestore des outils diffèrent des slugs
+      // (selon comment "id" est stocké), on vérifie aussi par nom résolu.
+      tools.some(t => (slugify(t.name) === refA || slugify(t.name) === refB)
+                    && changedToolIds.has(String(t.id || slugify(t.name))));
+
+    const hasChanged = ownHasChanged || referencedToolChanged;
+    if (!ownHasChanged && referencedToolChanged) compCascade++;
+
     const slug = comp.slug;
     if (!slug) { compSkippedNoSlug++; continue; }
+
+    const folder   = path.join('comparateur', slug);
+    const filePath = path.join(folder, 'index.html');
+
+    if (!hasChanged && fs.existsSync(filePath)) { compUnchanged++; continue; }
 
     const html = generateComparaison(comp, tools, comparaisons);
     if (!html) { compSkippedNoSlug++; continue; }
 
-    const folder = path.join('comparateur', slug);
     fs.mkdirSync(folder, { recursive: true });
-    fs.writeFileSync(path.join(folder, 'index.html'), html, 'utf8');
+    fs.writeFileSync(filePath, html, 'utf8');
     compGenerated++;
   }
 
-  console.log(`\n✅ Comparateur — ${compGenerated} pages générées, ${compSkippedNoSlug} ignorée(s) (slug vide).`);
+  console.log(`\n✅ Comparateur — ${compGenerated} régénérée(s) (dont ${compCascade} via cascade outil modifié), ${compUnchanged} inchangée(s) (skip), ${compSkippedNoSlug} ignorée(s) (slug vide).`);
   console.log(`\nStructure :`);
   console.log(`  comparateur/{slug}/index.html`);
 
@@ -1332,6 +1554,7 @@ async function main() {
   let removedComparaisons = 0;
   if (fs.existsSync('comparateur')) {
     for (const slugDir of fs.readdirSync('comparateur')) {
+      if (slugDir === 'page') continue; // dossier de pagination, pas une comparaison
       const fullPath = path.join('comparateur', slugDir);
       if (!fs.statSync(fullPath).isDirectory()) continue;
       if (!validComparaisonPaths.has(fullPath)) {
@@ -1342,6 +1565,89 @@ async function main() {
     }
   }
   console.log(`✓ ${removedComparaisons} dossier(s) comparateur orphelin(s) supprimé(s).`);
+
+  // ════════════════════════════════════════════════════════════
+  // COMPARATEUR — PAGE LISTING PAGINÉE (comparateur/index.html)
+  // ════════════════════════════════════════════════════════════
+  // Régénérée si : une comparaison a été ajoutée/modifiée/supprimée
+  // (le nombre total ou le hash de l'ensemble a changé), ou si le
+  // nombre de pages change suite à ça. On la reconstruit entièrement
+  // à chaque fois qu'un changement est détecté côté comparaisons —
+  // c'est une liste globale, pas un doc individuel qu'on peut hasher
+  // isolément de la même façon.
+  const comparaisonsValides = comparaisons.filter(c => c.slug);
+  // Tri : plus récentes en premier (fallback ordre Firestore si pas de updatedAt)
+  const comparaisonsTriees = [...comparaisonsValides].sort((a, b) => updatedAtMs(b) - updatedAtMs(a));
+  const totalPages = Math.max(1, Math.ceil(comparaisonsTriees.length / COMPARATEUR_PAR_PAGE));
+
+  // Détection de changement au niveau de la liste : le run a-t-il généré,
+  // supprimé, ou fait cascader au moins une comparaison ? Si oui, la liste
+  // (qui agrège toutes les comparaisons) doit être reconstruite.
+  const listeAChange = compGenerated > 0 || removedComparaisons > 0;
+  const indexExists = fs.existsSync(path.join('comparateur', 'index.html'));
+
+  let listPagesGenerated = 0;
+  if (listeAChange || !indexExists) {
+    for (let p = 1; p <= totalPages; p++) {
+      const html = generateComparateurIndexPage(comparaisonsTriees, tools, p, totalPages);
+      const folder = p === 1 ? 'comparateur' : path.join('comparateur', 'page', String(p));
+      fs.mkdirSync(folder, { recursive: true });
+      fs.writeFileSync(path.join(folder, 'index.html'), html, 'utf8');
+      listPagesGenerated++;
+    }
+    console.log(`\n✅ Page listing comparateur — ${listPagesGenerated} page(s) générée(s) (${comparaisonsTriees.length} comparaisons, ${totalPages} page(s) au total).`);
+  } else {
+    console.log(`\n✅ Page listing comparateur — inchangée, régénération non nécessaire.`);
+  }
+
+  // ─── NETTOYAGE DES PAGES DE PAGINATION EXCÉDENTAIRES ───
+  // Si le nombre de comparaisons diminue, il faut supprimer les anciennes
+  // pages de pagination devenues excédentaires (ex: on avait 3 pages, il
+  // n'en faut plus que 2 → comparateur/page/3/ doit disparaître).
+  const pageDir = path.join('comparateur', 'page');
+  let removedPages = 0;
+  if (fs.existsSync(pageDir)) {
+    for (const pDir of fs.readdirSync(pageDir)) {
+      const pNum = Number(pDir);
+      const fullPath = path.join(pageDir, pDir);
+      if (!fs.statSync(fullPath).isDirectory()) continue;
+      if (isNaN(pNum) || pNum > totalPages || pNum < 2) {
+        fs.rmSync(fullPath, { recursive: true, force: true });
+        console.log(`  🗑️  Page de pagination excédentaire supprimée : ${fullPath}`);
+        removedPages++;
+      }
+    }
+  }
+  if (removedPages > 0) console.log(`✓ ${removedPages} page(s) de pagination excédentaire(s) supprimée(s).`);
+
+  // ─── REDIRECTION DEPUIS L'ANCIEN CHEMIN tools/comparateur.html ───
+  // L'ancienne page (fetch JS runtime) est remplacée par la génération
+  // statique ci-dessus. On garde un fichier de redirection à l'ancien
+  // chemin pour ne pas casser les liens externes/backlinks existants.
+  const redirectFolder = 'tools';
+  fs.mkdirSync(redirectFolder, { recursive: true });
+  fs.writeFileSync(path.join(redirectFolder, 'comparateur.html'), `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Redirection — Comparateur | Albexia</title>
+  <meta name="robots" content="noindex, follow" />
+  <link rel="canonical" href="${SITE_ORIGIN}/comparateur/index.html" />
+  <meta http-equiv="refresh" content="0; url=${R}comparateur/index.html" />
+  <script>window.location.replace('${R}comparateur/index.html');</script>
+</head>
+<body>
+  <p>Cette page a été déplacée. Si vous n'êtes pas redirigé automatiquement,
+  <a href="${R}comparateur/index.html">cliquez ici</a>.</p>
+</body>
+</html>`, 'utf8');
+  console.log(`\n↪️  Redirection tools/comparateur.html → comparateur/index.html écrite.`);
+
+  // ─── SAUVEGARDE DE L'ÉTAT DE GÉNÉRATION ───
+  // newState ne contient que les docs actuellement en base : un doc supprimé
+  // de Firestore disparaît automatiquement de l'état au prochain run.
+  saveState(newState);
+  console.log(`\n💾 État de génération sauvegardé dans ${STATE_PATH} (à committer avec le reste).`);
 }
 
 main().catch(err => { console.error('❌ Erreur:', err); process.exit(1); });
