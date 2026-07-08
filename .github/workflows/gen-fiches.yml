@@ -1,4 +1,4 @@
-name: Générer les fiches outils et articles
+name: Générer les fiches outils, articles et comparateur
 
 on:
   workflow_dispatch:        # Bouton manuel dans GitHub Actions
@@ -24,7 +24,7 @@ jobs:
       - name: Installer les dépendances
         run: npm install firebase-admin
 
-      - name: Générer les fiches HTML (outils + articles)
+      - name: Générer les fiches HTML (outils + articles + comparateur)
         env:
           FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
         run: node gen-fiches.js
@@ -33,6 +33,6 @@ jobs:
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add tools/ articles/
-          git diff --staged --quiet || git commit -m "🤖 Fiches outils et articles générées automatiquement"
+          git add tools/ articles/ comparateur/
+          git diff --staged --quiet || git commit -m "🤖 Fiches outils, articles et comparateur générées automatiquement"
           git push
