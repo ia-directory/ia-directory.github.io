@@ -945,23 +945,47 @@ function logoInlineComp(outil) {
 // ── Page listing paginée : comparateur/index.html, comparateur/page/2/index.html, ... ──
 const COMPARATEUR_PAR_PAGE = 12;
 
+// Réutilise les classes .paire-link/.paire-logos/.paire-vs déjà stylées dans
+// css/style.css (existantes sur le site depuis l'ancien comparateur.html) —
+// pas de CSS à dupliquer pour cette partie.
 function comparateurItemHTML(comp, tools) {
   const langue = comp.langue || 'fr';
   const a = resoudreOutilComparaison('a', comp, tools, langue);
   const b = resoudreOutilComparaison('b', comp, tools, langue);
-  const logo = (outil) => outil.favicon
-    ? `<img src="${outil.favicon}" alt="${outil.nom}" class="cpl-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
-       <span class="cpl-logo-fallback" style="display:none">${outil.emoji}</span>`
-    : `<span class="cpl-logo-fallback">${outil.emoji}</span>`;
-  return `<a href="${R}comparateur/${comp.slug}/index.html" class="cpl-item">
-    <div class="cpl-logos">
-      ${logo(a)}
-      <span class="cpl-vs">vs</span>
-      ${logo(b)}
+  return `<a href="${R}comparateur/${comp.slug}/index.html" class="paire-link">
+    <div class="paire-logos">
+      <img src="${a.favicon}" alt="${a.nom}" onerror="this.style.display='none'">
+      <span class="paire-vs">VS</span>
+      <img src="${b.favicon}" alt="${b.nom}" onerror="this.style.display='none'">
     </div>
-    <span class="cpl-name">${a.nom} vs ${b.nom}</span>
-    <span class="cpl-arrow">→</span>
+    <span style="flex:1;font-size:12px">${a.nom} vs ${b.nom}</span>
+    <span style="color:var(--text-dim);font-size:11px">→</span>
   </a>`;
+}
+
+// Construit le tableau TOOLS_DATA injecté au build pour le picker interactif,
+// depuis la collection "outils" déjà en mémoire (zéro lecture Firestore côté
+// visiteur). Seuls les outils FR sont inclus — c'est un annuaire francophone,
+// et TOOLS_DATA original ne mélangeait pas les variantes de langue.
+function buildToolsDataJSON(tools) {
+  const fr = tools.filter(t => t.name && (!t.langue || t.langue === 'fr'));
+  const data = fr.map(t => ({
+    id: t.id,
+    name: t.name,
+    emoji: t.emoji || '🤖',
+    favicon: `https://www.google.com/s2/favicons?sz=64&domain=${(t.url||'').replace(/^https?:\/\//,'').split('/')[0]}`,
+    category: t.category || '',
+    price: t.price || '',
+    essai_gratuit: !!t.essai_gratuit,
+    duree_essai: t.duree_essai || null,
+    langue_fr: !!t.interface_fr,
+    api: !!t.api,
+    mobile: !!t.mobile,
+    ideal_pour: t.ideal_pour || '',
+    note: typeof t.note === 'number' ? t.note : (typeof t.rating === 'number' ? t.rating : null),
+    lien_affilie: t.url || '#',
+  }));
+  return JSON.stringify(data);
 }
 
 function paginationHTML(currentPage, totalPages) {
@@ -1038,20 +1062,168 @@ function generateComparateurIndexPage(comparaisonsTriees, tools, pageNum, totalP
 
 ${navHTML(langue)}
 
-<section class="cpl-hero">
-  <h1>Comparateur d'outils IA</h1>
-  <p>Comparez les meilleurs outils d'intelligence artificielle côte à côte : fonctionnalités, prix, avis et verdict Albexia.</p>
+<section class="comp-hero">
+  <div class="comp-badge">⚖️ Comparez les outils IA</div>
+  <h1>Trouvez <span class="grad">le meilleur outil</span><br>pour vous</h1>
+  <p>Sélectionnez 2 ou 3 outils et comparez-les côte à côte en quelques secondes.</p>
 </section>
 
-<div class="cpl-section-title">${pageNum === 1 ? 'Comparaisons' : `Comparaisons — Page ${pageNum}`} (${comparaisonsTriees.length})</div>
-
-<div class="cpl-list">
-${listHTML}
+<div class="comp-selection">
+  <div class="comp-search">
+    <span class="comp-search-icon">🔍</span>
+    <input type="text" id="comp-search-input" placeholder="Rechercher un outil… (ex: Jasper, Canva, Runway)">
+  </div>
+  <div class="comp-cat-filters" id="comp-cats"></div>
+  <div class="tools-picker" id="tools-picker"></div>
 </div>
 
-${paginationHTML(pageNum, totalPages)}
+<div class="selected-bar">
+  <div class="selected-bar-inner">
+    <div class="selected-chips" id="selected-chips">
+      <span class="selected-hint" id="selected-hint">Sélectionnez 2 ou 3 outils ci-dessus</span>
+    </div>
+    <button class="comp-btn" id="comp-btn" disabled onclick="afficherComparaison()">Comparer →</button>
+  </div>
+</div>
+
+<div class="comp-result" id="comp-result">
+  <div class="comp-result-title" id="comp-result-title"></div>
+  <div class="comp-table-wrap">
+    <table class="comp-table" id="comp-table"></table>
+  </div>
+  <div class="comp-cta-row" id="comp-cta-row"></div>
+  <span class="comp-reset" onclick="resetComparaison()">← Nouvelle comparaison</span>
+</div>
+
+<div class="paires-section">
+  <div class="paires-title">${pageNum === 1 ? 'Comparaisons populaires' : `Comparaisons populaires — Page ${pageNum}`} (${comparaisonsTriees.length})</div>
+  <div class="paires-grid" id="paires-grid">
+${listHTML}
+  </div>
+  ${paginationHTML(pageNum, totalPages)}
+</div>
 
 ${footerHTML()}
+<script>
+const TOOLS_DATA = ${buildToolsDataJSON(tools)};
+
+let selected = [], filteredTools = [...TOOLS_DATA], activeCategory = 'Tous';
+
+function normaliser(s){ return (s||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().trim(); }
+
+function initCats(){
+  const cats = ['Tous', ...new Set(TOOLS_DATA.map(t=>t.category).filter(Boolean))];
+  const el = document.getElementById('comp-cats');
+  el.innerHTML = cats.map(c=>\`<button class="comp-cat-btn\${c==='Tous'?' active':''}" data-cat="\${c}">\${c}</button>\`).join('');
+  el.querySelectorAll('.comp-cat-btn').forEach(btn=>{
+    btn.addEventListener('click',()=>{
+      activeCategory=btn.dataset.cat;
+      el.querySelectorAll('.comp-cat-btn').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      applyFilters();
+    });
+  });
+}
+
+function applyFilters(){
+  const q=normaliser(document.getElementById('comp-search-input').value);
+  filteredTools=TOOLS_DATA.filter(t=>{
+    const matchCat=activeCategory==='Tous'||t.category===activeCategory;
+    const matchQ=!q||normaliser(t.name).includes(q)||normaliser(t.category).includes(q);
+    return matchCat&&matchQ;
+  });
+  renderPicker();
+}
+
+function renderPicker(){
+  document.getElementById('tools-picker').innerHTML=filteredTools.map(t=>{
+    const isSel=selected.includes(t.id), isDisabled=!isSel&&selected.length>=3;
+    const logo = t.favicon
+      ? \`<img src="\${t.favicon}" alt="\${t.name}" class="picker-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="picker-logo-fallback" style="display:none">\${t.emoji}</span>\`
+      : \`<span class="picker-logo-fallback">\${t.emoji}</span>\`;
+    return \`<div class="picker-card\${isSel?' selected':''}\${isDisabled?' disabled':''}" onclick="toggleTool(\${t.id})">
+      \${logo}<span class="picker-name">\${t.name}</span><span class="picker-check">✓</span>
+    </div>\`;
+  }).join('');
+}
+
+function toggleTool(id){
+  const idx=selected.indexOf(id);
+  if(idx>-1){ selected.splice(idx,1); } else if(selected.length<3){ selected.push(id); }
+  renderPicker(); renderChips();
+}
+
+function renderChips(){
+  const hint=document.getElementById('selected-hint');
+  const chips=document.getElementById('selected-chips');
+  const btn=document.getElementById('comp-btn');
+  chips.querySelectorAll('.selected-chip').forEach(e=>e.remove());
+  if(selected.length===0){ hint.style.display='inline'; }
+  else {
+    hint.style.display='none';
+    selected.forEach(id=>{
+      const t=TOOLS_DATA.find(x=>x.id===id); if(!t) return;
+      const chip=document.createElement('div'); chip.className='selected-chip';
+      const logoEl = t.favicon ? \`<img src="\${t.favicon}" alt="" style="width:14px;height:14px;border-radius:3px;object-fit:contain" onerror="this.style.display='none'">\` : t.emoji;
+      chip.innerHTML=\`\${logoEl} \${t.name} <span class="chip-remove" onclick="toggleTool(\${id})">×</span>\`;
+      chips.appendChild(chip);
+    });
+  }
+  btn.disabled=selected.length<2;
+}
+
+function afficherComparaison(){
+  const outils=selected.map(id=>TOOLS_DATA.find(t=>t.id===id)).filter(Boolean);
+  if(outils.length<2) return;
+  const result=document.getElementById('comp-result');
+  document.getElementById('comp-result-title').textContent=outils.map(t=>t.name).join(' vs ');
+  const criteres=[
+    ['Prix de base',       t=>t.price||'—',                    false],
+    ['Essai gratuit',      t=>t.essai_gratuit,                 true],
+    ["Durée d'essai",      t=>t.duree_essai||'—',              false],
+    ['Support français',   t=>t.langue_fr,                     true],
+    ['API disponible',     t=>t.api,                           true],
+    ['App mobile',         t=>t.mobile,                        true],
+    ['Idéal pour',         t=>t.ideal_pour||'—',               false],
+    ['Note Albexia',       t=>t.note?t.note+'/5':'—',          false],
+  ];
+  let thead='<thead><tr><th>Critère</th>';
+  outils.forEach(t=>{
+    const logoEl = t.favicon
+      ? \`<img src="\${t.favicon}" alt="\${t.name}" class="th-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><span class="th-logo-fallback" style="display:none">\${t.emoji}</span>\`
+      : \`<span class="th-logo-fallback">\${t.emoji}</span>\`;
+    thead+=\`<th class="tool-col">\${logoEl}\${t.name}</th>\`;
+  });
+  thead+='</tr></thead>';
+  let tbody='<tbody>';
+  criteres.forEach(([label,fn,isBool])=>{
+    tbody+=\`<tr><td class="crit-col">\${label}</td>\`;
+    outils.forEach(t=>{
+      const val=fn(t);
+      if(isBool){ tbody+=val===true?'<td><span class="yes">✓</span></td>':val===false?'<td><span class="no">✗</span></td>':'<td><span style="color:var(--text-dim)">—</span></td>'; }
+      else { tbody+=\`<td>\${val}</td>\`; }
+    });
+    tbody+='</tr>';
+  });
+  tbody+='</tbody>';
+  document.getElementById('comp-table').innerHTML=thead+tbody;
+  document.getElementById('comp-cta-row').innerHTML=outils.map(t=>{
+    const logoEl = t.favicon ? \`<img src="\${t.favicon}" alt="">\` : '';
+    return \`<a href="\${t.lien_affilie}" target="_blank" rel="noopener" class="comp-cta-btn">\${logoEl} Essayer \${t.name} →</a>\`;
+  }).join('');
+  result.classList.add('show');
+  result.scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+function resetComparaison(){
+  selected=[]; renderPicker(); renderChips();
+  document.getElementById('comp-result').classList.remove('show');
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+document.getElementById('comp-search-input').addEventListener('input',applyFilters);
+initCats(); applyFilters();
+</script>
 ${sharedJS()}
 </body>
 </html>`;
@@ -1095,6 +1267,7 @@ function generateComparaison(comp, tools, allComparaisons) {
   <h1>${a.nom} <span class="vs-sep">vs</span> ${b.nom}</h1>
   <p class="cp-resume">${comp.resume || ''}</p>
 </section>`;
+
 
   // ── Header outils ──
   const toolsHeaderHTML = `<div class="cp-tools-header">
@@ -1581,9 +1754,12 @@ async function main() {
   const totalPages = Math.max(1, Math.ceil(comparaisonsTriees.length / COMPARATEUR_PAR_PAGE));
 
   // Détection de changement au niveau de la liste : le run a-t-il généré,
-  // supprimé, ou fait cascader au moins une comparaison ? Si oui, la liste
-  // (qui agrège toutes les comparaisons) doit être reconstruite.
-  const listeAChange = compGenerated > 0 || removedComparaisons > 0;
+  // supprimé, ou fait cascader au moins une comparaison ? Ou bien un outil
+  // a-t-il changé (TOOLS_DATA, embarqué dans cette page pour le picker
+  // interactif, dépend de TOUS les outils FR, pas seulement ceux référencés
+  // par une comparaison) ? Si l'une de ces conditions est vraie, la page
+  // doit être reconstruite.
+  const listeAChange = compGenerated > 0 || removedComparaisons > 0 || changedToolIds.size > 0;
   const indexExists = fs.existsSync(path.join('comparateur', 'index.html'));
 
   let listPagesGenerated = 0;
