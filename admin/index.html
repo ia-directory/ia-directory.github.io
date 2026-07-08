@@ -335,6 +335,13 @@
                   <option value="true">Oui</option>
                 </select>
               </div>
+              <div>
+                <label>App mobile</label>
+                <select id="o-mobile">
+                  <option value="false" selected>Non</option>
+                  <option value="true">Oui</option>
+                </select>
+              </div>
             </div>
           </fieldset>
 
@@ -917,7 +924,7 @@ Support français|oui|non|bool"></textarea>
 </div>
 
 <script type="module">
-  import { auth, db, onAuthStateChanged, collection, getDocs, doc, setDoc, deleteDoc }
+  import { auth, db, onAuthStateChanged, collection, getDocs, doc, setDoc, deleteDoc, serverTimestamp }
     from '../js/firebase-config.js';
 
   const ADMIN_UID = "e9Hvx3qHcIOlTPkTnqCWRAVnt042";
@@ -1173,6 +1180,7 @@ Support français|oui|non|bool"></textarea>
     setVal('o-url-tarifs', tool.url_tarifs);
     setVal('o-interface-fr', tool.interface_fr ? 'true' : 'false');
     setVal('o-api', tool.api ? 'true' : 'false');
+    setVal('o-mobile', tool.mobile ? 'true' : 'false');
 
     setVal('o-presentation', tool.presentation);
     setVal('o-meta-desc', tool.meta_description);
@@ -1285,6 +1293,7 @@ Support français|oui|non|bool"></textarea>
       const urlTarifs    = document.getElementById('o-url-tarifs').value.trim();
       const interfaceFr  = document.getElementById('o-interface-fr').value === 'true';
       const api          = document.getElementById('o-api').value === 'true';
+      const mobile       = document.getElementById('o-mobile').value === 'true';
       const presentation = document.getElementById('o-presentation').value.trim();
       const metaDesc     = document.getElementById('o-meta-desc').value.trim();
       const screenshot   = document.getElementById('o-screenshot').value.trim();
@@ -1327,7 +1336,7 @@ Support français|oui|non|bool"></textarea>
           plan,langue:'en',traductions:{fr:mainId},ideal_pour:document.getElementById('o-ideal-en').value.trim(),
           fonctionnalites:fonctionnalitesEn,faq:faqEn,presentation:presentationEn,
           meta_description:metaDescEn,maker,plateformes,url_tarifs:urlTarifs,
-          interface_fr:interfaceFr,api,stats,tutoriels,alternatives,screenshot_url:screenshot,
+          interface_fr:interfaceFr,api,mobile,stats,tutoriels,alternatives,screenshot_url:screenshot,
           generer_fiche:genererFiche,slug_articles:slugArticles||null});
       }
       const nameEs=document.getElementById('o-name-es').value.trim();
@@ -1340,7 +1349,7 @@ Support français|oui|non|bool"></textarea>
           plan,langue:'es',traductions:{fr:mainId},ideal_pour:document.getElementById('o-ideal-es').value.trim(),
           fonctionnalites:fonctionnalitesEs,faq:faqEs,presentation:presentationEs,
           meta_description:metaDescEs,maker,plateformes,url_tarifs:urlTarifs,
-          interface_fr:interfaceFr,api,stats,tutoriels,alternatives,screenshot_url:screenshot,
+          interface_fr:interfaceFr,api,mobile,stats,tutoriels,alternatives,screenshot_url:screenshot,
           generer_fiche:genererFiche,slug_articles:slugArticles||null});
       }
 
@@ -1348,7 +1357,7 @@ Support français|oui|non|bool"></textarea>
         price,rating:editingTool?(editingTool.rating||0):0,url,tags,page:`tools/${folder}/${slug}.html`,
         plan,langue:'fr',essai_gratuit:essai,duree_essai:duree,ideal_pour:idealFr,traductions,
         points_forts:pointsForts,limite,alternatives,maker,plateformes,url_tarifs:urlTarifs,
-        interface_fr:interfaceFr,api,presentation,meta_description:metaDesc,
+        interface_fr:interfaceFr,api,mobile,presentation,meta_description:metaDesc,
         screenshot_url:screenshot,stats,fonctionnalites,faq,tutoriels,
         generer_fiche:genererFiche,slug_articles:slugArticles||null});
 
@@ -1357,7 +1366,7 @@ Support français|oui|non|bool"></textarea>
         if (existingEs && !(nameEs && descEs)) await deleteDoc(doc(db,'outils',String(existingEs.id)));
       }
 
-      for (const d of toWrite) await setDoc(doc(db,'outils',String(d.id)),d);
+      for (const d of toWrite) await setDoc(doc(db,'outils',String(d.id)),{...d, updatedAt: serverTimestamp()});
       invalidateToolsCache();
 
       const action = editingTool ? 'mis à jour' : 'créé';
@@ -1411,6 +1420,7 @@ Support français|oui|non|bool"></textarea>
         docData.thumb=`https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
       }
 
+      docData.updatedAt = serverTimestamp();
       await setDoc(doc(db,'galerie',String(nextId)),docData);
       showMsg('warn-galerie','ok-galerie','ok',`✓ Œuvre ajoutée (ID ${nextId}) — visible immédiatement dans la galerie.`);
       e.target.reset();
@@ -1506,7 +1516,8 @@ Support français|oui|non|bool"></textarea>
         id: nextId, nom, emoji, favicon, categorie, badge,
         badge_label: badgeLabel, offre, description: desc,
         prix_barre: prixBarre, prix_offre: prixOffre,
-        lien, permanent, highlight, expiration
+        lien, permanent, highlight, expiration,
+        updatedAt: serverTimestamp()
       });
 
       showMsg('warn-deals','ok-deals','ok',`✓ Deal créé (ID ${nextId}) — visible immédiatement sur deals/.`);
@@ -2071,7 +2082,7 @@ Support français|oui|non|bool"></textarea>
         if (existingEs && !(titleEs && excerptEs && corpsEs)) await deleteDoc(doc(db,'articles',String(existingEs.id)));
       }
 
-      for (const d of toWrite) await setDoc(doc(db,'articles',String(d.id)), d);
+      for (const d of toWrite) await setDoc(doc(db,'articles',String(d.id)), {...d, updatedAt: serverTimestamp()});
       invalidateArticlesCache();
 
       const action = editingArticle ? 'mis à jour' : 'publié';
@@ -2421,6 +2432,7 @@ Support français|oui|non|bool"></textarea>
         faq: parseFAQ(document.getElementById('cp-faq').value),
       };
 
+      docData.updatedAt = serverTimestamp();
       await setDoc(doc(db, 'comparaisons', String(id)), docData);
       invalidateComparaisonsCache();
 
