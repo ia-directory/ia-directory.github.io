@@ -1,0 +1,923 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Soumettre un outil IA — Albexia</title>
+  <meta name="description" content="Soumettez votre outil IA sur Albexia et bénéficiez d'un listing premium gratuit pendant notre phase de lancement." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="/css/style.css">
+  
+  <style>
+    :root {
+      --pink: #ff6b9d;
+      --pink-light: #ff8fb5;
+      --pink-glow: rgba(255, 107, 157, 0.15);
+       --bg:           #0a0a0f;
+      --bg2:          #12121a;
+      --bg3:          #1a1a26;
+         --off-white: #f0f0f5;
+      --muted: #8888a0;
+      --border: rgba(255,107,157,0.18);
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--off-white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 16px;
+      line-height: 1.6;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+      /* ── HERO ── */
+    .hero {
+      padding: 5rem 2.5rem 3rem;
+      max-width: 860px;
+      margin: 0 auto;
+      text-align: center;
+      position: relative;
+    }
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 50%;
+      transform: translateX(-50%);
+      width: 600px; height: 300px;
+      background: radial-gradient(ellipse at center, rgba(255,107,157,0.12) 0%, transparent 70%);
+      pointer-events: none;
+    }
+    .badge-lancement {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: rgba(255,107,157,0.1);
+      border: 1px solid var(--border);
+      border-radius: 100px;
+      padding: 0.4rem 1rem;
+      font-size: 0.8rem;
+      color: var(--pink-light);
+      font-weight: 500;
+      margin-bottom: 1.8rem;
+      animation: fadeUp 0.6s ease both;
+    }
+    .badge-lancement::before {
+      content: '';
+      width: 7px; height: 7px;
+      background: #4ade80;
+      border-radius: 50%;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.3; }
+    }
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.2rem);
+      font-weight: 800;
+      line-height: 1.1;
+      letter-spacing: -0.03em;
+      margin-bottom: 1.2rem;
+      animation: fadeUp 0.6s 0.1s ease both;
+    }
+    h1 em {
+      font-style: normal;
+      color: var(--pink);
+    }
+    .hero-sub {
+      font-size: 1.1rem;
+      color: var(--muted);
+      max-width: 560px;
+      margin: 0 auto 1.5rem;
+      font-weight: 300;
+      animation: fadeUp 0.6s 0.2s ease both;
+    }
+    .deadline-box {
+      display: inline-block;
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 12px;
+      padding: 0.9rem 1.6rem;
+      font-size: 0.88rem;
+      color: var(--off-white);
+      animation: fadeUp 0.6s 0.3s ease both;
+    }
+    .deadline-box strong { color: var(--pink); }
+
+    /* ── SECTION TITLES ── */
+    .section {
+      max-width: 860px;
+      margin: 0 auto;
+      padding: 3rem 2.5rem;
+    }
+    .section-label {
+      font-family: 'Syne', sans-serif;
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0.15em;
+      text-transform: uppercase;
+      color: var(--pink);
+      margin-bottom: 0.6rem;
+    }
+    .section-title {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+      margin-bottom: 2rem;
+    }
+
+    /* ── TABLE COMPARATIF ── */
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 16px;
+      border: 1px solid var(--border);
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    thead {
+      background: var(--bg2);
+    }
+    thead th {
+      padding: 1rem 1.4rem;
+      text-align: left;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 0.85rem;
+    }
+    thead th:nth-child(2) { color: var(--pink); }
+    thead th:nth-child(3) { color: var(--muted); }
+    tbody tr {
+      border-top: 1px solid rgba(255,255,255,0.05);
+      transition: background 0.15s;
+    }
+    tbody tr:hover { background: rgba(255,107,157,0.04); }
+    tbody td {
+      padding: 0.9rem 1.4rem;
+      vertical-align: middle;
+    }
+    tbody td:first-child { color: var(--muted); font-size: 0.88rem; }
+    .check { color: #4ade80; font-size: 1.1rem; }
+    .cross { color: #ff4d6d; font-size: 1.1rem; }
+    .tag-vip {
+      background: rgba(255,107,157,0.12);
+      color: var(--pink-light);
+      border-radius: 100px;
+      padding: 0.15rem 0.7rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 0.4rem;
+    }
+    .tag-always {
+      background: rgba(74,222,128,0.1);
+      color: #4ade80;
+      border-radius: 100px;
+      padding: 0.15rem 0.7rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-left: 0.4rem;
+    }
+
+    /* ── STEPS ── */
+    .steps {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 1.2rem;
+    }
+    .step {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.6rem;
+      position: relative;
+      overflow: hidden;
+      transition: border-color 0.2s, transform 0.2s;
+    }
+    .step:hover {
+      border-color: var(--pink);
+      transform: translateY(-3px);
+    }
+    .step-num {
+      font-family: 'Syne', sans-serif;
+      font-size: 2.5rem;
+      font-weight: 800;
+      color: rgba(255,107,157,0.12);
+      line-height: 1;
+      margin-bottom: 0.8rem;
+    }
+    .step h3 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .step p { font-size: 0.85rem; color: var(--muted); }
+
+    /* ── FORMULAIRE ── */
+    .form-wrap {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.5rem;
+    }
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1.2rem;
+    }
+    .form-group {
+      display: flex;
+      flex-direction: column;
+      gap: 0.45rem;
+    }
+    .form-group.full { grid-column: 1 / -1; }
+    label {
+      font-size: 0.82rem;
+      font-weight: 500;
+      color: var(--muted);
+      letter-spacing: 0.02em;
+    }
+    label span { color: var(--pink); }
+    input, select, textarea {
+      background: var(--bg3);
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 10px;
+      color: var(--off-white);
+      font-family: 'DM Sans', sans-serif;
+      font-size: 0.92rem;
+      padding: 0.75rem 1rem;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+      width: 100%;
+    }
+    input::placeholder, textarea::placeholder { color: rgba(136,136,160,0.5); }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--pink);
+      box-shadow: 0 0 0 3px rgba(255,107,157,0.1);
+    }
+    select option { background: var(--bg3); }
+    textarea { resize: vertical; min-height: 110px; }
+    .char-count {
+      font-size: 0.75rem;
+      color: var(--muted);
+      text-align: right;
+    }
+    .form-note {
+      font-size: 0.8rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+    .btn-submit {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.6rem;
+      background: var(--pink);
+      color: #fff;
+      font-family: 'Syne', sans-serif;
+      font-weight: 700;
+      font-size: 1rem;
+      border: none;
+      border-radius: 12px;
+      padding: 0.9rem 2.2rem;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+      margin-top: 0.5rem;
+    }
+    .btn-submit:hover {
+      background: var(--pink-light);
+      transform: translateY(-2px);
+      box-shadow: 0 8px 24px rgba(255,107,157,0.3);
+    }
+    .btn-submit:active { transform: translateY(0); }
+
+    /* ── SUPPORT SECTION ── */
+    .support-strip {
+      max-width: 860px;
+      margin: 0 auto 4rem;
+      padding: 0 2.5rem;
+    }
+    .support-card {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 1.8rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1.5rem;
+      flex-wrap: wrap;
+    }
+    .support-text p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      max-width: 480px;
+    }
+    .support-text strong {
+      display: block;
+      font-family: 'Syne', sans-serif;
+      font-size: 1rem;
+      color: var(--off-white);
+      margin-bottom: 0.3rem;
+    }
+    .btn-support {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: transparent;
+      border: 1px solid var(--border);
+      color: var(--off-white);
+      font-family: 'Syne', sans-serif;
+      font-weight: 600;
+      font-size: 0.88rem;
+      border-radius: 10px;
+      padding: 0.7rem 1.4rem;
+      cursor: pointer;
+      transition: border-color 0.2s, color 0.2s;
+      white-space: nowrap;
+    }
+    .btn-support:hover { border-color: var(--pink); color: var(--pink); }
+
+    /* ── MODAL ── */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.75);
+      backdrop-filter: blur(6px);
+      z-index: 200;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: var(--bg2);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 2.2rem;
+      max-width: 440px;
+      width: 100%;
+      position: relative;
+      animation: fadeUp 0.3s ease;
+    }
+    .modal-close {
+      position: absolute;
+      top: 1rem; right: 1rem;
+      background: none;
+      border: none;
+      color: var(--muted);
+      font-size: 1.3rem;
+      cursor: pointer;
+      line-height: 1;
+      transition: color 0.2s;
+    }
+    .modal-close:hover { color: var(--off-white); }
+    .modal h2 {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.3rem;
+      font-weight: 700;
+      margin-bottom: 0.4rem;
+    }
+    .modal p { font-size: 0.85rem; color: var(--muted); margin-bottom: 1.4rem; }
+    .qr-placeholder {
+      background: #fff;
+      border-radius: 12px;
+      width: 140px; height: 140px;
+      margin: 0 auto 1.4rem;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.7rem;
+      color: #333;
+      text-align: center;
+      padding: 0.5rem;
+    }
+    .address-box {
+      background: var(--bg3);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 0.9rem 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 0.8rem;
+      margin-bottom: 0.8rem;
+    }
+    .address-box code {
+      font-family: monospace;
+      font-size: 0.75rem;
+      color: var(--pink-light);
+      word-break: break-all;
+    }
+    .btn-copy {
+      background: none;
+      border: 1px solid var(--border);
+      color: var(--muted);
+      border-radius: 7px;
+      padding: 0.35rem 0.7rem;
+      font-size: 0.75rem;
+      cursor: pointer;
+      white-space: nowrap;
+      transition: border-color 0.2s, color 0.2s;
+      flex-shrink: 0;
+    }
+    .btn-copy:hover { border-color: var(--pink); color: var(--pink); }
+    .network-tag {
+      display: inline-block;
+      background: rgba(255,107,157,0.1);
+      color: var(--pink-light);
+      border-radius: 100px;
+      padding: 0.2rem 0.7rem;
+      font-size: 0.75rem;
+      font-weight: 600;
+      margin-bottom: 1rem;
+    }
+    .modal-note {
+      font-size: 0.78rem;
+      color: var(--muted);
+      text-align: center;
+      font-style: italic;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      border-top: 1px solid var(--border);
+      text-align: center;
+      padding: 1.5rem;
+      font-size: 0.8rem;
+      color: var(--muted);
+    }
+    footer a { color: var(--muted); text-decoration: none; }
+    footer a:hover { color: var(--pink); }
+
+    /* --- CORRECTIF DE BORD À BORD (MOBILE) --- */
+
+/* 1. On empêche le corps de la page de glisser horizontalement */
+html, body {
+  overflow-x: hidden;
+  width: 100%;
+  position: relative;
+}
+
+/* 2. On force toutes les sections à respecter la largeur du téléphone */
+.hero, .section, .support-strip, nav {
+  max-width: 100% !important;
+  box-sizing: border-box !important;
+}
+
+/* 3. On neutralise le gradient lumineux qui dépasse souvent à droite */
+.hero::before {
+  max-width: 100vw !important;
+}
+
+@media (max-width: 768px) {
+  /* 4. On force le tableau à rester dans sa boîte pour ne pas pousser les murs */
+  .table-wrap {
+    display: block !important;
+    width: 100% !important;
+    overflow-x: auto !important;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* 5. On passe le formulaire en une seule colonne pour qu'il soit bien égal partout */
+  .form-grid {
+    grid-template-columns: 1fr !important;
+  }
+
+  /* 6. On aligne les marges pour que ce soit symétrique */
+  .hero, .section {
+    padding-left: 1.5rem !important;
+    padding-right: 1.5rem !important;
+  }
+}
+  </style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav>
+   <div class="logo">
+      <svg viewBox="0 0 130 36" xmlns="http://www.w3.org/2000/svg" height="32" aria-label="Albexia">
+  <style>
+    /* Animation de construction pour les polygones */
+    .poly-part {
+      animation: buildIn 1.2s ease-out forwards;
+      opacity: 0;
+    }
+
+    /* Animation d'apparition pour le texte */
+    .logo-text {
+      animation: fadeIn 1s ease-out 0.8s forwards; /* Démarre après 0.8s */
+      opacity: 0;
+    }
+
+    @keyframes buildIn {
+      0% {
+        opacity: 0;
+        transform: translateY(10px) scale(0.8);
+      }
+      100% {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+
+    @keyframes fadeIn {
+      0% {
+        opacity: 0;
+        transform: translateX(-5px);
+      }
+      100% {
+        opacity: 1;
+        transform: translateX(0);
+      }
+    }
+
+    /* Délais spécifiques pour chaque pièce pour un effet "construction" */
+    .part-1 { animation-delay: 0.1s; }
+    .part-2 { animation-delay: 0.3s; }
+    .part-3 { animation-delay: 0.5s; }
+  </style>
+
+  <polygon class="poly-part part-1" points="2,10 14,32 10,32" fill="#ff6b9d"/>
+  
+  <polygon class="poly-part part-2" points="14,2 18,12 10,12" fill="#ff6b9d" opacity="0.6"/>
+  
+  <polygon class="poly-part part-3" points="26,10 14,32 18,32" fill="#ff6b9d"/>
+
+  <text class="logo-text" x="36" y="26" font-family="Georgia, serif" font-size="20" font-weight="700" fill="#f0f0f5" letter-spacing="-0.5">
+  Albe<tspan fill="#ff6b9d">x</tspan>ia
+</text>
+      </svg>
+   </div>
+     
+    <div class="nav-links">
+    <button class="nav-link" onclick="window.location.href='/index.html'">Accueil</button>
+    <button class="nav-link" onclick="window.location.href='/index.html#tools'">Outils</button>
+    <button class="nav-link" onclick="window.location.href='/index.html#blog'">Blog</button>
+    </div>
+
+  <!-- ═══════════════════════════════════════════════════
+     NOUVEAU MENU KEBAB — Albexia
+     Remplace l'ancien kebab-wrap dans toutes les pages.
+     Top 3 des incontournables + lien vers le Hub complet.
+     ═══════════════════════════════════════════════════ -->
+
+<div class="kebab-wrap" id="kebab-wrap">
+  <button class="kebab-btn" id="kebab-btn" aria-label="Plus de pages" aria-expanded="false">
+    <span></span><span></span><span></span>
+  </button>
+
+  <div class="kebab-menu" id="kebab-menu" role="menu">
+
+    <!-- Top 3 des pages incontournables -->
+    <div class="kebab-label">Incontournables</div>
+
+    <a href="/glossaire.html" class="kebab-item" role="menuitem">
+      <span class="kebab-ico">📖</span>
+      <div>
+        <div class="kebab-item-name">Glossaire IA</div>
+        <div class="kebab-item-sub">Tous les termes en français</div>
+      </div>
+    </a>
+
+    <a href="/comparateur.html" class="kebab-item" role="menuitem">
+      <span class="kebab-ico">⚖️</span>
+      <div>
+        <div class="kebab-item-name">Comparateur</div>
+        <div class="kebab-item-sub">Comparer les outils côte à côte</div>
+      </div>
+    </a>
+
+    <a href="/pages/deals.html" class="kebab-item" role="menuitem">
+      <span class="kebab-ico">🔥</span>
+      <div>
+        <div class="kebab-item-name">Deals &amp; Promos</div>
+        <div class="kebab-item-sub">Essais gratuits · Offres exclusives</div>
+      </div>
+    </a>
+
+    <!-- Séparateur -->
+    <div class="kebab-divider"></div>
+
+    <!-- Lien Hub complet -->
+    <a href="/hub.html" class="kebab-item kebab-hub-link" role="menuitem">
+      <span class="kebab-ico">📂</span>
+      <div>
+        <div class="kebab-item-name">Voir toutes les sections</div>
+        <div class="kebab-item-sub">Carte complète d'Albexia →</div>
+      </div>
+    </a>
+
+  </div>
+</div>
+
+</nav>
+
+
+<!-- HERO -->
+<section class="hero">
+  <div class="badge-lancement">Phase de lancement — Listing premium gratuit</div>
+  <h1>Votre outil mérite d'être vu par toute la <em>francophonie</em></h1>
+  <p class="hero-sub">Les créateurs qui nous rejoignent bénéficient automatiquement d'un listing premium — badge vérifié, fiche complète, mise en avant éditoriale.</p>
+  <div class="deadline-box">
+    🟢 Soumissions gratuites jusqu'au <strong>31 mars 2026</strong> ou <strong>10 000 visiteurs/mois</strong> — selon la première échéance atteinte.
+  </div>
+</section>
+
+<!-- COMPARATIF -->
+<section class="section">
+  <div class="section-label">Pourquoi soumettre ?</div>
+  <div class="section-title">Deux niveaux de listing, une seule règle</div>
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Avantage</th>
+          <th>Soumis par le créateur <span class="tag-vip">VIP</span></th>
+          <th>Découvert par Albexia</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Badge Partenaire Albexia</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+          <td>Fiche complète (description longue, captures, vidéo)</td>
+          <td><span class="check">✓</span></td>
+          <td>Basique</td>
+        </tr>
+        <tr>
+          <td>Position prioritaire dans la catégorie</td>
+          <td><span class="check">✓</span></td>
+          <td>Standard</td>
+        </tr>
+        <tr>
+          <td>Mise en avant éditoriale</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+          <td>Mention newsletter & réseaux sociaux</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+          <td>Article de blog dédié (selon pertinence)</td>
+          <td><span class="check">✓</span></td>
+          <td><span class="cross">✗</span></td>
+        </tr>
+        <tr>
+          <td>Gratuit</td>
+          <td><span class="check">✓</span> <span class="tag-vip">Phase lancement</span></td>
+          <td><span class="check">✓</span> <span class="tag-always">Toujours</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<!-- STEPS -->
+<section class="section" style="padding-top:0;">
+  <div class="section-label">Processus</div>
+  <div class="section-title">Comment ça marche</div>
+  <div class="steps">
+    <div class="step">
+      <div class="step-num">01</div>
+      <h3>Remplissez le formulaire</h3>
+      <p>Décrivez votre outil en quelques minutes. Captures et vidéo optionnelles.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">02</div>
+      <h3>Notre équipe examine</h3>
+      <p>Chaque soumission est relue sous 48h. Nous vous contactons si besoin.</p>
+    </div>
+    <div class="step">
+      <div class="step-num">03</div>
+      <h3>Publication avec badge</h3>
+      <p>Votre fiche est publiée avec le badge Partenaire Albexia et toutes les options premium.</p>
+    </div>
+  </div>
+</section>
+
+<!-- FORMULAIRE -->
+<section class="section" style="padding-top:0;">
+  <div class="section-label">Soumettre</div>
+  <div class="section-title">Votre outil IA</div>
+  <div class="form-wrap">
+    <form id="form-soumettre-outil">
+      <div class="form-grid">
+
+        <div class="form-group">
+          <label for="tool-name">Nom de l'outil <span>*</span></label>
+          <input type="text" id="tool-name" name="nom_outil" placeholder="ex. ChatGPT, Midjourney…" required />
+        </div>
+
+        <div class="form-group">
+          <label for="tool-url">URL officielle <span>*</span></label>
+          <input type="url" id="tool-url" name="url_outil" placeholder="https://…" required />
+        </div>
+
+        <div class="form-group">
+          <label for="tool-cat">Catégorie <span>*</span></label>
+          <select id="tool-cat" name="categorie" required>
+            <option value="" disabled selected>Choisir une catégorie</option>
+            <option>Rédaction & Contenu</option>
+            <option>Image & Design</option>
+            <option>Vidéo & Audio</option>
+            <option>Code & Développement</option>
+            <option>Productivité</option>
+            <option>Marketing & SEO</option>
+            <option>Éducation</option>
+            <option>Santé & Bien-être</option>
+            <option>Finance & Business</option>
+            <option>Autre</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="tool-price">Modèle de prix</label>
+          <select id="tool-price" name="modele_prix">
+            <option value="" disabled selected>Sélectionner</option>
+            <option>Gratuit</option>
+            <option>Freemium</option>
+            <option>Payant</option>
+            <option>Essai gratuit</option>
+          </select>
+        </div>
+
+        <div class="form-group full">
+          <label for="tool-tier">Formule de listing souhaitée <span>*</span></label>
+          <select id="tool-tier" name="tier_demande" required>
+            <option value="gratuit" selected>Gratuit — Standard</option>
+            <option value="starter">Starter</option>
+            <option value="featured">Featured — mise en avant éditoriale</option>
+          </select>
+        </div>
+
+        <div class="form-group full">
+          <label for="tool-desc">Description courte <span>*</span> <span style="font-weight:300;">(150 mots max)</span></label>
+          <textarea id="tool-desc" name="description" placeholder="Décrivez votre outil : à quoi il sert, pour qui, ce qui le rend unique…" maxlength="900" oninput="updateCount(this)" required></textarea>
+          <div class="char-count"><span id="char-count">0</span> / 900 caractères</div>
+        </div>
+
+        <div class="form-group full">
+          <label for="tool-email">Votre email <span>*</span></label>
+          <input type="email" id="tool-email" name="email_contact" placeholder="contact@votreoutil.com" required />
+        </div>
+
+        <div class="form-group full">
+          <label for="tool-extras">Informations complémentaires <span style="font-weight:300;">(optionnel)</span></label>
+          <textarea id="tool-extras" name="extras" placeholder="Lien vers captures d'écran, vidéo de démo, programme d'affiliation…" style="min-height:80px;"></textarea>
+        </div>
+
+      </div>
+
+      <div style="margin-top:1.5rem; display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:1rem;">
+        <p class="form-note">En soumettant, vous acceptez que votre outil soit évalué par l'équipe Albexia. Aucune publication sans validation.</p>
+        <button type="submit" class="btn-submit">
+          <svg width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z"/></svg>
+          Soumettre mon outil
+        </button>
+      </div>
+    </form>
+  </div>
+</section>
+
+<!-- SUPPORT -->
+<div class="support-strip">
+  <div class="support-card">
+    <div class="support-text">
+      <strong>Soutenir Albexia</strong>
+      <p>Albexia est un projet indépendant construit pour la communauté francophone. Si cet annuaire vous est utile, vous pouvez soutenir son développement via un don en crypto.</p>
+    </div>
+    <button class="btn-support" onclick="document.getElementById('modal-don').classList.add('open')">
+      ☕ Soutenir Albexia
+    </button>
+  </div>
+</div>
+
+<!-- MODAL DON -->
+<div class="modal-overlay" id="modal-don" onclick="closeModal(event)">
+  <div class="modal">
+    <button class="modal-close" onclick="document.getElementById('modal-don').classList.remove('open')">✕</button>
+    <h2>Soutenir Albexia</h2>
+    <p>Chaque contribution, petite ou grande, aide à maintenir et développer cet annuaire pour toute la francophonie.</p>
+    <div class="network-tag">Réseau TRC20 — USDT</div>
+    <div class="qr-placeholder">
+      <img src="/medias/images/qr-code-usdt.png" alt="QR Code USDT TRC20" width="120" height="120" />
+      </div>
+    <div class="address-box">
+      <code id="crypto-address">TUPPmBVXPTvMBHMBtKzuNP6Kz6HBnqkZJJ</code>
+      <button class="btn-copy" onclick="copyAddress()">Copier</button>
+    </div>
+    <p class="modal-note">Aucun montant minimum. Chaque contribution compte. Merci. 🙏</p>
+  </div>
+</div>
+
+<!-- FOOTER -->
+<footer><div style="text-align:center;padding:24px;font-size:13px;color:#4a4a6a;border-top:1px solid rgba(255,255,255,0.07)">&copy; 2025-2026 <a href="/index.html" style="color:#a8a3ff;text-decoration:none">Albexia</a> — <a href="/mentions-legales.html" style="color:#7a7a9a;text-decoration:none">Mentions légales</a> · <a href="/politique-confidentialite.html" style="color:#7a7a9a;text-decoration:none">Confidentialité</a> · <a href="/contact.html" style="color:#7a7a9a;text-decoration:none">Contact</a></div></footer>
+
+  <script type="module">
+  import { db, collection, addDoc, serverTimestamp } from '/js/firebase-config.js';
+
+  // Kebab toggle
+  const kebabBtn = document.getElementById('kebab-btn');
+  const kebabMenu = document.getElementById('kebab-menu');
+  if (kebabBtn && kebabMenu) {
+    kebabBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const open = kebabMenu.classList.toggle('open');
+      kebabBtn.setAttribute('aria-expanded', open);
+    });
+    document.addEventListener('click', () => {
+      kebabMenu.classList.remove('open');
+      kebabBtn.setAttribute('aria-expanded', 'false');
+    });
+    kebabMenu.addEventListener('click', e => e.stopPropagation());
+  }
+        
+
+  function updateCount(el) {
+    document.getElementById('char-count').textContent = el.value.length;
+  }
+
+  function copyAddress() {
+    const addr = document.getElementById('crypto-address').textContent;
+    navigator.clipboard.writeText(addr).then(() => {
+      const btn = document.querySelector('.btn-copy');
+      btn.textContent = 'Copié ✓';
+      btn.style.color = '#4ade80';
+      btn.style.borderColor = '#4ade80';
+      setTimeout(() => {
+        btn.textContent = 'Copier';
+        btn.style.color = '';
+        btn.style.borderColor = '';
+      }, 2000);
+    });
+  }
+
+  function closeModal(e) {
+    if (e.target === document.getElementById('modal-don')) {
+      document.getElementById('modal-don').classList.remove('open');
+    }
+  }
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') document.getElementById('modal-don').classList.remove('open');
+  });
+
+  // ── Soumission Firebase (collection "soumissions") ──
+  document.getElementById('form-soumettre-outil')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    const btn = this.querySelector('.btn-submit');
+    const originalHTML = btn.innerHTML;
+    btn.disabled = true;
+    btn.innerHTML = '<span>Envoi en cours…</span>';
+
+    const data = {
+      nom_outil:     document.getElementById('tool-name').value.trim(),
+      url_outil:     document.getElementById('tool-url').value.trim(),
+      categorie:     document.getElementById('tool-cat').value,
+      modele_prix:   document.getElementById('tool-price').value || '',
+      tier_demande:  document.getElementById('tool-tier').value,
+      description:   document.getElementById('tool-desc').value.trim(),
+      email_contact: document.getElementById('tool-email').value.trim(),
+      extras:        document.getElementById('tool-extras').value.trim(),
+      status: 'pending',
+      created_at: serverTimestamp()
+    };
+
+    try {
+      await addDoc(collection(db, 'soumissions'), data);
+      this.innerHTML = `
+        <div style="text-align:center;padding:2rem 0;">
+          <div style="font-size:3rem;margin-bottom:1rem;">✅</div>
+          <h3 style="color:#00d4aa;margin-bottom:.5rem;">Soumission envoyée !</h3>
+          <p style="color:#a8a3ff;">Votre outil sera examiné par l'équipe Albexia sous 48h.</p>
+        </div>`;
+    } catch (err) {
+      btn.disabled = false;
+      btn.innerHTML = originalHTML;
+      alert('Erreur lors de l\'envoi. Veuillez réessayer. (' + err.message + ')');
+    }
+  });
+
+</script>
+</body>
+</html>
