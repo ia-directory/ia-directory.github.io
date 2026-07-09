@@ -127,6 +127,26 @@
     .img-modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);
       z-index:1000;align-items:center;justify-content:center;padding:20px;}
     .img-modal-overlay.open{display:flex;}
+    .soumission-card{background:var(--bg2);border:1px solid var(--border);border-radius:14px;
+      padding:16px 18px;margin-bottom:12px;}
+    .soumission-card.featured{border-color:rgba(255,107,157,0.35);}
+    .soumission-top{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:10px;}
+    .soumission-name{font-family:'Syne',sans-serif;font-weight:700;font-size:15px;letter-spacing:-0.02em;}
+    .soumission-meta{font-size:12px;color:var(--text-muted);margin-top:3px;}
+    .soumission-meta a{color:var(--accent3);text-decoration:none;}
+    .soumission-tier{font-size:10px;font-weight:700;padding:3px 9px;border-radius:20px;white-space:nowrap;
+      text-transform:uppercase;letter-spacing:0.03em;}
+    .soumission-tier.gratuit{background:rgba(122,122,154,0.15);color:var(--text-muted);}
+    .soumission-tier.starter{background:rgba(108,99,255,0.15);color:#a8a3ff;}
+    .soumission-tier.featured{background:rgba(255,107,157,0.15);color:var(--accent2);}
+    .soumission-desc{font-size:13px;color:#c8c8d0;line-height:1.5;margin-bottom:10px;}
+    .soumission-extras{font-size:12px;color:var(--text-dim);margin-bottom:10px;font-style:italic;}
+    .soumission-actions{display:flex;gap:8px;flex-wrap:wrap;}
+    .soumission-actions button{font-family:'DM Sans',sans-serif;font-size:13px;font-weight:600;
+      border-radius:8px;padding:8px 14px;cursor:pointer;transition:opacity .2s;}
+    .btn-traiter{background:var(--accent);color:#fff;border:none;}
+    .btn-rejeter{background:rgba(255,80,80,0.12);color:#ff5050;border:1px solid rgba(255,80,80,0.35);}
+    .soumission-date{font-size:11px;color:var(--text-dim);}
     .img-modal{background:var(--bg2);border:1px solid var(--border-hover);border-radius:14px;
       padding:20px;max-width:420px;width:100%;}
     .img-modal h3{font-family:'Syne',sans-serif;font-size:15px;margin-bottom:12px;}
@@ -151,6 +171,7 @@
 <div id="app">
   <div class="tabs">
     <button class="tab-btn active" data-tab="outils">🛠 Outils</button>
+    <button class="tab-btn" data-tab="soumissions">📥 Soumissions <span id="soumissions-count-badge"></span></button>
     <button class="tab-btn" data-tab="galerie">🖼 Galerie</button>
     <button class="tab-btn" data-tab="deals">🏷 Deals</button>
     <button class="tab-btn" data-tab="articles">📝 Articles</button>
@@ -376,6 +397,17 @@
         </div>
       </div>
     </div>
+  </div>
+
+  <div class="tab-panel" id="tab-soumissions">
+    <div class="msg msg-warn" id="warn-soumissions"></div>
+    <div class="msg msg-ok"   id="ok-soumissions"></div>
+
+    <div id="soumissions-empty" style="display:none;color:var(--text-dim);font-size:14px;padding:24px 0;text-align:center;">
+      Aucune soumission en attente pour l'instant.
+    </div>
+
+    <div id="soumissions-list"></div>
   </div>
 
   <div class="tab-panel" id="tab-galerie">
@@ -924,8 +956,8 @@ Support français|oui|non|bool"></textarea>
 </div>
 
 <script type="module">
-  import { auth, db, onAuthStateChanged, collection, getDocs, doc, setDoc, deleteDoc, serverTimestamp }
-    from '../js/firebase-config.js';
+  import { auth, db, onAuthStateChanged, collection, getDocs, doc, setDoc, addDoc, deleteDoc, updateDoc, query, where, orderBy, serverTimestamp }
+    from '/js/firebase-config.js';
 
   const ADMIN_UID = "e9Hvx3qHcIOlTPkTnqCWRAVnt042";
 
@@ -934,6 +966,7 @@ Support français|oui|non|bool"></textarea>
       document.getElementById('gate').style.display = 'none';
       document.getElementById('app').style.display  = 'block';
       document.getElementById('admin-badge').textContent = '✓ Admin connecté';
+      refreshSoumissionsBadgeOnly();
     } else {
       document.getElementById('gate').innerHTML =
         '<p>Accès refusé. <a href="../profil.html">Connectez-vous</a> avec le compte admin.</p>';
@@ -947,8 +980,139 @@ Support français|oui|non|bool"></textarea>
       document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
       btn.classList.add('active');
       document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+      if (btn.dataset.tab === 'soumissions') loadSoumissions();
     });
   });
+
+  // ══════════════════════════════════════
+  // SOUMISSIONS (page /soumettre/)
+  // ══════════════════════════════════════
+  const TIER_LABELS = { gratuit: 'Gratuit', starter: 'Starter', featured: 'Featured' };
+
+  async function refreshSoumissionsBadgeOnly() {
+    try {
+      const q = query(collection(db, 'soumissions'), where('status', '==', 'pending'));
+      const snap = await getDocs(q);
+      updateSoumissionsBadge(snap.size);
+    } catch (_) {}
+  }
+
+  async function loadSoumissions() {
+    const listEl = document.getElementById('soumissions-list');
+    const emptyEl = document.getElementById('soumissions-empty');
+    listEl.innerHTML = '<p style="color:var(--text-dim);font-size:13px;">Chargement…</p>';
+    try {
+      const q = query(collection(db, 'soumissions'), where('status', '==', 'pending'));
+      const snap = await getDocs(q);
+      const items = [];
+      snap.forEach(d => items.push({ id: d.id, ...d.data() }));
+      items.sort((a, b) => (b.created_at?.toMillis?.() || 0) - (a.created_at?.toMillis?.() || 0));
+
+      updateSoumissionsBadge(items.length);
+
+      if (!items.length) {
+        listEl.innerHTML = '';
+        emptyEl.style.display = 'block';
+        return;
+      }
+      emptyEl.style.display = 'none';
+
+      listEl.innerHTML = items.map(s => {
+        const tier = s.tier_demande || 'gratuit';
+        const dateStr = s.created_at?.toDate ? s.created_at.toDate().toLocaleDateString('fr-FR', {day:'2-digit',month:'short',year:'numeric'}) : '';
+        return `
+        <div class="soumission-card ${tier === 'featured' ? 'featured' : ''}" data-id="${s.id}">
+          <div class="soumission-top">
+            <div>
+              <div class="soumission-name">${escapeHtml(s.nom_outil || 'Sans nom')}</div>
+              <div class="soumission-meta">
+                <a href="${escapeHtml(s.url_outil || '#')}" target="_blank" rel="noopener">${escapeHtml(s.url_outil || '')}</a>
+                · ${escapeHtml(s.categorie || '—')} · ${escapeHtml(s.email_contact || '—')}
+              </div>
+            </div>
+            <span class="soumission-tier ${tier}">${TIER_LABELS[tier] || tier}</span>
+          </div>
+          <p class="soumission-desc">${escapeHtml(s.description || '')}</p>
+          ${s.extras ? `<div class="soumission-extras">💬 ${escapeHtml(s.extras)}</div>` : ''}
+          <div class="soumission-actions">
+            <button class="btn-traiter" data-id="${s.id}">→ Traiter (créer la fiche)</button>
+            <button class="btn-rejeter" data-id="${s.id}">Rejeter</button>
+            <span class="soumission-date">${dateStr}</span>
+          </div>
+        </div>`;
+      }).join('');
+
+      listEl.querySelectorAll('.btn-traiter').forEach(btn => {
+        btn.addEventListener('click', () => traiterSoumission(items.find(s => s.id === btn.dataset.id)));
+      });
+      listEl.querySelectorAll('.btn-rejeter').forEach(btn => {
+        btn.addEventListener('click', () => rejeterSoumission(btn.dataset.id));
+      });
+    } catch (err) {
+      listEl.innerHTML = '';
+      showMsg('warn-soumissions', 'ok-soumissions', 'warn', 'Erreur de chargement : ' + err.message);
+    }
+  }
+
+  async function updateSoumissionsBadge(count) {
+    const badge = document.getElementById('soumissions-count-badge');
+    badge.textContent = count > 0 ? `(${count})` : '';
+  }
+
+  function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.textContent = str || '';
+    return d.innerHTML;
+  }
+
+  function traiterSoumission(s) {
+    if (!s) return;
+    // Bascule vers l'onglet Outils et pré-remplit le formulaire de création
+    document.querySelector('.tab-btn[data-tab="outils"]').click();
+    exitEditMode(); // s'assure qu'on est bien en mode "création", pas édition d'un outil existant
+
+    setVal('o-url', s.url_outil || '');
+    setVal('o-name-fr', s.nom_outil || '');
+    setVal('o-desc-fr', s.description || '');
+    setVal('o-cat', mapCategorieSoumission(s.categorie));
+    setVal('o-plan', s.tier_demande === 'featured' ? 'featured' : (s.tier_demande === 'starter' ? 'starter' : ''));
+    document.getElementById('o-plan').dispatchEvent(new Event('change'));
+    updateToolPreview();
+
+    // Marque la soumission comme "en cours de traitement" pour éviter le double-traitement
+    updateDoc(doc(db, 'soumissions', s.id), { status: 'processing' }).catch(()=>{});
+
+    // Mémorise l'id pour marquer "approved" une fois l'outil réellement créé
+    window.__soumissionEnCours = s.id;
+
+    showMsg('warn-outils', 'ok-outils', 'ok',
+      `Formulaire pré-rempli depuis la soumission de « ${s.nom_outil} ». Vérifiez/complétez les champs puis cliquez sur "Créer l'outil".`);
+  }
+
+  function mapCategorieSoumission(cat) {
+    const map = {
+      'Rédaction & Contenu': 'Texte',
+      'Image & Design': 'Image',
+      'Vidéo & Audio': 'Vidéo',
+      'Code & Développement': 'Code',
+      'Productivité': 'Productivité',
+      'Marketing & SEO': 'Texte',
+      'Éducation': 'Texte',
+      'Santé & Bien-être': 'Texte',
+      'Finance & Business': 'Texte',
+    };
+    return map[cat] || '';
+  }
+
+  async function rejeterSoumission(id) {
+    if (!confirm('Rejeter cette soumission ? Elle disparaîtra de la liste (elle reste en base avec le statut "rejected").')) return;
+    try {
+      await updateDoc(doc(db, 'soumissions', id), { status: 'rejected' });
+      loadSoumissions();
+    } catch (err) {
+      showMsg('warn-soumissions', 'ok-soumissions', 'warn', 'Erreur : ' + err.message);
+    }
+  }
 
   document.querySelectorAll('.accordion-toggle').forEach(btn => {
     btn.addEventListener('click', () => {
@@ -1368,6 +1532,13 @@ Support français|oui|non|bool"></textarea>
 
       for (const d of toWrite) await setDoc(doc(db,'outils',String(d.id)),{...d, updatedAt: serverTimestamp()});
       invalidateToolsCache();
+
+      if (window.__soumissionEnCours) {
+        try {
+          await updateDoc(doc(db, 'soumissions', window.__soumissionEnCours), { status: 'approved', outil_id: mainId });
+        } catch(_) {}
+        window.__soumissionEnCours = null;
+      }
 
       const action = editingTool ? 'mis à jour' : 'créé';
       showMsg('warn-outils','ok-outils','ok',
