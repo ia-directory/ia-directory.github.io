@@ -2605,5 +2605,10 @@
       "updatedAtMs": 0
     }
   },
-  "niches": {}
+  "niches": {
+    "ia-pour-les-avocat": {
+      "hash": "a1ef5cc71b72bb9a4484cf17f6942e6a282612eca1a3c1276bf9c2e4c0c8b834",
+      "updatedAtMs": 1783810099880
+    }
+  }
 }
