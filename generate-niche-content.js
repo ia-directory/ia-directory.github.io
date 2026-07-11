@@ -3,7 +3,10 @@
    generate-niche-content.js — Génération IA du contenu des
    micro-niches (intro / conseils / FAQ) via Google Gemini API.
 
-   Usage :
+   Usage (avec un fichier local — recommandé pour un usage manuel) :
+     GEMINI_API_KEY=xxx FIREBASE_SERVICE_ACCOUNT_PATH=./service-account.json node generate-niche-content.js
+
+   Usage (avec le JSON en ligne — pratique pour CI/scripts) :
      GEMINI_API_KEY=xxx FIREBASE_SERVICE_ACCOUNT='{...}' node generate-niche-content.js
 
    Options :
@@ -26,6 +29,7 @@
      https://aistudio.google.com/apikey
    ═══════════════════════════════════════════════════════ */
 
+const fs = require('fs');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore }        = require('firebase-admin/firestore');
 
@@ -42,7 +46,21 @@ if (!GEMINI_API_KEY) {
   process.exit(1);
 }
 
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+// Accepte soit un chemin vers un fichier .json local (FIREBASE_SERVICE_ACCOUNT_PATH,
+// pratique pour un lancement manuel — pas besoin de coller du JSON dans le terminal),
+// soit le JSON directement en variable d'environnement (FIREBASE_SERVICE_ACCOUNT,
+// utilisé par GitHub Actions où c'est un secret déjà géré proprement).
+let serviceAccount;
+if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
+  const raw = fs.readFileSync(process.env.FIREBASE_SERVICE_ACCOUNT_PATH, 'utf8');
+  serviceAccount = JSON.parse(raw);
+} else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+} else {
+  console.error('❌ Ni FIREBASE_SERVICE_ACCOUNT_PATH ni FIREBASE_SERVICE_ACCOUNT ne sont définis.');
+  console.error('   Le plus simple : télécharge ta clé de service Firebase et utilise FIREBASE_SERVICE_ACCOUNT_PATH=./ton-fichier.json');
+  process.exit(1);
+}
 initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore();
 
