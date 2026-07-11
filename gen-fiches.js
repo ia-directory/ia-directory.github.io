@@ -46,7 +46,7 @@ function loadState() {
     return JSON.parse(fs.readFileSync(STATE_PATH, 'utf8'));
   } catch {
     // Premier run, ou fichier absent/corrompu : état vide, tout sera généré.
-    return { outils: {}, articles: {}, comparaisons: {} };
+    return { outils: {}, articles: {}, comparaisons: {}, niches: {} };
   }
 }
 
@@ -978,6 +978,19 @@ function comparateurItemHTML(comp, tools) {
 // depuis la collection "outils" déjà en mémoire (zéro lecture Firestore côté
 // visiteur). Seuls les outils FR sont inclus — c'est un annuaire francophone,
 // et TOOLS_DATA original ne mélangeait pas les variantes de langue.
+//
+// triEtat : distingue "vrai" / "faux" / "jamais renseigné" plutôt que de tout
+// forcer en booléen strict. Un champ jamais coché dans l'admin (undefined)
+// affichait sinon une croix rouge trompeuse, identique à un vrai "non" —
+// alors que "—" (inconnu) est le signal honnête tant que la donnée n'a pas
+// été saisie. afficherComparaison() sait déjà gérer ce 3e état (val===true /
+// val===false / sinon "—") ; seul le cast en amont ici les confondait.
+function triEtat(val) {
+  if (val === true) return true;
+  if (val === false) return false;
+  return null; // jamais renseigné
+}
+
 function buildToolsDataJSON(tools) {
   const fr = tools.filter(t => t.name && (!t.langue || t.langue === 'fr'));
   const data = fr.map(t => ({
@@ -987,11 +1000,11 @@ function buildToolsDataJSON(tools) {
     favicon: `https://www.google.com/s2/favicons?sz=64&domain=${(t.url||'').replace(/^https?:\/\//,'').split('/')[0]}`,
     category: t.category || '',
     price: t.price || '',
-    essai_gratuit: !!t.essai_gratuit,
+    essai_gratuit: triEtat(t.essai_gratuit),
     duree_essai: t.duree_essai || null,
-    langue_fr: !!t.interface_fr,
-    api: !!t.api,
-    mobile: !!t.mobile,
+    langue_fr: triEtat(t.interface_fr),
+    api: triEtat(t.api),
+    mobile: triEtat(t.mobile),
     ideal_pour: t.ideal_pour || '',
     note: typeof t.note === 'number' ? t.note : (typeof t.rating === 'number' ? t.rating : null),
     lien_affilie: t.url || '#',
@@ -1506,11 +1519,174 @@ ${sharedJS()}
 }
 
 // ════════════════════════════════════════════════════════════
+// GÉNÉRATEUR NICHES (micro-niches SEO par métier)
+// Source : Firestore collection "niches"
+// Sortie : niches/{slug}/index.html
+//
+// Seules les niches status==='publie' sont générées — un brouillon
+// reste en Firestore mais n'a jamais de page HTML publique tant que
+// Damon ne l'a pas validé dans l'admin, quel que soit son contenu.
+// ════════════════════════════════════════════════════════════
+
+function nicheToolCardHTML(tool) {
+  const fav = `https://www.google.com/s2/favicons?sz=64&domain=${(tool.url||'').replace(/^https?:\/\//,'').split('/')[0]}`;
+  const note = typeof tool.note === 'number' ? tool.note : (typeof tool.rating === 'number' ? tool.rating : null);
+  const slug = slugify(tool.name);
+  const plan = tool.plan === 'featured' ? 'featured' : tool.plan === 'starter' ? 'starter' : 'standard';
+  const langue = tool.langue || 'fr';
+  const ficheUrl = `${R}tools/${plan}/${langue}/${slug}/`;
+  return `<a href="${ficheUrl}" class="niche-tool-card">
+  <div class="ntc-top">
+    <img src="${fav}" alt="${tool.name}" class="ntc-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <span class="ntc-logo-fallback" style="display:none">${tool.emoji||'🤖'}</span>
+    <span class="ntc-name">${tool.name}</span>
+    ${note ? `<span class="ntc-note">★ ${note}</span>` : ''}
+  </div>
+  <span class="ntc-cat">${tool.category||''}</span>
+  <span class="ntc-cta">Voir la fiche →</span>
+</a>`;
+}
+
+function generateNichePage(niche, tools, allNiches) {
+  const langue = 'fr';
+  const slug = niche.slug;
+  if (!slug) return null;
+
+  const outilsMatches = (niche.outils_slugs || [])
+    .map(s => tools.find(t => slugify(t.name) === s && (!t.langue || t.langue === 'fr')))
+    .filter(Boolean);
+
+  const canonicalUrl = `${SITE_ORIGIN}/niches/${slug}/index.html`;
+  const titleTag = niche.meta_title || `Meilleurs outils IA pour ${niche.metier} en 2026 | Albexia`;
+  const metaDesc = niche.meta_description || niche.intro_ia?.slice(0, 155) || `Découvrez les meilleurs outils IA sélectionnés pour ${niche.metier}. Comparatif et conseils Albexia.`;
+
+  const toolsGridHTML = outilsMatches.length
+    ? outilsMatches.map(nicheToolCardHTML).join('\n')
+    : `<p style="color:var(--text-dim);font-size:14px;">Aucun outil sélectionné pour l'instant.</p>`;
+
+  const conseilsHTML = niche.conseils_ia ? `<div class="niche-section">
+  <div class="niche-section-title">Comment choisir ?</div>
+  <div class="niche-conseils">${niche.conseils_ia}</div>
+</div>` : '';
+
+  const faqItems = niche.faq || [];
+  const faqHTML = faqItems.length ? `<div class="niche-section">
+  <div class="niche-section-title">Questions fréquentes</div>
+  <div class="niche-faq">
+    ${faqItems.map((f, i) => `<div class="niche-faq-item" id="nfaq-${i}">
+      <button class="niche-faq-question" onclick="toggleNicheFAQ(${i})">
+        <span>${f.question}</span>
+        <span class="niche-faq-arrow">▼</span>
+      </button>
+      <div class="niche-faq-answer">${f.reponse}</div>
+    </div>`).join('')}
+  </div>
+</div>` : '';
+
+  const faqJsonLd = faqItems.length ? `
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "FAQPage",
+    "mainEntity": [
+${faqItems.map(f => `      {
+        "@type": "Question",
+        "name": ${JSON.stringify(f.question)},
+        "acceptedAnswer": { "@type": "Answer", "text": ${JSON.stringify(f.reponse.replace(/<[^>]+>/g,''))} }
+      }`).join(',\n')}
+    ]
+  }
+  </script>` : '';
+
+  // Maillage interne : autres niches publiées de la même super-catégorie
+  const nichesLiees = allNiches.filter(n => n.status === 'publie' && n.super_categorie === niche.super_categorie && n.slug !== slug).slice(0, 8);
+  const relatedHTML = nichesLiees.length ? `<div class="niche-section">
+  <div class="niche-section-title">Autres métiers en ${niche.super_categorie}</div>
+  <div class="niche-related">
+    ${nichesLiees.map(n => `<a href="${R}niches/${n.slug}/index.html" class="niche-related-link">${n.metier}</a>`).join('')}
+  </div>
+</div>` : '';
+
+  const articleJsonLd = `
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    "headline": ${JSON.stringify(`Meilleurs outils IA pour ${niche.metier}`)},
+    "description": ${JSON.stringify(metaDesc)},
+    "inLanguage": "${langue}",
+    "author": { "@type": "Organization", "name": "Albexia" },
+    "publisher": { "@type": "Organization", "name": "Albexia", "url": "${SITE_ORIGIN}" },
+    "mainEntityOfPage": { "@type": "WebPage", "@id": "${canonicalUrl}" }
+  }
+  </script>`;
+
+  return `<!DOCTYPE html>
+<html lang="${langue}">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${titleTag}</title>
+  <meta name="description" content="${metaDesc}" />
+  <meta name="robots" content="index, follow" />
+
+  <link rel="canonical" href="${canonicalUrl}" />
+
+  <meta property="og:title"       content="${titleTag}" />
+  <meta property="og:description" content="${metaDesc}" />
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="${canonicalUrl}" />
+${articleJsonLd}
+${faqJsonLd}
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="${R}css/style.css" />
+  <link rel="stylesheet" href="${R}css/niche.css" />
+</head>
+<body>
+
+${navHTML(langue)}
+
+<section class="niche-hero">
+  <div class="niche-hero-glow"></div>
+  <div class="niche-badge">${niche.super_categorie}</div>
+  <h1>Meilleurs outils IA pour ${niche.metier}</h1>
+  <p>${niche.intro_ia || ''}</p>
+</section>
+
+<div class="niche-section">
+  <div class="niche-section-title">Notre sélection (${outilsMatches.length})</div>
+  <div class="niche-tools-grid">
+${toolsGridHTML}
+  </div>
+</div>
+
+${conseilsHTML}
+
+${faqHTML}
+
+${relatedHTML}
+
+<div class="niche-cta-wrap">
+  <a href="${R}index.html#tools" class="niche-cta-btn">Explorer tout le catalogue →</a>
+</div>
+
+<a href="${R}index.html#tools" class="niche-back">← Retour au catalogue</a>
+
+${footerHTML()}
+${faqHTML ? '<script>function toggleNicheFAQ(i){document.getElementById("nfaq-"+i).classList.toggle("open");}</script>' : ''}
+${sharedJS()}
+</body>
+</html>`;
+}
+
+// ════════════════════════════════════════════════════════════
 // MAIN
 // ════════════════════════════════════════════════════════════
 async function main() {
   const state = loadState();
-  const newState = { outils: {}, articles: {}, comparaisons: {} };
+  const newState = { outils: {}, articles: {}, comparaisons: {}, niches: {} };
 
   console.log('📥 Lecture de Firestore (outils)...');
   const snap  = await db.collection('outils').get();
@@ -1829,6 +2005,94 @@ async function main() {
 </body>
 </html>`, 'utf8');
   console.log(`\n↪️  Redirection tools/comparateur.html → comparateur/index.html écrite.`);
+
+  // ════════════════════════════════════════════════════════════
+  // NICHES (micro-niches SEO par métier)
+  // ════════════════════════════════════════════════════════════
+  // Seules les niches status==='publie' génèrent une page HTML publique —
+  // un brouillon reste en Firestore, visible dans l'admin, mais jamais
+  // exposé publiquement tant qu'il n'est pas validé.
+  console.log(`\n📥 Lecture de Firestore (niches)...`);
+  const nichesSnap = await db.collection('niches').get();
+  const niches = nichesSnap.docs.map(d => d.data());
+  console.log(`✓ ${niches.length} documents trouvés`);
+
+  let nichesGenerated = 0, nichesSkippedNoSlug = 0, nichesSkippedBrouillon = 0, nichesUnchanged = 0, nichesCascade = 0;
+
+  for (const niche of niches) {
+    const nicheHash = hashDoc(niche);
+    const nicheId   = String(niche.id || niche.slug);
+    newState.niches[nicheId] = { hash: nicheHash, updatedAtMs: updatedAtMs(niche) };
+
+    const ownHasChanged = state.niches?.[nicheId]?.hash !== nicheHash;
+
+    // Cascade : régénérer aussi si l'un des outils référencés a changé
+    // (note, favicon, etc.), même si la niche elle-même n'a pas bougé —
+    // même logique que pour le comparateur.
+    const outilsRefs = niche.outils_slugs || [];
+    const referencedToolChanged = outilsRefs.some(slugRef =>
+      changedToolIds.has(slugRef) ||
+      tools.some(t => slugify(t.name) === slugRef && changedToolIds.has(String(t.id || slugify(t.name))))
+    );
+
+    const hasChanged = ownHasChanged || referencedToolChanged;
+
+    const slug = niche.slug;
+    if (!slug) { nichesSkippedNoSlug++; continue; }
+
+    const folder   = path.join('niches', slug);
+    const filePath = path.join(folder, 'index.html');
+
+    if (niche.status !== 'publie') {
+      nichesSkippedBrouillon++;
+      // Un brouillon qui a été DÉPUBLIÉ (existait publié avant, repassé en
+      // brouillon) doit voir sa page retirée — pas seulement les nouveaux
+      // brouillons jamais publiés. On laisse le nettoyage orphelin plus bas
+      // s'en charger, puisqu'un brouillon n'est jamais dans validNichePaths.
+      continue;
+    }
+
+    // Comptée seulement ici (après le filtre brouillon) pour que le nombre
+    // reflète des pages RÉELLEMENT régénérées par cascade, pas des niches
+    // brouillon qui référencent aussi un outil modifié sans jamais publier.
+    if (!ownHasChanged && referencedToolChanged) nichesCascade++;
+
+    if (!hasChanged && fs.existsSync(filePath)) { nichesUnchanged++; continue; }
+
+    const html = generateNichePage(niche, tools, niches);
+    if (!html) { nichesSkippedNoSlug++; continue; }
+
+    fs.mkdirSync(folder, { recursive: true });
+    fs.writeFileSync(filePath, html, 'utf8');
+    nichesGenerated++;
+  }
+
+  console.log(`\n✅ Niches — ${nichesGenerated} régénérée(s) (dont ${nichesCascade} via cascade outil modifié), ${nichesUnchanged} inchangée(s) (skip), ${nichesSkippedBrouillon} en brouillon (non générées), ${nichesSkippedNoSlug} ignorée(s) (slug vide).`);
+  console.log(`\nStructure :`);
+  console.log(`  niches/{slug}/index.html`);
+
+  // ─── NETTOYAGE DES NICHES ORPHELINES OU DÉPUBLIÉES ───
+  console.log(`\n🧹 Nettoyage des pages niches orphelines ou dépubliées...`);
+
+  const validNichePaths = new Set();
+  for (const niche of niches) {
+    if (!niche.slug || niche.status !== 'publie') continue;
+    validNichePaths.add(path.join('niches', niche.slug));
+  }
+
+  let removedNiches = 0;
+  if (fs.existsSync('niches')) {
+    for (const slugDir of fs.readdirSync('niches')) {
+      const fullPath = path.join('niches', slugDir);
+      if (!fs.statSync(fullPath).isDirectory()) continue;
+      if (!validNichePaths.has(fullPath)) {
+        fs.rmSync(fullPath, { recursive: true, force: true });
+        console.log(`  🗑️  Supprimé : ${fullPath}`);
+        removedNiches++;
+      }
+    }
+  }
+  console.log(`✓ ${removedNiches} dossier(s) niche orphelin(s) ou dépublié(s) supprimé(s).`);
 
   // ─── SAUVEGARDE DE L'ÉTAT DE GÉNÉRATION ───
   // newState ne contient que les docs actuellement en base : un doc supprimé
