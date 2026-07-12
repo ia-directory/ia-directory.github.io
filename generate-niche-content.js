@@ -3,7 +3,10 @@
    generate-niche-content.js — Génération IA du contenu des
    micro-niches (intro / conseils / FAQ) via Google Gemini API.
 
-   Usage :
+   Usage (avec un fichier local — recommandé pour un usage manuel) :
+     GEMINI_API_KEY=xxx FIREBASE_SERVICE_ACCOUNT_PATH=./service-account.json node generate-niche-content.js
+
+   Usage (avec le JSON en ligne — pratique pour CI/scripts) :
      GEMINI_API_KEY=xxx FIREBASE_SERVICE_ACCOUNT='{...}' node generate-niche-content.js
 
    Options :
@@ -26,13 +29,17 @@
      https://aistudio.google.com/apikey
    ═══════════════════════════════════════════════════════ */
 
+const fs = require('fs');
 const { initializeApp, cert } = require('firebase-admin/app');
 const { getFirestore }        = require('firebase-admin/firestore');
 
 // ── Config ──────────────────────────────────────────────
-// gemini-2.0-flash est un bon compromis qualité/quota gratuit au moment de
-// l'écriture. Si Google renomme ou déprécie ce modèle, vérifie le nom exact
-// disponible sur https://aistudio.google.com avant de relancer.
+// gemini-3.5-flash est le modèle actuel recommandé par Google (juillet 2026),
+// avec accès gratuit confirmé. gemini-2.0-flash (utilisé précédemment) a été
+// arrêté le 1er juin 2026 — c'est la cause réelle des erreurs 429 rencontrées,
+// pas un dépassement de quota. Si Google renomme ou déprécie ce modèle à son
+// tour, vérifie le nom exact sur https://ai.google.dev/gemini-api/docs/pricing
+// avant de relancer.
 const GEMINI_MODEL = 'gemini-3.5-flash';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const DELAI_ENTRE_APPELS_MS = 4500; // reste sous les limites RPM du tier gratuit
@@ -42,7 +49,21 @@ if (!GEMINI_API_KEY) {
   process.exit(1);
 }
 
-const serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+// Accepte soit un chemin vers un fichier .json local (FIREBASE_SERVICE_ACCOUNT_PATH,
+// pratique pour un lancement manuel — pas besoin de coller du JSON dans le terminal),
+// soit le JSON directement en variable d'environnement (FIREBASE_SERVICE_ACCOUNT,
+// utilisé par GitHub Actions où c'est un secret déjà géré proprement).
+let serviceAccount;
+if (process.env.FIREBASE_SERVICE_ACCOUNT_PATH) {
+  const raw = fs.readFileSync(process.env.FIREBASE_SERVICE_ACCOUNT_PATH, 'utf8');
+  serviceAccount = JSON.parse(raw);
+} else if (process.env.FIREBASE_SERVICE_ACCOUNT) {
+  serviceAccount = JSON.parse(process.env.FIREBASE_SERVICE_ACCOUNT);
+} else {
+  console.error('❌ Ni FIREBASE_SERVICE_ACCOUNT_PATH ni FIREBASE_SERVICE_ACCOUNT ne sont définis.');
+  console.error('   Le plus simple : télécharge ta clé de service Firebase et utilise FIREBASE_SERVICE_ACCOUNT_PATH=./ton-fichier.json');
+  process.exit(1);
+}
 initializeApp({ credential: cert(serviceAccount) });
 const db = getFirestore();
 
@@ -128,6 +149,17 @@ async function main() {
     if (SLUG_FILTER) return n.slug === SLUG_FILTER;
     return FORCE || !n.intro_ia || !n.intro_ia.trim();
   });
+
+  // Cas distinct et fréquent en pratique : le slug tapé dans le workflow ne
+  // correspond à AUCUNE niche (faute de frappe, singulier/pluriel, etc.).
+  // Sans ce contrôle, le script se terminait "avec succès" en silence sans
+  // rien avoir généré — trompeur, difficile à diagnostiquer depuis les logs.
+  if (SLUG_FILTER && !aTraiter.length) {
+    console.log(`❌ Aucune niche trouvée avec le slug "${SLUG_FILTER}".`);
+    console.log(`   Slugs disponibles : ${niches.map(n => n.slug).filter(Boolean).join(', ') || '(aucune niche en base)'}`);
+    console.log(`   Vérifie l'orthographe exacte (singulier/pluriel, tirets) dans l'admin, onglet Niches.`);
+    process.exit(1);
+  }
 
   if (!aTraiter.length) {
     console.log('✅ Rien à générer — toutes les niches ont déjà un contenu (utilise --force pour régénérer).');
