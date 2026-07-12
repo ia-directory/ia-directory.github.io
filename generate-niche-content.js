@@ -147,6 +147,17 @@ async function main() {
     return FORCE || !n.intro_ia || !n.intro_ia.trim();
   });
 
+  // Cas distinct et fréquent en pratique : le slug tapé dans le workflow ne
+  // correspond à AUCUNE niche (faute de frappe, singulier/pluriel, etc.).
+  // Sans ce contrôle, le script se terminait "avec succès" en silence sans
+  // rien avoir généré — trompeur, difficile à diagnostiquer depuis les logs.
+  if (SLUG_FILTER && !aTraiter.length) {
+    console.log(`❌ Aucune niche trouvée avec le slug "${SLUG_FILTER}".`);
+    console.log(`   Slugs disponibles : ${niches.map(n => n.slug).filter(Boolean).join(', ') || '(aucune niche en base)'}`);
+    console.log(`   Vérifie l'orthographe exacte (singulier/pluriel, tirets) dans l'admin, onglet Niches.`);
+    process.exit(1);
+  }
+
   if (!aTraiter.length) {
     console.log('✅ Rien à générer — toutes les niches ont déjà un contenu (utilise --force pour régénérer).');
     return;
