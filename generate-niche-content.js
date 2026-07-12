@@ -37,7 +37,7 @@ const { getFirestore }        = require('firebase-admin/firestore');
 // gemini-2.0-flash est un bon compromis qualité/quota gratuit au moment de
 // l'écriture. Si Google renomme ou déprécie ce modèle, vérifie le nom exact
 // disponible sur https://aistudio.google.com avant de relancer.
-const GEMINI_MODEL = 'gemini-2.0-flash';
+const GEMINI_MODEL = 'gemini-3.5-flash';
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
 const DELAI_ENTRE_APPELS_MS = 4500; // reste sous les limites RPM du tier gratuit
 
