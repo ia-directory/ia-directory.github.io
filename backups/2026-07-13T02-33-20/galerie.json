@@ -1,0 +1,158 @@
+[
+  {
+    "id": 1,
+    "title": "Cité futuriste au coucher du soleil",
+    "tool": "Midjourney",
+    "type": "image",
+    "src": "https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?w=800&q=80",
+    "thumb": "https://images.unsplash.com/photo-1622547748225-3fc4abd2cca0?w=400&q=70",
+    "author": "Communauté",
+    "likes": 248,
+    "date": "2025-03-10"
+  },
+  {
+    "id": 10,
+    "title": "Rythmes afro-électroniques",
+    "tool": "Suno AI",
+    "type": "musique",
+    "src": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-3.mp3",
+    "thumb": "https://images.unsplash.com/photo-1493225457124-a3eb161ffa5f?w=400&q=70",
+    "author": "Communauté",
+    "likes": 178,
+    "date": "2025-02-20"
+  },
+  {
+    "id": 11,
+    "title": "Océan en tempête dramatique",
+    "tool": "Midjourney",
+    "type": "image",
+    "src": "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=800&q=80",
+    "thumb": "https://images.unsplash.com/photo-1505118380757-91f5f5632de0?w=400&q=70",
+    "author": "Communauté",
+    "likes": 335,
+    "date": "2025-02-18"
+  },
+  {
+    "id": 12,
+    "title": "Galaxie spirale générée",
+    "tool": "Stable Diffusion",
+    "type": "image",
+    "src": "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=800&q=80",
+    "thumb": "https://images.unsplash.com/photo-1462331940025-496dfbfc7564?w=400&q=70",
+    "author": "Communauté",
+    "likes": 289,
+    "date": "2025-02-15"
+  },
+  {
+    "id": 13,
+    "title": "Femme en costume rose",
+    "tool": "Stable Diffusion",
+    "type": "image",
+    "src": "https://pixabay.com/images/download/x-8118606_1920.png",
+    "thumb": "https://pixabay.com/images/download/x-8118606_1920.png",
+    "prompt": "Professional woman in pink satin suit holding coffee cup, studio lighting, photorealistic",
+    "author": "Communauté",
+    "likes": 0,
+    "date": "2026-06-30"
+  },
+  {
+    "id": 14,
+    "title": "Solo au Loft",
+    "tool": "Gemini",
+    "type": "image",
+    "src": "https://ia-directory.github.io/medias/blog/creer-musique-suno-ai.jpg",
+    "thumb": "https://ia-directory.github.io/medias/blog/creer-musique-suno-ai.jpg",
+    "prompt": "Femme blonde jouant du violoncelle dans un salon confortable de style loft. Mur de briques apparentes, étagères, canapé et grande fenêtre en arrière-plan. Ambiance intime et chaleureuse. Photographie réaliste.",
+    "author": "Communauté",
+    "likes": 0,
+    "date": "2026-07-01"
+  },
+  {
+    "id": 2,
+    "title": "Jazz électronique — Lo-fi beats",
+    "tool": "Suno AI",
+    "type": "musique",
+    "src": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-1.mp3",
+    "thumb": "https://images.unsplash.com/photo-1511379938547-c1f69419868d?w=400&q=70",
+    "author": "Communauté",
+    "likes": 134,
+    "date": "2025-03-08"
+  },
+  {
+    "id": 3,
+    "title": "Portrait aquarelle numérique",
+    "tool": "DALL·E 3",
+    "type": "image",
+    "src": "https://images.unsplash.com/photo-1547149600-a6cdf8fce60c?w=800&q=80",
+    "thumb": "https://images.unsplash.com/photo-1547149600-a6cdf8fce60c?w=400&q=70",
+    "author": "Communauté",
+    "likes": 197,
+    "date": "2025-03-06"
+  },
+  {
+    "id": 4,
+    "title": "Court-métrage génératif",
+    "tool": "Runway ML",
+    "type": "vidéo",
+    "src": "https://www.w3schools.com/html/mov_bbb.mp4",
+    "thumb": "https://images.unsplash.com/photo-1536240478700-b869ad10e128?w=400&q=70",
+    "author": "Communauté",
+    "likes": 312,
+    "date": "2025-03-05"
+  },
+  {
+    "id": 5,
+    "title": "Paysage montagneux abstrait",
+    "tool": "Stable Diffusion",
+    "type": "image",
+    "src": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=800&q=80",
+    "thumb": "https://images.unsplash.com/photo-1506905925346-21bda4d32df4?w=400&q=70",
+    "author": "Communauté",
+    "likes": 89,
+    "date": "2025-03-03"
+  },
+  {
+    "id": 6,
+    "title": "Symphonie ambient nocturne",
+    "tool": "Suno AI",
+    "type": "musique",
+    "src": "https://www.soundhelix.com/examples/mp3/SoundHelix-Song-2.mp3",
+    "thumb": "https://images.unsplash.com/photo-1465821185615-20b3c2fbf41b?w=400&q=70",
+    "author": "Communauté",
+    "likes": 156,
+    "date": "2025-03-01"
+  },
+  {
+    "id": 7,
+    "title": "Architecture bio-inspirée 3D",
+    "tool": "Midjourney",
+    "type": "image",
+    "src": "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=800&q=80",
+    "thumb": "https://images.unsplash.com/photo-1487958449943-2429e8be8625?w=400&q=70",
+    "author": "Communauté",
+    "likes": 274,
+    "date": "2025-02-28"
+  },
+  {
+    "id": 8,
+    "title": "Animation abstraite colorée",
+    "tool": "Kling AI",
+    "type": "vidéo",
+    "src": "https://www.w3schools.com/html/movie.mp4",
+    "thumb": "https://images.unsplash.com/photo-1550684376-efcbd6e3f031?w=400&q=70",
+    "author": "Communauté",
+    "likes": 421,
+    "date": "2025-02-25"
+  },
+  {
+    "id": 9,
+    "title": "Forêt enchantée nocturne",
+    "tool": "DALL·E 3",
+    "type": "image",
+    "src": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=800&q=80",
+    "thumb": "https://images.unsplash.com/photo-1448375240586-882707db888b?w=400&q=70",
+    "author": "Communauté",
+    "likes": 203,
+    "date": "2025-02-22"
+  }
+]
