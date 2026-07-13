@@ -1,0 +1,35 @@
+name: Réinitialiser le catalogue (outils/niches + catégories)
+
+on:
+  workflow_dispatch:
+    inputs:
+      confirm:
+        description: 'Exécuter réellement (sinon simulation seule, rien n’est supprimé)'
+        required: false
+        type: boolean
+        default: false
+
+jobs:
+  reset:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installer les dépendances
+        run: npm install firebase-admin
+
+      - name: Réinitialiser le catalogue
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: |
+          if [ "${{ github.event.inputs.confirm }}" = "true" ]; then
+            node reset-catalogue.js --confirm
+          else
+            node reset-catalogue.js
+          fi

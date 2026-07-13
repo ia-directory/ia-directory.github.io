@@ -1,0 +1,29 @@
+name: Créer des niches en masse
+
+on:
+  workflow_dispatch:
+    inputs:
+      fichier:
+        description: 'Chemin du fichier JSON dans le repo (créé/édité via l’éditeur GitHub)'
+        required: false
+        default: 'niches-a-creer.json'
+
+jobs:
+  bulk-create:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installer les dépendances
+        run: npm install firebase-admin
+
+      - name: Créer les niches en masse
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node bulk-create-niches.js "${{ github.event.inputs.fichier }}"
