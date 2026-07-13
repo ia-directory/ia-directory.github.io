@@ -2550,10 +2550,6 @@
     }
   },
   "articles": {
-    "1": {
-      "hash": "3fd89c017bda544a220dbac84fa6857a3e177f1adaf2f8a67ee917df2b9b60de",
-      "updatedAtMs": 0
-    },
     "2": {
       "hash": "b90c6026b4870f5e285d84ce1b8ac6040b323386c88e150dd7db081ac098e124",
       "updatedAtMs": 0
@@ -2564,14 +2560,6 @@
     },
     "4": {
       "hash": "f682aa0cc1c4388b8887387049ce353ec44da75830550f43b3ce3c31f40c73f8",
-      "updatedAtMs": 0
-    },
-    "1-en": {
-      "hash": "e3d356a3721fe0f6eb5b21857aca74d262f243f3cea110b221d218ba0d04b203",
-      "updatedAtMs": 0
-    },
-    "1-es": {
-      "hash": "109f9d554363af89e63d74c35b9c5963d7afa89fdfbfbea1f8ad2eabe0870203",
       "updatedAtMs": 0
     },
     "2-en": {
