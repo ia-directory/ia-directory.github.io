@@ -1,0 +1,17 @@
+[
+  {
+    "metier": "Avocats",
+    "super_categorie": "Juridique",
+    "mots_cles_matching": "juridique, contrat, recherche, rédaction, document"
+  },
+  {
+    "metier": "Marketeurs digitaux",
+    "super_categorie": "Marketing",
+    "mots_cles_matching": "marketing, publicité, campagne, réseaux sociaux, contenu"
+  },
+  {
+    "metier": "Spécialistes SEO",
+    "super_categorie": "SEO",
+    "mots_cles_matching": "seo, référencement, mots-clés, backlink, optimisation"
+  }
+]
