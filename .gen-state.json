@@ -225,5 +225,18 @@
       "updatedAtMs": 0
     }
   },
-  "niches": {}
+  "niches": {
+    "ia-pour-les-avocats": {
+      "hash": "b75af417adeb77a0daf69418ce467bbb7905b56e16c5b18e7229bc7e067d5747",
+      "updatedAtMs": 1784070748551
+    },
+    "ia-pour-les-marketeurs-digitaux": {
+      "hash": "a19d474ca9706bf232eec7689f3832a03fabf8f2f8107d5a6d2459a2dec2cfc5",
+      "updatedAtMs": 1784070662801
+    },
+    "ia-pour-les-specialistes-seo": {
+      "hash": "12525273146b05a8c3d9c253d293f0ebc098fb7fefa6eb5d7021cc45b97632e4",
+      "updatedAtMs": 1784070693788
+    }
+  }
 }
