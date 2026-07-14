@@ -101,6 +101,27 @@ async function appellerGemini(prompt) {
   return JSON.parse(text);
 }
 
+// Enrobe appellerGemini avec des nouvelles tentatives automatiques —
+// utile pour deux cas rencontrés en pratique : une erreur JSON (le modèle
+// n'est pas déterministe, une 2e génération est souvent valide même si la
+// 1ère ne l'était pas) et une erreur API transitoire (503 "high demand",
+// 429 quota momentané). N'insiste pas indéfiniment : 2 tentatives
+// supplémentaires max, avec un court délai entre chacune.
+async function appellerGeminiAvecRetry(prompt, maxTentatives = 3) {
+  let derniereErreur;
+  for (let tentative = 1; tentative <= maxTentatives; tentative++) {
+    try {
+      return await appellerGemini(prompt);
+    } catch (err) {
+      derniereErreur = err;
+      if (tentative < maxTentatives) {
+        await new Promise(r => setTimeout(r, 3000 * tentative));
+      }
+    }
+  }
+  throw derniereErreur;
+}
+
 // ── Construction du brief envoyé à l'IA ────────────────────
 function construireBrief(niche, outilsResolus) {
   const listeOutils = outilsResolus.length
@@ -127,7 +148,9 @@ Génère un contenu au format JSON strict avec exactement ces clés :
   ]
 }
 
-Génère exactement 4 questions de FAQ, pertinentes et spécifiques à ce métier (pas des questions génériques sur l'IA en général). Réponds UNIQUEMENT avec le JSON, sans texte avant ou après, sans balises markdown.`;
+Génère exactement 4 questions de FAQ, pertinentes et spécifiques à ce métier (pas des questions génériques sur l'IA en général).
+
+RÈGLE STRICTE DE FORMAT : n'utilise JAMAIS de guillemets doubles ( " ) à l'intérieur des textes générés (intro, conseils, questions, réponses) — même pour citer un exemple ou un terme. Reformule plutôt sans guillemets (ex: écris "le mot-clé chaussures femme" au lieu de 'le mot-clé "chaussures femme"'). Des guillemets non échappés dans le texte cassent le JSON. Réponds UNIQUEMENT avec le JSON, sans texte avant ou après, sans balises markdown.`;
 }
 
 // ── Main ──────────────────────────────────────────────────
@@ -178,7 +201,7 @@ async function main() {
         .filter(Boolean);
 
       const prompt = construireBrief(niche, outilsResolus);
-      const contenu = await appellerGemini(prompt);
+      const contenu = await appellerGeminiAvecRetry(prompt);
 
       if (!contenu.intro || !contenu.faq || !Array.isArray(contenu.faq)) {
         throw new Error('Format de réponse inattendu (intro ou faq manquant)');
