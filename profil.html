@@ -1424,15 +1424,51 @@
 ══════════════════════════════════════════════ -->
 <div id="profile-page">
 
-  <!-- ── MOBILE TABS ─────────────────────────── -->
+    <!-- ── MOBILE TABS ─────────────────────────── -->
   <div class="mobile-tabs">
-    <button class="mobile-tab active" onclick="switchSection('collections')">📁 Collections</button>
-    <button class="mobile-tab" onclick="switchSection('quiz')">🧠 Quiz</button>
-    <button class="mobile-tab" onclick="switchSection('avis')">💬 Avis</button>
-    <button class="mobile-tab" onclick="switchSection('videos')">🎬 Vidéos</button>
-    <button class="mobile-tab" onclick="switchSection('profil-public')">👤 Profil public</button>
-    <button class="mobile-tab" onclick="switchSection('parametres')">⚙️ Params</button>
+    <button class="mobile-tab active" onclick="switchSection('collections')">
+      <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle;margin-right:4px;">
+        <path d="M2 4.5C2 3.67 2.67 3 3.5 3H6.5L8.5 5H14.5C15.33 5 16 5.67 16 6.5V13.5C16 14.33 15.33 15 14.5 15H3.5C2.67 15 2 14.33 2 13.5V4.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+      </svg>
+      Collections
+    </button>
+    <button class="mobile-tab" onclick="switchSection('quiz')">
+      <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle;margin-right:4px;">
+        <path d="M9 3L3 6L9 9L15 6L9 3Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+        <path d="M4.5 8.5V12C4.5 12 7 14.5 9 14.5C11 14.5 13.5 12 13.5 12V8.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M15 6V10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      Quiz
+    </button>
+    <button class="mobile-tab" onclick="switchSection('avis')">
+      <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle;margin-right:4px;">
+        <path d="M15.5 9C15.5 12.1 12.6 14.5 9 14.5C7.8 14.5 6.7 14.2 5.7 13.7L2.5 14.5L3.5 11.6C2.8 10.9 2.5 10 2.5 9C2.5 5.9 5.4 3.5 9 3.5C12.6 3.5 15.5 5.9 15.5 9Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Avis
+    </button>
+    <button class="mobile-tab" onclick="switchSection('videos')">
+      <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle;margin-right:4px;">
+        <path d="M4 3C4 2.45 4.45 2 5 2H13C13.55 2 14 2.45 14 3V16L9 12.5L4 16V3Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+        <path d="M8 6.5L10.5 8L8 9.5V6.5Z" fill="currentColor"/>
+      </svg>
+      Vidéos
+    </button>
+    <button class="mobile-tab" onclick="switchSection('profil-public')">
+      <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle;margin-right:4px;">
+        <circle cx="9" cy="6" r="3" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M3 15c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      Profil public
+    </button>
+    <button class="mobile-tab" onclick="switchSection('parametres')">
+      <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle;margin-right:4px;">
+        <circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M9 1v2M9 15v2M1 9h2M15 9h2M3.3 3.3l1.4 1.4M13.3 13.3l1.4 1.4M3.3 14.7l1.4-1.4M13.3 4.7l1.4-1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      Params
+    </button>
   </div>
+
 
   <div class="profile-layout">
 
@@ -1454,25 +1490,44 @@
         <button class="sidebar-toggle" id="sidebar-toggle" onclick="toggleSidebar()" title="Réduire">‹</button>
       </div>
 
-      <!-- Navigation -->
+            <!-- Navigation -->
       <nav class="sidebar-nav">
         <button class="sidebar-item active" data-section="collections" data-tooltip="Collections" onclick="switchSection('collections')">
-          <span class="sidebar-item-icon">📁</span>
+          <span class="sidebar-item-icon">
+            <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle">
+              <path d="M2 4.5C2 3.67 2.67 3 3.5 3H6.5L8.5 5H14.5C15.33 5 16 5.67 16 6.5V13.5C16 14.33 15.33 15 14.5 15H3.5C2.67 15 2 14.33 2 13.5V4.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+            </svg>
+          </span>
           <span class="sidebar-item-label">Collections</span>
           <span class="sidebar-badge" id="col-count">0</span>
         </button>
         <button class="sidebar-item" data-section="quiz" data-tooltip="Quiz" onclick="switchSection('quiz')">
-          <span class="sidebar-item-icon">🧠</span>
+          <span class="sidebar-item-icon">
+            <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle">
+              <path d="M9 3L3 6L9 9L15 6L9 3Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+              <path d="M4.5 8.5V12C4.5 12 7 14.5 9 14.5C11 14.5 13.5 12 13.5 12V8.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M15 6V10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </span>
           <span class="sidebar-item-label">Historique quiz</span>
           <span class="sidebar-badge" id="quiz-count">0</span>
         </button>
         <button class="sidebar-item" data-section="avis" data-tooltip="Mes Avis" onclick="switchSection('avis')">
-          <span class="sidebar-item-icon">💬</span>
+          <span class="sidebar-item-icon">
+            <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle">
+              <path d="M15.5 9C15.5 12.1 12.6 14.5 9 14.5C7.8 14.5 6.7 14.2 5.7 13.7L2.5 14.5L3.5 11.6C2.8 10.9 2.5 10 2.5 9C2.5 5.9 5.4 3.5 9 3.5C12.6 3.5 15.5 5.9 15.5 9Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
           <span class="sidebar-item-label">Mes Avis</span>
           <span class="sidebar-badge" id="avis-count">0</span>
         </button>
         <button class="sidebar-item" data-section="videos" data-tooltip="Vidéos sauvegardées" onclick="switchSection('videos')">
-          <span class="sidebar-item-icon">🎬</span>
+          <span class="sidebar-item-icon">
+            <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle">
+              <path d="M4 3C4 2.45 4.45 2 5 2H13C13.55 2 14 2.45 14 3V16L9 12.5L4 16V3Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+              <path d="M8 6.5L10.5 8L8 9.5V6.5Z" fill="currentColor"/>
+            </svg>
+          </span>
           <span class="sidebar-item-label">Vidéos sauvegardées</span>
           <span class="sidebar-badge" id="videos-count">0</span>
         </button>
@@ -1483,7 +1538,12 @@
           <span class="sidebar-item-label">Profil public</span>
         </button>
         <button class="sidebar-item" data-section="parametres" data-tooltip="Paramètres" onclick="switchSection('parametres')">
-          <span class="sidebar-item-icon">⚙️</span>
+          <span class="sidebar-item-icon">
+            <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle">
+              <circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.4"/>
+              <path d="M9 1v2M9 15v2M1 9h2M15 9h2M3.3 3.3l1.4 1.4M13.3 13.3l1.4 1.4M3.3 14.7l1.4-1.4M13.3 4.7l1.4-1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </span>
           <span class="sidebar-item-label">Paramètres</span>
         </button>
       </nav>
@@ -1491,14 +1551,23 @@
       <!-- Footer : partager + déconnexion -->
       <div class="sidebar-footer">
         <button class="sidebar-item" data-tooltip="Mon profil public" onclick="sharePublicProfile()" style="color:var(--accent2)">
-          <span class="sidebar-item-icon">🔗</span>
+          <span class="sidebar-item-icon">
+            <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle">
+              <path d="M6.5 11.5L11.5 6.5M8.5 5.5L6.5 3.5C5.1 2.1 2.9 2.1 1.5 3.5C0.1 4.9 0.1 7.1 1.5 8.5L3.5 10.5M14.5 7.5L16.5 9.5C17.9 10.9 17.9 13.1 16.5 14.5C15.1 15.9 12.9 15.9 11.5 14.5L9.5 12.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </span>
           <span class="sidebar-item-label">Partager mon profil</span>
         </button>
         <button class="sidebar-item sidebar-item-logout" data-tooltip="Déconnexion" onclick="handleLogout()">
-          <span class="sidebar-item-icon">🚪</span>
+          <span class="sidebar-item-icon">
+            <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle">
+              <path d="M7 3H3C2.45 3 2 3.45 2 4V14C2 14.55 2.45 15 3 15H7M11 5L15 9L11 13M15 9H6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </span>
           <span class="sidebar-item-label">Déconnexion</span>
         </button>
       </div>
+
 
     </aside>
 
@@ -1508,7 +1577,12 @@
       <!-- 1. COLLECTIONS -->
       <div class="profile-section active" id="section-collections">
         <div class="section-header">
-          <div class="section-title">📁 Mes collections</div>
+          <div class="section-title">
+            <svg viewBox="0 0 20 20" fill="none" width="18" height="18" style="display:inline-block;vertical-align:middle">
+              <path d="M2.5 5.5C2.5 4.4 3.4 3.5 4.5 3.5H7.5L9.5 5.5H15.5C16.6 5.5 17.5 6.4 17.5 7.5V14.5C17.5 15.6 16.6 16.5 15.5 16.5H4.5C3.4 16.5 2.5 15.6 2.5 14.5V5.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+            Mes collections
+          </div>
         </div>
         <div id="collections-container">
           <div class="loader"><div class="spinner"></div> Chargement…</div>
@@ -1518,7 +1592,14 @@
       <!-- 2. HISTORIQUE QUIZ -->
       <div class="profile-section" id="section-quiz">
         <div class="section-header">
-          <div class="section-title">🧠 Historique quiz</div>
+          <div class="section-title">
+            <svg viewBox="0 0 20 20" fill="none" width="18" height="18" style="display:inline-block;vertical-align:middle">
+              <path d="M10 3.5L3.5 6.5L10 9.5L16.5 6.5L10 3.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M3.5 9.5V13.5C3.5 13.5 6.5 16.5 10 16.5C13.5 16.5 16.5 13.5 16.5 13.5V9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M16.5 6.5V11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+            </svg>
+            Historique quiz
+          </div>
           <button class="btn-sm btn-outline" onclick="openQuizInProfil()">Faire le quiz →</button>
         </div>
         <div id="quiz-history-container">
@@ -1529,7 +1610,12 @@
       <!-- 3. MES AVIS -->
       <div class="profile-section" id="section-avis">
         <div class="section-header">
-          <div class="section-title">💬 Mes Avis</div>
+          <div class="section-title">
+            <svg viewBox="0 0 20 20" fill="none" width="18" height="18" style="display:inline-block;vertical-align:middle">
+              <path d="M17.5 10C17.5 13.59 14.14 16.5 10 16.5C8.62 16.5 7.32 16.14 6.2 15.52L2.5 16.5L3.75 13.13C2.96 12.25 2.5 11.17 2.5 10C2.5 6.41 5.86 3.5 10 3.5C14.14 3.5 17.5 6.41 17.5 10Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+            Mes Avis
+          </div>
         </div>
         <div id="avis-container">
           <div class="loader"><div class="spinner"></div> Chargement…</div>
@@ -1539,7 +1625,13 @@
       <!-- 4. VIDÉOS SAUVEGARDÉES -->
       <div class="profile-section" id="section-videos">
         <div class="section-header">
-          <div class="section-title">🎬 Vidéos sauvegardées</div>
+          <div class="section-title">
+            <svg viewBox="0 0 20 20" fill="none" width="18" height="18" style="display:inline-block;vertical-align:middle">
+              <path d="M4.5 3.5H15.5V16.5L10 12.5L4.5 16.5V3.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M9 7L12 9L9 11V7Z" fill="currentColor"/>
+            </svg>
+            Vidéos sauvegardées
+          </div>
         </div>
         <div id="saved-videos-container">
           <div class="loader"><div class="spinner"></div> Chargement…</div>
@@ -1550,7 +1642,7 @@
       <div class="profile-section" id="section-profil-public">
         <div class="section-header">
           <div class="section-title">
-            <svg viewBox="0 0 20 20" fill="none" width="18" height="18"><circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 17c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+            <svg viewBox="0 0 20 20" fill="none" width="18" height="18" style="display:inline-block;vertical-align:middle"><circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 17c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
             Profil public
           </div>
           <a href="./profil-public.html" id="see-public-link" target="_blank"
@@ -1561,6 +1653,7 @@
             <svg viewBox="0 0 12 12" fill="none" width="11" height="11"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
           </a>
         </div>
+
 
         <!-- Bio + Role -->
         <div class="public-profile-card">
@@ -1671,10 +1764,14 @@
   </div>
 </div>
 
-<!-- ── MODAL NOUVELLE COLLECTION ─────────────── -->
 <div class="modal-overlay" id="modal-new-col">
   <div class="modal">
-    <h3>✨ Nouvelle collection</h3>
+    <h3 style="display:flex;align-items:center;gap:8px;">
+      <svg viewBox="0 0 24 24" fill="none" width="18" height="18" stroke="currentColor" stroke-width="1.8" style="color:var(--accent2)">
+        <path d="M12 5v14M5 12h14" stroke-linecap="round"/>
+      </svg>
+      Nouvelle collection
+    </h3>
     <input type="text" id="new-col-name" placeholder="Ex : Outils pour le SEO" maxlength="40"
            onkeydown="if(event.key==='Enter') confirmNewCollection()">
     <div class="modal-actions">
@@ -1684,10 +1781,15 @@
   </div>
 </div>
 
-<!-- ── MODAL RENOMMER COLLECTION ─────────────── -->
 <div class="modal-overlay" id="modal-rename-col">
   <div class="modal">
-    <h3>✏️ Renommer la collection</h3>
+    <h3 style="display:flex;align-items:center;gap:8px;">
+      <svg viewBox="0 0 24 24" fill="none" width="18" height="18" stroke="currentColor" stroke-width="1.8">
+        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7" stroke-linecap="round" stroke-linejoin="round"/>
+        <path d="M18.5 2.5a2.121 2.121 0 1 1 3 3L12 15l-4 1 1-4 9.5-9.5z" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Renommer la collection
+    </h3>
     <input type="text" id="rename-col-name" placeholder="Nouveau nom" maxlength="40"
            onkeydown="if(event.key==='Enter') confirmRename()">
     <div class="modal-actions">
@@ -1697,10 +1799,14 @@
   </div>
 </div>
 
-<!-- ── MODAL QUITTER ALBEXIA ─────────────────── -->
 <div class="modal-overlay" id="modal-exit-tool">
   <div class="modal">
-    <h3>🔗 Vous quittez Albexia</h3>
+    <h3 style="display:flex;align-items:center;gap:8px;">
+      <svg viewBox="0 0 24 24" fill="none" width="18" height="18" stroke="currentColor" stroke-width="1.8" style="color:var(--danger)">
+        <path d="M10.3 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5M17 16l4-4-4-4M21 12H9" stroke-linecap="round" stroke-linejoin="round"/>
+      </svg>
+      Vous quittez Albexia
+    </h3>
     <p style="color:#aaa;font-size:.9rem;line-height:1.6;margin:8px 0 20px">
       Vous allez être redirigé vers le site officiel de
       <strong id="exit-tool-name" style="color:#f0f0f5"></strong>.<br>
@@ -1719,12 +1825,18 @@
   </div>
 </div>
 
-<!-- ══ QUIZ MODAL ═══════════════════════════════ -->
 <div class="modal-overlay" id="quiz-overlay">
   <div class="modal quiz-modal" role="dialog" aria-modal="true" aria-labelledby="quiz-title">
 
     <div class="modal-header">
-      <h3 id="quiz-title">🎯 Trouver mon outil IA</h3>
+      <h3 id="quiz-title" style="display:flex;align-items:center;gap:8px;">
+        <svg viewBox="0 0 24 24" fill="none" width="18" height="18" stroke="currentColor" stroke-width="1.8" style="color:var(--accent)">
+          <circle cx="12" cy="12" r="10"/>
+          <circle cx="12" cy="12" r="6"/>
+          <circle cx="12" cy="12" r="2"/>
+        </svg>
+        Trouver mon outil IA
+      </h3>
       <button class="modal-close" onclick="closeQuiz()" aria-label="Fermer">✕</button>
     </div>
 
@@ -1738,19 +1850,43 @@
     </div>
 
     <div class="quiz-results" id="quiz-results" style="display:none">
-      <div class="quiz-results-title">🎯 Vos 3 outils recommandés</div>
+      <div class="quiz-results-title" style="display:flex;align-items:center;justify-content:center;gap:8px;">
+        <svg viewBox="0 0 24 24" fill="none" width="20" height="20" stroke="currentColor" stroke-width="1.8" style="color:var(--accent2)">
+          <circle cx="12" cy="12" r="10"/>
+          <circle cx="12" cy="12" r="6"/>
+          <circle cx="12" cy="12" r="2"/>
+        </svg>
+        Vos 3 outils recommandés
+      </div>
       <div class="quiz-results-sub" id="quiz-results-sub"></div>
       <div class="quiz-results-grid" id="quiz-results-grid"></div>
       <div class="quiz-results-actions">
-        <button class="btn-sm btn-outline" onclick="restartQuiz()">🔄 Recommencer</button>
-        <button class="btn-quiz-share" onclick="copyQuizLink()">🔗 Copier le lien</button>
-        <button class="btn-quiz-whatsapp" onclick="shareWhatsApp()">💬 WhatsApp</button>
+        <button class="btn-sm btn-outline" onclick="restartQuiz()" style="display:inline-flex;align-items:center;gap:6px;">
+          <svg viewBox="0 0 24 24" fill="none" width="14" height="14" stroke="currentColor" stroke-width="2">
+            <path d="M21.5 2v6h-6M21.34 15.57a10 10 0 1 1-.57-8.38l.73-1.19" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Recommencer
+        </button>
+        <button class="btn-quiz-share" onclick="copyQuizLink()" style="display:inline-flex;align-items:center;gap:6px;">
+          <svg viewBox="0 0 24 24" fill="none" width="14" height="14" stroke="currentColor" stroke-width="2">
+            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          Copier le lien
+        </button>
+        <button class="btn-quiz-whatsapp" onclick="shareWhatsApp()" style="display:inline-flex;align-items:center;gap:6px;">
+          <svg viewBox="0 0 24 24" fill="none" width="14" height="14" stroke="currentColor" stroke-width="2" stroke-linejoin="round" stroke-linecap="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"/>
+          </svg>
+          WhatsApp
+        </button>
       </div>
       <div class="quiz-copy-confirm" id="quiz-copy-confirm" style="display:none">✓ Lien copié !</div>
     </div>
 
   </div>
 </div>
+
 
 <!-- ── TOAST ──────────────────────────────────── -->
 <div id="toast"></div>
