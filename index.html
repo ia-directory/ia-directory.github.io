@@ -172,10 +172,10 @@
       </svg>
    </div>
     <div class="nav-links">
-      <button class="nav-link active" data-page="home">Accueil</button>
-      <button class="nav-link" data-page="tools">Outils</button>
-      <button class="nav-link" data-page="blog">Blog</button>
-      <button class="nav-link" data-page="gallery">Galerie</button>
+      <button class="nav-link active" data-page="home" data-i18n="nav.home">Accueil</button>
+      <button class="nav-link" data-page="tools" data-i18n="nav.tools">Outils</button>
+      <button class="nav-link" data-page="blog" data-i18n="nav.blog">Blog</button>
+      <button class="nav-link" data-page="gallery" data-i18n="nav.gallery">Galerie</button>
     </div>
     <!-- Sélecteur de langue — caché jusqu'à l'ajout de contenu EN/ES -->
     <div class="lang-selector" id="lang-selector" style="display:flex">
@@ -189,9 +189,9 @@
     <div class="nav-avatar" id="nav-avatar">?</div>
   </a>
   <!-- Bouton connexion — visible par défaut -->
-  <a href="profil.html" id="nav-login-btn" class="nav-link">Connexion</a>
+  <a href="profil.html" id="nav-login-btn" class="nav-link" data-i18n="nav.login">Connexion</a>
 </div>
-    <button class="nav-cta" id="open-submit-btn">Soumettre un outil +</button>
+    <button class="nav-cta" id="open-submit-btn" data-i18n="nav.submit">Soumettre un outil +</button>
 
 
  <!-- ═══════════════════════════════════════════════════
@@ -208,29 +208,29 @@
   <div class="kebab-menu" id="kebab-menu" role="menu">
 
     <!-- Top 3 des pages incontournables -->
-    <div class="kebab-label">Incontournables</div>
+    <div class="kebab-label" data-i18n="kebab.mustHave">Incontournables</div>
 
     <a href="glossaire.html" class="kebab-item" role="menuitem">
       <span class="kebab-ico">📖</span>
       <div>
-        <div class="kebab-item-name">Glossaire IA</div>
-        <div class="kebab-item-sub">Tous les termes en français</div>
+        <div class="kebab-item-name" data-i18n="kebab.glossary">Glossaire IA</div>
+        <div class="kebab-item-sub" data-i18n="kebab.glossarySub">Tous les termes en français</div>
       </div>
     </a>
 
     <a href="comparateur.html" class="kebab-item" role="menuitem">
       <span class="kebab-ico">⚖️</span>
       <div>
-        <div class="kebab-item-name">Comparateur</div>
-        <div class="kebab-item-sub">Comparer les outils côte à côte</div>
+        <div class="kebab-item-name" data-i18n="kebab.compare">Comparateur</div>
+        <div class="kebab-item-sub" data-i18n="kebab.compareSub">Comparer les outils côte à côte</div>
       </div>
     </a>
 
     <a href="deals/index.html" class="kebab-item" role="menuitem">
       <span class="kebab-ico">🔥</span>
       <div>
-        <div class="kebab-item-name">Deals &amp; Promos</div>
-        <div class="kebab-item-sub">Essais gratuits · Offres exclusives</div>
+        <div class="kebab-item-name" data-i18n="kebab.deals">Deals &amp; Promos</div>
+        <div class="kebab-item-sub" data-i18n="kebab.dealsSub">Essais gratuits · Offres exclusives</div>
       </div>
     </a>
 
@@ -241,8 +241,8 @@
     <a href="hub.html" class="kebab-item kebab-hub-link" role="menuitem">
       <span class="kebab-ico">📂</span>
       <div>
-        <div class="kebab-item-name">Voir toutes les sections</div>
-        <div class="kebab-item-sub">Carte complète d'Albexia →</div>
+        <div class="kebab-item-name" data-i18n="kebab.hub">Voir toutes les sections</div>
+        <div class="kebab-item-sub" data-i18n="kebab.hubSub">Carte complète d'Albexia →</div>
       </div>
     </a>
 
@@ -498,24 +498,24 @@
     <div class="hero">
       <div class="hero-badge">
         <span class="pulse"></span>
-        Nouvelle plateforme · 2026
+        <span data-i18n="hero.badge">Nouvelle plateforme · 2026</span>
       </div>
-      <h1>Explorez<br>l'univers de <span class="grad">l'IA</span></h1>
-      <p>Outils, articles et œuvres générées par intelligence artificielle — tout en un seul endroit pour le grand public.</p>
+      <h1 data-i18n-html="hero.title">Explorez<br>l'univers de <span class="grad">l'IA</span></h1>
+      <p data-i18n="hero.subtitle">Outils, articles et œuvres générées par intelligence artificielle — tout en un seul endroit pour le grand public.</p>
       <div class="hero-actions">
-        <button class="btn-main" onclick="showPage('tools')">Explorer les outils</button>
-        <button class="btn-outline" onclick="showPage('gallery')">Voir la galerie</button>
+        <button class="btn-main" onclick="showPage('tools')" data-i18n="hero.ctaTools">Explorer les outils</button>
+        <button class="btn-outline" onclick="showPage('gallery')" data-i18n="hero.ctaGallery">Voir la galerie</button>
       </div>
       <div class="hero-quiz-cta">
         <button class="btn-quiz" onclick="openQuiz()">
-          🎯 Trouver mon outil IA en 30 secondes
+          🎯 <span data-i18n="hero.quizCta">Trouver mon outil IA en 30 secondes</span>
         </button>
-        <span class="hero-quiz-sub">5 questions · Recommandations personnalisées · Gratuit</span>
+        <span class="hero-quiz-sub" data-i18n="hero.quizSub">5 questions · Recommandations personnalisées · Gratuit</span>
       </div>
       <div class="hero-stats">
-        <div class="stat-blue"><div class="stat-n">120+</div><div class="stat-l">Outils IA</div></div>
-        <div class="stat-pink"><div class="stat-n">48</div><div class="stat-l">Articles</div></div>
-        <div class="stat-green"><div class="stat-n">300+</div><div class="stat-l">Œuvres créatives</div></div>
+        <div class="stat-blue"><div class="stat-n">120+</div><div class="stat-l" data-i18n="hero.statTools">Outils IA</div></div>
+        <div class="stat-pink"><div class="stat-n">48</div><div class="stat-l" data-i18n="hero.statArticles">Articles</div></div>
+        <div class="stat-green"><div class="stat-n">300+</div><div class="stat-l" data-i18n="hero.statWorks">Œuvres créatives</div></div>
       </div>
     </div>
 
@@ -588,8 +588,8 @@
   <section id="tools" class="page">
     <div class="container">
       <div class="page-header">
-        <h2 class="page-title">Outils & logiciels IA</h2>
-        <p class="page-sub">Découvrez les meilleurs outils d'intelligence artificielle, classés et évalués.</p>
+        <h2 class="page-title" data-i18n="tools.title">Outils & logiciels IA</h2>
+        <p class="page-sub" data-i18n="tools.subtitle">Découvrez les meilleurs outils d'intelligence artificielle, classés et évalués.</p>
       </div>
 
       <div class="search-wrap">
@@ -599,6 +599,7 @@
           id="tool-search"
           type="text"
           placeholder="Rechercher un outil, une catégorie, un tag..."
+          data-i18n-placeholder="tools.searchPlaceholder"
           autocomplete="off"
         >
       </div>
@@ -608,7 +609,7 @@
       </div>
 
       <div class="tools-grid" id="tools-grid">
-        <div class="loading"><div class="spinner"></div>Chargement des outils...</div>
+        <div class="loading"><div class="spinner"></div><span data-i18n="tools.loading">Chargement des outils...</span></div>
       </div>
     </div>
   </section>
@@ -617,8 +618,8 @@
   <section id="blog" class="page">
     <div class="container">
       <div class="page-header">
-        <h2 class="page-title">Blog IA</h2>
-        <p class="page-sub">Articles, guides et tutoriels sur l'intelligence artificielle pour tous.</p>
+        <h2 class="page-title" data-i18n="blog.title">Blog IA</h2>
+        <p class="page-sub" data-i18n="blog.subtitle">Articles, guides et tutoriels sur l'intelligence artificielle pour tous.</p>
       </div>
 
       <div class="filters" id="blog-filters">
@@ -626,7 +627,7 @@
       </div>
 
       <div class="blog-list" id="blog-list">
-        <div class="loading"><div class="spinner"></div>Chargement des articles...</div>
+        <div class="loading"><div class="spinner"></div><span data-i18n="blog.loading">Chargement des articles...</span></div>
       </div>
     </div>
   </section>
@@ -635,8 +636,8 @@
   <section id="gallery" class="page">
     <div class="container">
       <div class="page-header">
-        <h2 class="page-title">Galerie IA</h2>
-        <p class="page-sub">Images, vidéos et musiques générées par intelligence artificielle.</p>
+        <h2 class="page-title" data-i18n="gallery.title">Galerie IA</h2>
+        <p class="page-sub" data-i18n="gallery.subtitle">Images, vidéos et musiques générées par intelligence artificielle.</p>
       </div>
 
       <div class="filters" id="gallery-filters">
@@ -644,7 +645,7 @@
       </div>
 
       <div class="gallery-grid" id="gallery-grid">
-        <div class="loading"><div class="spinner"></div>Chargement de la galerie...</div>
+        <div class="loading"><div class="spinner"></div><span data-i18n="gallery.loading">Chargement de la galerie...</span></div>
       </div>
     </div>
   </section>
@@ -658,7 +659,7 @@
 
       <!-- En-tête -->
       <div class="modal-header">
-        <h3 id="quiz-title">🎯 Trouver mon outil IA</h3>
+        <h3 id="quiz-title">🎯 <span data-i18n="quiz.title">Trouver mon outil IA</span></h3>
         <button class="modal-close" onclick="closeQuiz()" aria-label="Fermer">✕</button>
       </div>
 
@@ -679,15 +680,15 @@
 
       <!-- Résultats (caché au départ) -->
       <div class="quiz-results" id="quiz-results" style="display:none">
-        <div class="quiz-results-title">🎯 Vos 3 outils recommandés</div>
+        <div class="quiz-results-title">🎯 <span data-i18n="quiz.resultsTitle">Vos 3 outils recommandés</span></div>
         <div class="quiz-results-sub" id="quiz-results-sub"></div>
         <div class="quiz-results-grid" id="quiz-results-grid"></div>
         <div class="quiz-results-actions">
-          <button class="btn-outline" onclick="restartQuiz()">🔄 Recommencer</button>
-          <button class="btn-quiz-share" onclick="copyQuizLink()">🔗 Copier le lien</button>
+          <button class="btn-outline" onclick="restartQuiz()">🔄 <span data-i18n="quiz.restart">Recommencer</span></button>
+          <button class="btn-quiz-share" onclick="copyQuizLink()">🔗 <span data-i18n="quiz.copyLink">Copier le lien</span></button>
           <button class="btn-quiz-whatsapp" onclick="shareWhatsApp()">💬 WhatsApp</button>
         </div>
-        <div class="quiz-copy-confirm" id="quiz-copy-confirm" style="display:none">✓ Lien copié !</div>
+        <div class="quiz-copy-confirm" id="quiz-copy-confirm" style="display:none">✓ <span data-i18n="quiz.linkCopied">Lien copié !</span></div>
       </div>
 
     </div>
@@ -712,51 +713,51 @@
             
 
             <div class="footer-newsletter">
-              <div class="footer-nl-label">Newsletter hebdomadaire</div>
+              <div class="footer-nl-label" data-i18n="footer.newsletterLabel">Newsletter hebdomadaire</div>
               <form class="footer-nl-row" action="https://formspree.io/f/xojbojld" method="POST" id="newsletter-form" onsubmit="handleFooterNewsletter(event)">
                 <input type="email" name="email" id="footer-email" class="footer-nl-input" placeholder="votre@email.com" required>
                 <input type="hidden" name="_subject" value="Nouvelle inscription newsletter Albexia">
-                <button type="submit" class="footer-nl-btn">S'abonner</button>
+                <button type="submit" class="footer-nl-btn" data-i18n="footer.subscribe">S'abonner</button>
               </form>
-              <div class="footer-nl-badge" id="nl-feedback">✓ Gratuit · Sans spam · Désabonnement en 1 clic</div>
+              <div class="footer-nl-badge" id="nl-feedback" data-i18n="footer.newsletterBadge">✓ Gratuit · Sans spam · Désabonnement en 1 clic</div>
             </div>
 
             
 
           <!-- Colonne 2 : Navigation -->
           <div class="footer-col">
-            <div class="footer-col-title">Navigation</div>
-            <button class="footer-link" onclick="showPage('home')">Accueil</button>
-            <button class="footer-link" onclick="showPage('tools')">Outils IA</button>
-            <button class="footer-link" onclick="showPage('blog')">Blog</button>
-            <button class="footer-link" onclick="showPage('gallery')">Galerie</button>
-            <a class="footer-link" href="profile.html#favorites">Mes favoris</a>
-            <button class="footer-link" onclick="openModal()">Soumettre un outil</button>
+            <div class="footer-col-title" data-i18n="footer.navTitle">Navigation</div>
+            <button class="footer-link" onclick="showPage('home')" data-i18n="nav.home">Accueil</button>
+            <button class="footer-link" onclick="showPage('tools')" data-i18n="footer.toolsLink">Outils IA</button>
+            <button class="footer-link" onclick="showPage('blog')" data-i18n="nav.blog">Blog</button>
+            <button class="footer-link" onclick="showPage('gallery')" data-i18n="nav.gallery">Galerie</button>
+            <a class="footer-link" href="profile.html#favorites" data-i18n="footer.favorites">Mes favoris</a>
+            <button class="footer-link" onclick="openModal()" data-i18n="footer.submitTool">Soumettre un outil</button>
           </div>
 
           <!-- Colonne 3 : Catégories -->
           <div class="footer-col">
-            <div class="footer-col-title">Catégories</div>
-            <button class="footer-link" onclick="showPage('tools');setToolCat('Texte')">Texte & Rédaction</button>
-            <button class="footer-link" onclick="showPage('tools');setToolCat('Image')">Image & Design</button>
-            <button class="footer-link" onclick="showPage('tools');setToolCat('Vidéo')">Vidéo</button>
-            <button class="footer-link" onclick="showPage('tools');setToolCat('Musique')">Musique & Audio</button>
-            <button class="footer-link" onclick="showPage('tools');setToolCat('Code')">Code</button>
-            <button class="footer-link" onclick="showPage('tools');setToolCat('Productivité')">Productivité</button>
+            <div class="footer-col-title" data-i18n="footer.categoriesTitle">Catégories</div>
+            <button class="footer-link" onclick="showPage('tools');setToolCat('Texte')" data-i18n="footer.catText">Texte & Rédaction</button>
+            <button class="footer-link" onclick="showPage('tools');setToolCat('Image')" data-i18n="footer.catImage">Image & Design</button>
+            <button class="footer-link" onclick="showPage('tools');setToolCat('Vidéo')" data-i18n="footer.catVideo">Vidéo</button>
+            <button class="footer-link" onclick="showPage('tools');setToolCat('Musique')" data-i18n="footer.catMusic">Musique & Audio</button>
+            <button class="footer-link" onclick="showPage('tools');setToolCat('Code')" data-i18n="footer.catCode">Code</button>
+            <button class="footer-link" onclick="showPage('tools');setToolCat('Productivité')" data-i18n="footer.catProductivity">Productivité</button>
           </div>
 
           <!-- Colonne 4 : Légal + Contact -->
           <div class="footer-col">
-            <div class="footer-col-title">Légal</div>
-            <a href="mentions-legales.html" class="footer-link">Mentions légales</a>
-            <a href="politique-confidentialite.html" class="footer-link">Politique de confidentialité</a>
-            <a href="mentions-legales.html#cgu" class="footer-link">Conditions d'utilisation</a>
-            <a href="mentions-legales.html#cookies" class="footer-link">Gestion des cookies</a>
+            <div class="footer-col-title" data-i18n="footer.legalTitle">Légal</div>
+            <a href="mentions-legales.html" class="footer-link" data-i18n="footer.legalNotice">Mentions légales</a>
+            <a href="politique-confidentialite.html" class="footer-link" data-i18n="footer.privacyPolicy">Politique de confidentialité</a>
+            <a href="mentions-legales.html#cgu" class="footer-link" data-i18n="footer.terms">Conditions d'utilisation</a>
+            <a href="mentions-legales.html#cookies" class="footer-link" data-i18n="footer.cookies">Gestion des cookies</a>
 
-            <div class="footer-col-title" style="margin-top: 20px;">Contact</div>
-            <a href="contact.html" class="footer-link">Nous contacter</a>
+            <div class="footer-col-title" style="margin-top: 20px;" data-i18n="footer.contactTitle">Contact</div>
+            <a href="contact.html" class="footer-link" data-i18n="footer.contactUs">Nous contacter</a>
             <a href="mailto:contact@annuaireia.com" class="footer-link">contact@annuaireia.com</a>
-            <a href="mailto:partenariats@annuaireia.com" class="footer-link">Partenariats</a>
+            <a href="mailto:partenariats@annuaireia.com" class="footer-link" data-i18n="footer.partnerships">Partenariats</a>
           </div>
 
         </div>
@@ -766,13 +767,13 @@
     <!-- Barre de bas de footer -->
     <div class="footer-bottom">
       <div class="container footer-bottom-inner">
-        <span class="footer-copy">&copy; 2025-2026 Albexia — Tous droits réservés</span>
+        <span class="footer-copy" data-i18n="footer.copyright">&copy; 2025-2026 Albexia — Tous droits réservés</span>
         <div class="footer-legal-links">
-          <a href="politique-confidentialite.html" class="footer-legal-link">Vie privée</a>
+          <a href="politique-confidentialite.html" class="footer-legal-link" data-i18n="footer.privacy">Vie privée</a>
           <a href="mentions-legales.html#cgu" class="footer-legal-link">CGU</a>
           <a href="mentions-legales.html#cookies" class="footer-legal-link">Cookies</a>
         </div>
-        <span class="footer-made">Fait avec ❤️ pour la communauté IA</span>
+        <span class="footer-made" data-i18n="footer.madeWith">Fait avec ❤️ pour la communauté IA</span>
       </div>
     </div>
   </footer>
