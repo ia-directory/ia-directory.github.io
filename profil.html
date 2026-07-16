@@ -2559,6 +2559,8 @@
       const sections = ['collections', 'quiz', 'avis', 'videos', 'genie', 'profil-public', 'parametres'];
       tab.classList.toggle('active', sections[i] === sectionId);
     });
+
+    if (sectionId === 'genie') window.genieRefreshQuota?.();
   };
 
   // ─── AUTH TABS ────────────────────────────────
@@ -3426,6 +3428,25 @@
     if (btn) btn.disabled = !enabled;
   }
 
+  window.genieRefreshQuota = async function() {
+    if (!currentUser) return;
+    try {
+      const idToken = await currentUser.getIdToken();
+      const res = await fetch(GENIE_WORKER_URL, {
+        method: 'GET',
+        headers: { 'Authorization': 'Bearer ' + idToken },
+      });
+      if (!res.ok) return;
+      const data = await res.json();
+      if (typeof data.voeuxRestants === 'number') {
+        genieUpdateVoeuxUI(data.voeuxRestants, data.voeuxTotal || 3);
+        genieSetInputEnabled(data.voeuxRestants > 0);
+      }
+    } catch (err) {
+      console.error('Erreur chargement quota Génie:', err);
+    }
+  };
+
   window.genieAsk = async function() {
     if (genieLoading) return;
     const input = document.getElementById('genie-input');
@@ -3482,7 +3503,10 @@
       genieAppendBotMsg("Je n'arrive pas à me connecter pour le moment. Réessaie dans un instant.", []);
     } finally {
       genieLoading = false;
-      if (!document.getElementById('genie-send-btn')?.disabled) genieSetInputEnabled(true);
+      // Ne réactive PAS l'input si le quota est à 0 (on veut le garder désactivé)
+      const countEl = document.getElementById('genie-voeux-count');
+      const quotaEpuise = countEl && parseInt(countEl.textContent, 10) <= 0;
+      genieSetInputEnabled(!quotaEpuise);
     }
   };
 </script>
