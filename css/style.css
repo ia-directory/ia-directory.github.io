@@ -3542,3 +3542,10 @@ nav .logo { display: flex; align-items: center; }
   cursor: not-allowed;
 }
 
+
+
+                   @media (max-width: 1024px) and (min-width: 769px) {
+  .hero { padding: 56px 24px 40px; }
+  .hero h1 { font-size: clamp(32px, 5vw, 48px); }
+     }
+
