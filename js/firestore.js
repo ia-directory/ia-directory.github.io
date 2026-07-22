@@ -5,7 +5,8 @@
 
 import {
   db, doc, setDoc, getDoc, updateDoc,
-  collection, addDoc, getDocs, deleteDoc, query, orderBy
+  collection, addDoc, getDocs, deleteDoc, query, orderBy,
+  where, serverTimestamp
 } from './firebase-config.js';
 
 // ══════════════════════════════════════
@@ -215,4 +216,49 @@ export async function getSavedVideos(uid) {
   const ref  = collection(db, 'users', uid, 'savedVideos');
   const snap = await getDocs(query(ref, orderBy('savedAt', 'desc')));
   return snap.docs.map(d => ({ id: d.id, ...d.data() }));
+}
+
+// ══════════════════════════════════════
+// SOUMISSIONS D'OUTILS (depuis le profil connecté)
+// ══════════════════════════════════════
+// Écrit dans la même collection top-level "soumissions" que soumettre.html,
+// avec un champ uid en plus pour permettre le filtrage par utilisateur.
+// Les soumissions faites via soumettre.html (visiteur non connecté) n'ont
+// pas de champ uid et n'apparaîtront donc pas ici (comportement voulu,
+// pas de rattachement rétroactif par email pour l'instant).
+
+export async function createSoumission(uid, data) {
+  const ref = collection(db, 'soumissions');
+  const doc = await addDoc(ref, {
+    uid,
+    nom_outil:     data.nom_outil     || '',
+    url_outil:     data.url_outil     || '',
+    categorie:     data.categorie     || '',
+    modele_prix:   data.modele_prix   || '',
+    tier_demande:  data.tier_demande  || 'gratuit',
+    description:   data.description   || '',
+    extras:        data.extras        || '',
+    status: 'pending',
+    created_at: serverTimestamp(),
+  });
+  return doc.id;
+}
+
+export async function getUserSoumissions(uid) {
+  const ref  = collection(db, 'soumissions');
+  const snap = await getDocs(query(ref, where('uid', '==', uid), orderBy('created_at', 'desc')));
+  const items = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+
+  // Pour les soumissions approuvées, résout l'URL réelle de la fiche
+  // via le champ "page" du document outils correspondant (outil_id).
+  await Promise.all(items.map(async (s) => {
+    if (s.status === 'approved' && s.outil_id) {
+      try {
+        const outilSnap = await getDoc(doc(db, 'outils', String(s.outil_id)));
+        if (outilSnap.exists()) s.fiche_page = outilSnap.data().page || null;
+      } catch (_) { /* ignore, le lien restera masqué */ }
+    }
+  }));
+
+  return items;
 }
