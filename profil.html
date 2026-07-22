@@ -690,6 +690,95 @@
     .empty-state .icon { font-size: 2.5rem; margin-bottom: 10px; }
     .empty-state p { font-size: .9rem; margin-bottom: 16px; }
 
+    /* ── SOUMISSIONS ──────────────────────────────── */
+    .soum-list { display: flex; flex-direction: column; gap: 10px; margin-bottom: 20px; }
+    .soum-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      flex-wrap: wrap;
+      transition: border-color .15s;
+    }
+    .soum-card:hover { border-color: rgba(255,255,255,.15); }
+    .soum-icon {
+      width: 38px; height: 38px;
+      border-radius: 10px;
+      background: var(--surface2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
+    }
+    .soum-info { flex: 1; min-width: 160px; }
+    .soum-name { font-size: .92rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .soum-meta { font-size: .75rem; color: var(--muted); margin-top: 2px; display: flex; gap: 8px; flex-wrap: wrap; }
+    .soum-tier {
+      background: rgba(108,99,255,.15); color: #a8a3ff;
+      font-size: .68rem; font-weight: 600; padding: 1px 8px; border-radius: 20px;
+    }
+    .status-pill {
+      font-size: .72rem; font-weight: 600; padding: 4px 11px; border-radius: 20px;
+      white-space: nowrap; display: flex; align-items: center; gap: 5px; flex-shrink: 0;
+    }
+    .status-pending  { background: rgba(245,166,35,.12);  color: #f5a623; border: 1px solid rgba(245,166,35,.3); }
+    .status-approved { background: rgba(0,212,170,.12);   color: #00d4aa; border: 1px solid rgba(0,212,170,.3); }
+    .status-rejected { background: rgba(255,71,87,.12);   color: var(--danger); border: 1px solid rgba(255,71,87,.3); }
+    .status-dot { width: 6px; height: 6px; border-radius: 50%; background: currentColor; }
+    .soum-link { font-size: .75rem; color: var(--muted); text-decoration: none; flex-shrink: 0; }
+    .soum-link:hover { color: #ff6b9d; }
+
+    .soum-form-wrap {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 22px;
+      margin-bottom: 20px;
+    }
+    .soum-form-title { font-size: .95rem; font-weight: 700; margin-bottom: 4px; }
+    .soum-form-note { font-size: .78rem; color: var(--muted); margin-bottom: 16px; }
+    .soum-connected-badge {
+      display: flex; align-items: center; gap: 8px;
+      background: rgba(0,212,170,.08); border: 1px solid rgba(0,212,170,.25);
+      border-radius: var(--radius-sm); padding: 8px 12px;
+      font-size: .78rem; color: #00d4aa; margin-bottom: 16px;
+    }
+    .soum-form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .soum-form-grid .form-group.full { grid-column: 1 / -1; }
+    .soum-form-grid label { font-size: .76rem; font-weight: 500; color: var(--muted); display: block; margin-bottom: 5px; }
+    .soum-form-grid label span { color: #ff6b9d; }
+    .soum-form-grid input, .soum-form-grid select, .soum-form-grid textarea {
+      background: var(--surface2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      color: var(--text);
+      font-family: inherit;
+      font-size: .85rem;
+      padding: 9px 11px;
+      outline: none;
+      width: 100%;
+      transition: border-color .15s;
+    }
+    .soum-form-grid input:focus, .soum-form-grid select:focus, .soum-form-grid textarea:focus {
+      border-color: #ff6b9d;
+    }
+    .soum-form-grid textarea { resize: vertical; min-height: 70px; }
+    .soum-char-count { font-size: .7rem; color: var(--muted); text-align: right; margin-top: 4px; }
+    .soum-form-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 16px; }
+    .soum-note-box {
+      font-size: .72rem; color: var(--muted); line-height: 1.5;
+      padding: 10px 12px; background: rgba(108,99,255,.05);
+      border-radius: var(--radius-sm); border: 1px solid rgba(108,99,255,.12);
+    }
+    .soum-note-box a { color: #ff6b9d; text-decoration: none; }
+    .soum-note-box a:hover { text-decoration: underline; }
+
+    @media (max-width: 600px) {
+      .soum-form-grid { grid-template-columns: 1fr; }
+    }
+
     /* ── RESPONSIVE ──────────────────────────────── */
     @media (max-width: 768px) {
     }
@@ -920,223 +1009,6 @@
     }
     .sidebar-item-logout { color: #ff6b78 !important; }
     .sidebar-item-logout:hover { background: rgba(255,71,87,.1) !important; color: #ff6b78 !important; }
-
-    /* ── GÉNIE ────────────────────────────────────── */
-    .sidebar-item-genie .sidebar-item-icon { animation: genie-float 3s ease-in-out infinite; }
-    @keyframes genie-float {
-      0%, 100% { transform: translateY(0); }
-      50% { transform: translateY(-2px); }
-    }
-    .genie-voeux-badge {
-      background: linear-gradient(135deg, var(--accent), #8b7cff);
-      color: #fff;
-      border-radius: 20px;
-      padding: 1px 7px;
-      font-size: .7rem;
-      font-weight: 600;
-      flex-shrink: 0;
-    }
-    .sidebar.collapsed .genie-voeux-badge { display: none; }
-
-    .genie-chat-wrap {
-      display: flex;
-      flex-direction: column;
-      height: calc(100vh - 180px);
-      min-height: 420px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      overflow: hidden;
-    }
-    .genie-chat-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 12px;
-      padding: 16px 18px;
-      border-bottom: 1px solid var(--border);
-      flex-wrap: wrap;
-    }
-    .genie-chat-title {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      font-weight: 700;
-      font-size: 1rem;
-    }
-    .genie-chat-title .emoji { font-size: 1.3rem; animation: genie-float 3s ease-in-out infinite; }
-    .genie-voeux-tracker {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      padding: 6px 12px;
-      border-radius: 20px;
-      font-size: .78rem;
-      color: var(--muted);
-    }
-    .genie-voeux-tracker strong { color: var(--accent); }
-    .genie-jauge {
-      width: 44px;
-      height: 6px;
-      background: var(--border);
-      border-radius: 4px;
-      overflow: hidden;
-    }
-    .genie-jauge-fill {
-      height: 100%;
-      background: linear-gradient(135deg, var(--accent), #8b7cff);
-      border-radius: 4px;
-      transition: width .3s ease;
-    }
-
-    .genie-chat-history {
-      flex: 1;
-      overflow-y: auto;
-      padding: 18px;
-      display: flex;
-      flex-direction: column;
-      gap: 16px;
-    }
-    .genie-msg-user {
-      align-self: flex-end;
-      max-width: 82%;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      padding: 11px 15px;
-      border-radius: 14px 14px 3px 14px;
-      font-size: .88rem;
-      line-height: 1.5;
-    }
-    .genie-msg-bot-row {
-      display: flex;
-      gap: 10px;
-      align-self: flex-start;
-      max-width: 90%;
-    }
-    .genie-bot-avatar {
-      width: 32px;
-      height: 32px;
-      border-radius: 50%;
-      background: var(--surface2);
-      border: 1px solid var(--accent);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      flex-shrink: 0;
-      font-size: .95rem;
-    }
-    .genie-msg-bot {
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      padding: 12px 15px;
-      border-radius: 3px 14px 14px 14px;
-      font-size: .88rem;
-      line-height: 1.55;
-    }
-    .genie-tool-card {
-      margin-top: 10px;
-      background: var(--bg);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 12px 14px;
-    }
-    .genie-tool-card + .genie-tool-card { margin-top: 8px; }
-    .genie-tool-head {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 6px;
-    }
-    .genie-tool-emoji {
-      width: 34px;
-      height: 34px;
-      border-radius: 9px;
-      background: var(--surface2);
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      flex-shrink: 0;
-    }
-    .genie-tool-name { font-weight: 700; font-size: .88rem; }
-    .genie-tool-cat { font-size: .74rem; color: var(--muted); }
-    .genie-tool-desc { font-size: .8rem; color: var(--muted); line-height: 1.45; margin-bottom: 10px; }
-    .genie-tool-link {
-      display: inline-block;
-      font-size: .78rem;
-      font-weight: 600;
-      color: var(--accent);
-      text-decoration: none;
-      border: 1px solid var(--accent);
-      padding: 6px 12px;
-      border-radius: var(--radius-sm);
-      transition: all .2s ease;
-    }
-    .genie-tool-link:hover { background: var(--accent); color: #fff; }
-
-    .genie-typing { display: flex; gap: 4px; padding: 4px 0; }
-    .genie-typing span {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--muted);
-      animation: genie-bounce 1.2s infinite ease-in-out;
-    }
-    .genie-typing span:nth-child(2) { animation-delay: .15s; }
-    .genie-typing span:nth-child(3) { animation-delay: .3s; }
-    @keyframes genie-bounce {
-      0%, 60%, 100% { transform: translateY(0); opacity: .5; }
-      30% { transform: translateY(-4px); opacity: 1; }
-    }
-
-    .genie-input-bar {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      padding: 14px;
-      border-top: 1px solid var(--border);
-    }
-    .genie-input-bar input {
-      flex: 1;
-      background: var(--surface2);
-      border: 1px solid var(--border);
-      border-radius: var(--radius-sm);
-      padding: 11px 14px;
-      color: var(--text);
-      font-size: .88rem;
-      font-family: inherit;
-      outline: none;
-      transition: border-color .2s ease;
-    }
-    .genie-input-bar input:focus { border-color: var(--accent); }
-    .genie-input-bar input:disabled { opacity: .5; }
-    .genie-send-btn {
-      background: linear-gradient(135deg, var(--accent), #8b7cff);
-      color: #fff;
-      border: none;
-      padding: 11px 18px;
-      border-radius: var(--radius-sm);
-      font-weight: 700;
-      font-size: .82rem;
-      cursor: pointer;
-      white-space: nowrap;
-      transition: transform .15s ease, opacity .2s ease;
-    }
-    .genie-send-btn:hover:not(:disabled) { transform: translateY(-1px); }
-    .genie-send-btn:disabled { opacity: .5; cursor: not-allowed; }
-
-    .genie-quota-empty {
-      text-align: center;
-      padding: 24px 18px;
-      color: var(--muted);
-      font-size: .85rem;
-      line-height: 1.6;
-    }
-
-    @media (max-width: 640px) {
-      .genie-chat-wrap { height: calc(100vh - 260px); min-height: 380px; }
-      .genie-msg-user, .genie-msg-bot-row { max-width: 96%; }
-    }
 
     /* ── MAIN CONTENT ────────────────────────────── */
     .profile-main {
@@ -1643,13 +1515,13 @@
 
     <!-- ── MOBILE TABS ─────────────────────────── -->
   <div class="mobile-tabs">
-    <button class="mobile-tab active" onclick="switchSection('collections')">
+    <button class="mobile-tab active" data-section="collections" onclick="switchSection('collections')">
       <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle;margin-right:4px;">
         <path d="M2 4.5C2 3.67 2.67 3 3.5 3H6.5L8.5 5H14.5C15.33 5 16 5.67 16 6.5V13.5C16 14.33 15.33 15 14.5 15H3.5C2.67 15 2 14.33 2 13.5V4.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
       </svg>
       Collections
     </button>
-    <button class="mobile-tab" onclick="switchSection('quiz')">
+    <button class="mobile-tab" data-section="quiz" onclick="switchSection('quiz')">
       <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle;margin-right:4px;">
         <path d="M9 3L3 6L9 9L15 6L9 3Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
         <path d="M4.5 8.5V12C4.5 12 7 14.5 9 14.5C11 14.5 13.5 12 13.5 12V8.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
@@ -1657,30 +1529,33 @@
       </svg>
       Quiz
     </button>
-    <button class="mobile-tab" onclick="switchSection('avis')">
+    <button class="mobile-tab" data-section="avis" onclick="switchSection('avis')">
       <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle;margin-right:4px;">
         <path d="M15.5 9C15.5 12.1 12.6 14.5 9 14.5C7.8 14.5 6.7 14.2 5.7 13.7L2.5 14.5L3.5 11.6C2.8 10.9 2.5 10 2.5 9C2.5 5.9 5.4 3.5 9 3.5C12.6 3.5 15.5 5.9 15.5 9Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
       </svg>
       Avis
     </button>
-    <button class="mobile-tab" onclick="switchSection('videos')">
+    <button class="mobile-tab" data-section="videos" onclick="switchSection('videos')">
       <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle;margin-right:4px;">
         <path d="M4 3C4 2.45 4.45 2 5 2H13C13.55 2 14 2.45 14 3V16L9 12.5L4 16V3Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
         <path d="M8 6.5L10.5 8L8 9.5V6.5Z" fill="currentColor"/>
       </svg>
       Vidéos
     </button>
-    <button class="mobile-tab" onclick="switchSection('genie')">
-      🧞‍♂️ Génie
+    <button class="mobile-tab" data-section="soumissions" onclick="switchSection('soumissions')">
+      <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle;margin-right:4px;">
+        <path d="M2.5 9L15.5 2.5L13.5 15L9 12L6.5 14.5V11.5L2.5 9Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+      </svg>
+      Soumissions
     </button>
-    <button class="mobile-tab" onclick="switchSection('profil-public')">
+    <button class="mobile-tab" data-section="profil-public" onclick="switchSection('profil-public')">
       <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle;margin-right:4px;">
         <circle cx="9" cy="6" r="3" stroke="currentColor" stroke-width="1.4"/>
         <path d="M3 15c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
       </svg>
       Profil public
     </button>
-    <button class="mobile-tab" onclick="switchSection('parametres')">
+    <button class="mobile-tab" data-section="parametres" onclick="switchSection('parametres')">
       <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle;margin-right:4px;">
         <circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.4"/>
         <path d="M9 1v2M9 15v2M1 9h2M15 9h2M3.3 3.3l1.4 1.4M13.3 13.3l1.4 1.4M3.3 14.7l1.4-1.4M13.3 4.7l1.4-1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
@@ -1751,10 +1626,14 @@
           <span class="sidebar-item-label">Vidéos sauvegardées</span>
           <span class="sidebar-badge" id="videos-count">0</span>
         </button>
-        <button class="sidebar-item sidebar-item-genie" data-section="genie" data-tooltip="Le Génie" onclick="switchSection('genie')">
-          <span class="sidebar-item-icon">🧞‍♂️</span>
-          <span class="sidebar-item-label">Le Génie</span>
-          <span class="genie-voeux-badge" id="genie-nav-badge">3</span>
+        <button class="sidebar-item" data-section="soumissions" data-tooltip="Mes soumissions" onclick="switchSection('soumissions')">
+          <span class="sidebar-item-icon">
+            <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle">
+              <path d="M2.5 9L15.5 2.5L13.5 15L9 12L6.5 14.5V11.5L2.5 9Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
+            </svg>
+          </span>
+          <span class="sidebar-item-label">Mes soumissions</span>
+          <span class="sidebar-badge" id="soum-count">0</span>
         </button>
         <button class="sidebar-item" data-section="profil-public" data-tooltip="Profil public" onclick="switchSection('profil-public')">
           <span class="sidebar-item-icon">
@@ -1863,37 +1742,93 @@
         </div>
       </div>
 
-      <!-- LE GÉNIE -->
-      <div class="profile-section" id="section-genie">
+      <!-- 5. MES SOUMISSIONS -->
+      <div class="profile-section" id="section-soumissions">
         <div class="section-header">
-          <div class="section-title">🧞‍♂️ Le Génie</div>
+          <div class="section-title">
+            <svg viewBox="0 0 20 20" fill="none" width="18" height="18" style="display:inline-block;vertical-align:middle">
+              <path d="M2.7 10L17.3 2.7L15 17.3L10 13.5L7.2 16.3V12.8L2.7 10Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
+            </svg>
+            Mes soumissions
+          </div>
+          <button class="btn-sm btn-outline" id="btn-toggle-soum-form" onclick="toggleSoumForm()">+ Soumettre un outil</button>
         </div>
 
-        <div class="genie-chat-wrap">
-          <div class="genie-chat-header">
-            <div class="genie-chat-title">
-              <span class="emoji">🧞‍♂️</span> Demande au Génie
-            </div>
-            <div class="genie-voeux-tracker">
-              Vœux : <strong id="genie-voeux-count">3</strong> / <span id="genie-voeux-total">3</span>
-              <div class="genie-jauge"><div class="genie-jauge-fill" id="genie-jauge-fill" style="width:100%"></div></div>
-            </div>
+        <div id="soumissions-container">
+          <div class="loader"><div class="spinner"></div> Chargement…</div>
+        </div>
+
+        <!-- Formulaire compact (masqué par défaut) -->
+        <div class="soum-form-wrap" id="soum-form-wrap" style="display:none">
+          <div class="soum-form-title">Nouvel outil</div>
+          <p class="soum-form-note">Votre soumission sera examinée par l'équipe Albexia sous 48h.</p>
+          <div class="soum-connected-badge" id="soum-connected-badge">
+            ✓ Connecté en tant que <strong id="soum-connected-email">—</strong> — pas besoin de ressaisir votre email
           </div>
 
-          <div class="genie-chat-history" id="genie-chat-history">
-            <div class="genie-msg-bot-row">
-              <div class="genie-bot-avatar">🧞‍♂️</div>
-              <div class="genie-msg-bot">
-                Salut ! Décris-moi ce que tu cherches (ex : "un outil pour générer des voix off en français") et je fouille le catalogue Albexia pour toi.
+          <form id="form-soum-outil">
+            <div class="soum-form-grid">
+              <div class="form-group">
+                <label for="soum-name">Nom de l'outil <span>*</span></label>
+                <input type="text" id="soum-name" placeholder="ex. ChatGPT, Midjourney…" required>
+              </div>
+              <div class="form-group">
+                <label for="soum-url">URL officielle <span>*</span></label>
+                <input type="url" id="soum-url" placeholder="https://…" required>
+              </div>
+              <div class="form-group">
+                <label for="soum-cat">Catégorie <span>*</span></label>
+                <select id="soum-cat" required>
+                  <option value="" disabled selected>Choisir une catégorie</option>
+                  <option>Rédaction & Contenu</option>
+                  <option>Image & Design</option>
+                  <option>Vidéo & Audio</option>
+                  <option>Code & Développement</option>
+                  <option>Productivité</option>
+                  <option>Marketing & SEO</option>
+                  <option>Éducation</option>
+                  <option>Santé & Bien-être</option>
+                  <option>Finance & Business</option>
+                  <option>Autre</option>
+                </select>
+              </div>
+              <div class="form-group">
+                <label for="soum-price">Modèle de prix</label>
+                <select id="soum-price">
+                  <option value="" disabled selected>Sélectionner</option>
+                  <option>Gratuit</option>
+                  <option>Freemium</option>
+                  <option>Payant</option>
+                  <option>Essai gratuit</option>
+                </select>
+              </div>
+              <div class="form-group full">
+                <label for="soum-tier">Formule de listing souhaitée <span>*</span></label>
+                <select id="soum-tier" required>
+                  <option value="gratuit" selected>Gratuit — Standard</option>
+                  <option value="starter">Starter</option>
+                  <option value="featured">Featured — mise en avant éditoriale</option>
+                </select>
+              </div>
+              <div class="form-group full">
+                <label for="soum-desc">Description courte <span>*</span> <span style="font-weight:300;color:var(--text-dim,#4a4a6a)">(150 mots max)</span></label>
+                <textarea id="soum-desc" placeholder="Décrivez votre outil : à quoi il sert, pour qui, ce qui le rend unique…" maxlength="900" oninput="updateSoumCount(this)" required></textarea>
+                <div class="soum-char-count"><span id="soum-char-count">0</span> / 900 caractères</div>
+              </div>
+              <div class="form-group full">
+                <label for="soum-extras">Informations complémentaires <span style="font-weight:300;color:var(--text-dim,#4a4a6a)">(optionnel)</span></label>
+                <textarea id="soum-extras" placeholder="Lien vers captures d'écran, vidéo de démo, programme d'affiliation…" style="min-height:70px"></textarea>
               </div>
             </div>
-          </div>
+            <div class="soum-form-actions">
+              <button type="button" class="btn-sm btn-outline" onclick="toggleSoumForm()">Annuler</button>
+              <button type="submit" class="btn-primary btn-sm" id="btn-submit-soum">Soumettre mon outil</button>
+            </div>
+          </form>
+        </div>
 
-          <div class="genie-input-bar">
-            <input type="text" id="genie-input" placeholder="Décris ton besoin…" maxlength="400"
-              onkeydown="if(event.key==='Enter'){event.preventDefault();window.genieAsk();}">
-            <button class="genie-send-btn" id="genie-send-btn" onclick="window.genieAsk()">Demander</button>
-          </div>
+        <div class="soum-note-box">
+          💡 Vous pouvez aussi soumettre un outil sans créer de compte via la <a href="/soumettre.html">page dédiée</a> — mais depuis votre profil, vous pouvez suivre le statut de vos soumissions ici.
         </div>
       </div>
 
@@ -2163,7 +2098,8 @@
     getUserProfile, updateDisplayName, updateLangue, updateNewsletter, updatePhotoURL,
     updateSkipExitModal, setCollectionPublic,
     getSavedVideos, unsaveVideo,
-    updatePublicProfile
+    updatePublicProfile,
+    createSoumission, getUserSoumissions
   } from './js/firestore.js';
   import { getUserReviews, deleteUserReview } from './js/reviews.js';
 
@@ -2555,12 +2491,9 @@
     });
 
     // Mobile tabs
-    document.querySelectorAll('.mobile-tab').forEach((tab, i) => {
-      const sections = ['collections', 'quiz', 'avis', 'videos', 'genie', 'profil-public', 'parametres'];
-      tab.classList.toggle('active', sections[i] === sectionId);
+    document.querySelectorAll('.mobile-tab[data-section]').forEach(tab => {
+      tab.classList.toggle('active', tab.dataset.section === sectionId);
     });
-
-    if (sectionId === 'genie') window.genieRefreshQuota?.();
   };
 
   // ─── AUTH TABS ────────────────────────────────
@@ -2649,6 +2582,7 @@
       await loadQuizHistory();
       await loadAvis();
       await loadSavedVideos();
+      await loadSoumissions();
       // Badges — calculés UNIQUEMENT sur les collections publiques (cohérent avec profil-public.html)
       const publicCols = collections.filter(c => c.isPublic === true);
       const earnedBadges = computeEarnedBadges(userProfile, publicCols, userAvis.length || 0);
@@ -3124,6 +3058,127 @@
     }
   };
 
+  // ══════════════════════════════════════
+  // MES SOUMISSIONS
+  // ══════════════════════════════════════
+  let userSoumissions = [];
+
+  const SOUM_STATUS_LABELS = {
+    pending:    { label: 'En attente',  cls: 'status-pending'  },
+    processing: { label: 'En cours de traitement', cls: 'status-pending' },
+    approved:   { label: 'Approuvé',    cls: 'status-approved' },
+    rejected:   { label: 'Rejeté',      cls: 'status-rejected' },
+  };
+
+  async function loadSoumissions() {
+    try {
+      userSoumissions = await getUserSoumissions(currentUser.uid);
+    } catch(e) {
+      userSoumissions = [];
+      console.error(e);
+    }
+    renderSoumissions();
+  }
+
+  function renderSoumissions() {
+    const container = document.getElementById('soumissions-container');
+    if (!container) return;
+
+    const countEl = document.getElementById('soum-count');
+    if (countEl) countEl.textContent = userSoumissions.length;
+
+    if (userSoumissions.length === 0) {
+      container.innerHTML = `
+        <div class="empty-state">
+          <div class="icon">📮</div>
+          <p>Tu n'as encore soumis aucun outil.<br>
+             Propose ton premier outil à l'annuaire !</p>
+        </div>`;
+      return;
+    }
+
+    container.innerHTML = `<div class="soum-list">${userSoumissions.map(renderSoumCard).join('')}</div>`;
+  }
+
+  function renderSoumCard(s) {
+    const st = SOUM_STATUS_LABELS[s.status] || SOUM_STATUS_LABELS.pending;
+    const date = s.created_at?.seconds
+      ? new Date(s.created_at.seconds * 1000).toLocaleDateString('fr-FR', {
+          day: 'numeric', month: 'short', year: 'numeric'
+        })
+      : '';
+    const tierLabels = { gratuit: 'Gratuit', starter: 'Starter', featured: 'Featured' };
+    const tierLabel = tierLabels[s.tier_demande] || s.tier_demande || '';
+
+    const link = (s.status === 'approved' && s.fiche_page)
+      ? `<a href="/${s.fiche_page}" class="soum-link">Voir la fiche →</a>`
+      : '';
+
+    return `
+      <div class="soum-card">
+        <div class="soum-icon">🤖</div>
+        <div class="soum-info">
+          <div class="soum-name">${escHtml(s.nom_outil)}</div>
+          <div class="soum-meta">
+            <span class="soum-tier">${escHtml(tierLabel)}</span>
+            <span>${escHtml(s.categorie || '')}</span>
+            <span>Soumis le ${date}</span>
+          </div>
+        </div>
+        <span class="status-pill ${st.cls}"><span class="status-dot"></span>${st.label}</span>
+        ${link}
+      </div>`;
+  }
+
+  window.toggleSoumForm = function() {
+    const wrap = document.getElementById('soum-form-wrap');
+    const isOpen = wrap.style.display !== 'none';
+    wrap.style.display = isOpen ? 'none' : 'block';
+    if (!isOpen) {
+      const emailEl = document.getElementById('soum-connected-email');
+      if (emailEl && currentUser) emailEl.textContent = currentUser.email || '—';
+      wrap.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  };
+
+  window.updateSoumCount = function(el) {
+    document.getElementById('soum-char-count').textContent = el.value.length;
+  };
+
+  document.getElementById('form-soum-outil')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    if (!currentUser) return;
+    const btn = document.getElementById('btn-submit-soum');
+    const originalText = btn.textContent;
+    btn.disabled = true;
+    btn.textContent = 'Envoi en cours…';
+
+    const data = {
+      nom_outil:    document.getElementById('soum-name').value.trim(),
+      url_outil:    document.getElementById('soum-url').value.trim(),
+      categorie:    document.getElementById('soum-cat').value,
+      modele_prix:  document.getElementById('soum-price').value || '',
+      tier_demande: document.getElementById('soum-tier').value,
+      description:  document.getElementById('soum-desc').value.trim(),
+      extras:       document.getElementById('soum-extras').value.trim(),
+    };
+
+    try {
+      await createSoumission(currentUser.uid, data);
+      this.reset();
+      document.getElementById('soum-char-count').textContent = '0';
+      window.toggleSoumForm();
+      showToast('✓ Soumission envoyée !');
+      await loadSoumissions();
+    } catch(err) {
+      showToast('⚠ Erreur lors de l\'envoi.');
+      console.error(err);
+    } finally {
+      btn.disabled = false;
+      btn.textContent = originalText;
+    }
+  });
+
   // ══════════════════════════════════════════════
   // VIDÉOS SAUVEGARDÉES
   // ══════════════════════════════════════════════
@@ -3339,176 +3394,6 @@
   document.getElementById('profil-player-modal')?.addEventListener('click', e => {
     if (e.target.id === 'profil-player-modal') fermerPlayerProfil();
   });
-
-  /* ══════════════════════════════════════════════
-     LE GÉNIE — assistant IA (Cloudflare Worker + Gemini)
-     ══════════════════════════════════════════════ */
-  const GENIE_WORKER_URL = 'https://genie-albexia.damonblackfall.workers.dev';
-  let genieLoading = false;
-
-  function genieEscapeHtml(str) {
-    const div = document.createElement('div');
-    div.textContent = str || '';
-    return div.innerHTML;
-  }
-
-  function genieAppendUserMsg(text) {
-    const history = document.getElementById('genie-chat-history');
-    if (!history) return;
-    const div = document.createElement('div');
-    div.className = 'genie-msg-user';
-    div.textContent = text;
-    history.appendChild(div);
-    history.scrollTop = history.scrollHeight;
-  }
-
-  function genieAppendTyping() {
-    const history = document.getElementById('genie-chat-history');
-    if (!history) return null;
-    const row = document.createElement('div');
-    row.className = 'genie-msg-bot-row';
-    row.id = 'genie-typing-row';
-    row.innerHTML = `
-      <div class="genie-bot-avatar">🧞‍♂️</div>
-      <div class="genie-msg-bot">
-        <div class="genie-typing"><span></span><span></span><span></span></div>
-      </div>`;
-    history.appendChild(row);
-    history.scrollTop = history.scrollHeight;
-    return row;
-  }
-
-  function genieRenderToolCard(tool) {
-    const desc = genieEscapeHtml((tool.description || '').slice(0, 130));
-    return `
-      <div class="genie-tool-card">
-        <div class="genie-tool-head">
-          <div class="genie-tool-emoji">${genieEscapeHtml(tool.emoji || '🤖')}</div>
-          <div>
-            <div class="genie-tool-name">${genieEscapeHtml(tool.name)}</div>
-            <div class="genie-tool-cat">${genieEscapeHtml(tool.category || '')}</div>
-          </div>
-        </div>
-        ${desc ? `<div class="genie-tool-desc">${desc}${tool.description && tool.description.length > 130 ? '…' : ''}</div>` : ''}
-        ${tool.url ? `<a href="${genieEscapeHtml(tool.url)}" target="_blank" rel="noopener" class="genie-tool-link">Visiter le site officiel ↗</a>` : ''}
-      </div>`;
-  }
-
-  function genieAppendBotMsg(reponse, outils) {
-    const history = document.getElementById('genie-chat-history');
-    if (!history) return;
-    const row = document.createElement('div');
-    row.className = 'genie-msg-bot-row';
-    const cardsHtml = (outils || []).map(genieRenderToolCard).join('');
-    row.innerHTML = `
-      <div class="genie-bot-avatar">🧞‍♂️</div>
-      <div>
-        <div class="genie-msg-bot">${genieEscapeHtml(reponse)}</div>
-        ${cardsHtml}
-      </div>`;
-    history.appendChild(row);
-    history.scrollTop = history.scrollHeight;
-  }
-
-  function genieUpdateVoeuxUI(voeuxRestants, voeuxTotal) {
-    const countEl = document.getElementById('genie-voeux-count');
-    const totalEl = document.getElementById('genie-voeux-total');
-    const fillEl  = document.getElementById('genie-jauge-fill');
-    const navBadge = document.getElementById('genie-nav-badge');
-    if (countEl) countEl.textContent = voeuxRestants;
-    if (totalEl) totalEl.textContent = voeuxTotal;
-    if (fillEl)  fillEl.style.width = (voeuxTotal > 0 ? (voeuxRestants / voeuxTotal) * 100 : 0) + '%';
-    if (navBadge) navBadge.textContent = voeuxRestants;
-  }
-
-  function genieSetInputEnabled(enabled) {
-    const input = document.getElementById('genie-input');
-    const btn = document.getElementById('genie-send-btn');
-    if (input) input.disabled = !enabled;
-    if (btn) btn.disabled = !enabled;
-  }
-
-  window.genieRefreshQuota = async function() {
-    if (!currentUser) return;
-    try {
-      const idToken = await currentUser.getIdToken();
-      const res = await fetch(GENIE_WORKER_URL, {
-        method: 'GET',
-        headers: { 'Authorization': 'Bearer ' + idToken },
-      });
-      if (!res.ok) return;
-      const data = await res.json();
-      if (typeof data.voeuxRestants === 'number') {
-        genieUpdateVoeuxUI(data.voeuxRestants, data.voeuxTotal || 3);
-        genieSetInputEnabled(data.voeuxRestants > 0);
-      }
-    } catch (err) {
-      console.error('Erreur chargement quota Génie:', err);
-    }
-  };
-
-  window.genieAsk = async function() {
-    if (genieLoading) return;
-    const input = document.getElementById('genie-input');
-    if (!input) return;
-    const question = input.value.trim();
-    if (!question) return;
-
-    if (!currentUser) {
-      showToast('⚠ Connecte-toi pour parler au Génie.');
-      return;
-    }
-
-    genieLoading = true;
-    genieSetInputEnabled(false);
-    genieAppendUserMsg(question);
-    input.value = '';
-    genieAppendTyping();
-
-    try {
-      const idToken = await currentUser.getIdToken();
-      const res = await fetch(GENIE_WORKER_URL, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': 'Bearer ' + idToken,
-        },
-        body: JSON.stringify({ question }),
-      });
-
-      const data = await res.json();
-      document.getElementById('genie-typing-row')?.remove();
-
-      if (res.status === 429) {
-        genieAppendBotMsg(data.message || "Tu as utilisé tous tes vœux pour aujourd'hui. Reviens demain !", []);
-        genieUpdateVoeuxUI(0, 3);
-        genieSetInputEnabled(false);
-        return;
-      }
-
-      if (!res.ok) {
-        genieAppendBotMsg(data.error || "Une erreur est survenue, réessaie dans un instant.", []);
-        return;
-      }
-
-      genieAppendBotMsg(data.reponse, data.outilsRecommandes);
-      if (typeof data.voeuxRestants === 'number') {
-        genieUpdateVoeuxUI(data.voeuxRestants, 3);
-        if (data.voeuxRestants <= 0) genieSetInputEnabled(false);
-      }
-
-    } catch (err) {
-      console.error('Erreur Génie:', err);
-      document.getElementById('genie-typing-row')?.remove();
-      genieAppendBotMsg("Je n'arrive pas à me connecter pour le moment. Réessaie dans un instant.", []);
-    } finally {
-      genieLoading = false;
-      // Ne réactive PAS l'input si le quota est à 0 (on veut le garder désactivé)
-      const countEl = document.getElementById('genie-voeux-count');
-      const quotaEpuise = countEl && parseInt(countEl.textContent, 10) <= 0;
-      genieSetInputEnabled(!quotaEpuise);
-    }
-  };
 </script>
 
 <!-- ── MODAL PLAYER VIDÉO (profil) ── -->
