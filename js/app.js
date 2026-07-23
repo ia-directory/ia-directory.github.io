@@ -133,6 +133,10 @@ const UI_TRANSLATIONS = {
     'kebab.dealsSub': 'Essais gratuits · Offres exclusives',
     'kebab.hub': 'Voir toutes les sections',
     'kebab.hubSub': "Carte complète d'Albexia →",
+    'editorial.introTitle': "L'intelligence artificielle, <span class=\"grad\">enfin accessible à tous</span>",
+    'editorial.introLead': "L'IA n'est plus réservée aux ingénieurs et aux grandes entreprises. Un chat, une phrase tapée au clavier suffisent aujourd'hui à générer une image, rédiger un texte ou automatiser une tâche répétitive. Pas besoin de coder, pas besoin de diplôme technique — juste une idée à formuler.",
+    'editorial.block1Title': 'Un annuaire, un blog, une galerie',
+    'editorial.block1P1': "Albexia réunit plus de 120 outils IA classés par catégorie, des articles pour s'y retrouver, et une galerie d'œuvres générées par IA. Chaque outil a une note et un prix clair, mis à jour à mesure que l'écosystème change. L'objectif est simple : rester un guide honnête sur l'IA, sans jargon ni promesse en l'air, pour que chacun puisse en tirer parti dès aujourd'hui.",
   },
   en: {
     'nav.home': 'Home',
@@ -203,6 +207,10 @@ const UI_TRANSLATIONS = {
     'kebab.dealsSub': 'Free trials · Exclusive offers',
     'kebab.hub': 'See all sections',
     'kebab.hubSub': "Albexia's full map →",
+    'editorial.introTitle': "Artificial intelligence, <span class=\"grad\">finally accessible to everyone</span>",
+    'editorial.introLead': "AI is no longer reserved for engineers and big companies. A chat, a sentence typed on a keyboard is enough today to generate an image, write a text or automate a repetitive task. No coding required, no technical degree needed — just an idea to put into words.",
+    'editorial.block1Title': 'A directory, a blog, a gallery',
+    'editorial.block1P1': "Albexia brings together over 120 AI tools sorted by category, articles to help you make sense of it all, and a gallery of AI-generated works. Every tool comes with a rating and a clear price, kept up to date as the landscape changes. The goal is simple: stay an honest guide to AI, with no jargon or empty promises, so everyone can make the most of it today.",
   },
   es: {
     'nav.home': 'Inicio',
@@ -273,6 +281,10 @@ const UI_TRANSLATIONS = {
     'kebab.dealsSub': 'Pruebas gratis · Ofertas exclusivas',
     'kebab.hub': 'Ver todas las secciones',
     'kebab.hubSub': 'Mapa completo de Albexia →',
+    'editorial.introTitle': "La inteligencia artificial, <span class=\"grad\">por fin al alcance de todos</span>",
+    'editorial.introLead': "La IA ya no está reservada a ingenieros y grandes empresas. Un chat, una frase escrita en el teclado bastan hoy para generar una imagen, redactar un texto o automatizar una tarea repetitiva. No hace falta programar, no hace falta un título técnico — solo una idea que formular.",
+    'editorial.block1Title': 'Un directorio, un blog, una galería',
+    'editorial.block1P1': "Albexia reúne más de 120 herramientas de IA clasificadas por categoría, artículos para entender mejor, y una galería de obras generadas por IA. Cada herramienta tiene una valoración y un precio claro, actualizados a medida que cambia el ecosistema. El objetivo es simple: ser una guía honesta sobre la IA, sin jerga ni promesas vacías, para que cada persona pueda aprovecharla desde hoy.",
   },
 };
 window.UI_TRANSLATIONS = UI_TRANSLATIONS;
@@ -1060,58 +1072,177 @@ document.addEventListener('DOMContentLoaded', () => {
 // QUIZ — TROUVER MON OUTIL IA
 // ═══════════════════════════════════════
 
-const QUIZ_QUESTIONS = [
-  {
-    id: 'metier',
-    question: 'Tu es plutôt…',
-    options: [
-      { label: '✍️ Rédacteur / Copywriter',   value: 'redacteur'    },
-      { label: '🎨 Designer / Créatif',        value: 'designer'     },
-      { label: '💻 Développeur',               value: 'developpeur'  },
-      { label: '🚀 Entrepreneur / Freelance',  value: 'entrepreneur' },
-      { label: '🎓 Étudiant',                  value: 'etudiant'     },
-      { label: '👤 Autre',                     value: 'autre'        },
-    ]
-  },
-  {
-    id: 'objectif',
-    question: "Ton objectif principal avec l'IA…",
-    options: [
-      { label: '⚡ Gagner du temps',           value: 'temps'     },
-      { label: '✏️ Créer du contenu',          value: 'contenu'   },
-      { label: '📚 Apprendre',                 value: 'apprendre' },
-      { label: '💰 Générer des revenus',       value: 'revenus'   },
-      { label: "📋 M'organiser",               value: 'organiser' },
-    ]
-  },
-  {
-    id: 'budget',
-    question: 'Ton budget mensuel pour un outil IA…',
-    options: [
-      { label: '🆓 Gratuit uniquement',        value: 'free'     },
-      { label: '💳 Moins de 20$/mois',         value: 'freemium' },
-      { label: '💎 Plus de 20$/mois',          value: 'paid'     },
-    ]
-  },
-  {
-    id: 'connexion',
-    question: 'Ta connexion internet est…',
-    options: [
-      { label: '🚀 Rapide et stable',          value: 'rapide'  },
-      { label: '📶 Correcte',                  value: 'moyenne' },
-      { label: '🐢 Lente ou instable',         value: 'lente'   },
-    ]
-  },
-  {
-    id: 'niveau',
-    question: 'Ton niveau avec les outils IA…',
-    options: [
-      { label: '🌱 Débutant complet',          value: 'debutant'      },
-      { label: '🌿 Quelques expériences',      value: 'intermediaire' },
-      { label: '🌳 Utilisateur régulier',      value: 'avance'        },
-    ]
-  }
-];
+// Questions et options du quiz, traduites FR/EN/ES. Les "value" (metier,
+// objectif, budget, connexion, niveau) restent les clés internes utilisées
+// par scoreOutil() et METIER_CATS — seuls les labels affichés changent.
+const QUIZ_QUESTIONS_I18N = {
+  fr: [
+    {
+      id: 'metier',
+      question: 'Tu es plutôt…',
+      options: [
+        { label: '✍️ Rédacteur / Copywriter',   value: 'redacteur'    },
+        { label: '🎨 Designer / Créatif',        value: 'designer'     },
+        { label: '💻 Développeur',               value: 'developpeur'  },
+        { label: '🚀 Entrepreneur / Freelance',  value: 'entrepreneur' },
+        { label: '🎓 Étudiant',                  value: 'etudiant'     },
+        { label: '👤 Autre',                     value: 'autre'        },
+      ]
+    },
+    {
+      id: 'objectif',
+      question: "Ton objectif principal avec l'IA…",
+      options: [
+        { label: '⚡ Gagner du temps',           value: 'temps'     },
+        { label: '✏️ Créer du contenu',          value: 'contenu'   },
+        { label: '📚 Apprendre',                 value: 'apprendre' },
+        { label: '💰 Générer des revenus',       value: 'revenus'   },
+        { label: "📋 M'organiser",               value: 'organiser' },
+      ]
+    },
+    {
+      id: 'budget',
+      question: 'Ton budget mensuel pour un outil IA…',
+      options: [
+        { label: '🆓 Gratuit uniquement',        value: 'free'     },
+        { label: '💳 Moins de 20$/mois',         value: 'freemium' },
+        { label: '💎 Plus de 20$/mois',          value: 'paid'     },
+      ]
+    },
+    {
+      id: 'connexion',
+      question: 'Ta connexion internet est…',
+      options: [
+        { label: '🚀 Rapide et stable',          value: 'rapide'  },
+        { label: '📶 Correcte',                  value: 'moyenne' },
+        { label: '🐢 Lente ou instable',         value: 'lente'   },
+      ]
+    },
+    {
+      id: 'niveau',
+      question: 'Ton niveau avec les outils IA…',
+      options: [
+        { label: '🌱 Débutant complet',          value: 'debutant'      },
+        { label: '🌿 Quelques expériences',      value: 'intermediaire' },
+        { label: '🌳 Utilisateur régulier',      value: 'avance'        },
+      ]
+    }
+  ],
+  en: [
+    {
+      id: 'metier',
+      question: 'You are more of a…',
+      options: [
+        { label: '✍️ Writer / Copywriter',       value: 'redacteur'    },
+        { label: '🎨 Designer / Creative',        value: 'designer'     },
+        { label: '💻 Developer',                  value: 'developpeur'  },
+        { label: '🚀 Entrepreneur / Freelancer',  value: 'entrepreneur' },
+        { label: '🎓 Student',                    value: 'etudiant'     },
+        { label: '👤 Other',                      value: 'autre'        },
+      ]
+    },
+    {
+      id: 'objectif',
+      question: 'Your main goal with AI…',
+      options: [
+        { label: '⚡ Save time',                  value: 'temps'     },
+        { label: '✏️ Create content',             value: 'contenu'   },
+        { label: '📚 Learn',                      value: 'apprendre' },
+        { label: '💰 Generate income',            value: 'revenus'   },
+        { label: '📋 Get organized',              value: 'organiser' },
+      ]
+    },
+    {
+      id: 'budget',
+      question: 'Your monthly budget for an AI tool…',
+      options: [
+        { label: '🆓 Free only',                  value: 'free'     },
+        { label: '💳 Under $20/month',            value: 'freemium' },
+        { label: '💎 Over $20/month',             value: 'paid'     },
+      ]
+    },
+    {
+      id: 'connexion',
+      question: 'Your internet connection is…',
+      options: [
+        { label: '🚀 Fast and stable',            value: 'rapide'  },
+        { label: '📶 Decent',                     value: 'moyenne' },
+        { label: '🐢 Slow or unstable',           value: 'lente'   },
+      ]
+    },
+    {
+      id: 'niveau',
+      question: 'Your level with AI tools…',
+      options: [
+        { label: '🌱 Complete beginner',          value: 'debutant'      },
+        { label: '🌿 Some experience',            value: 'intermediaire' },
+        { label: '🌳 Regular user',               value: 'avance'        },
+      ]
+    }
+  ],
+  es: [
+    {
+      id: 'metier',
+      question: 'Eres más bien…',
+      options: [
+        { label: '✍️ Redactor / Copywriter',      value: 'redacteur'    },
+        { label: '🎨 Diseñador / Creativo',        value: 'designer'     },
+        { label: '💻 Desarrollador',               value: 'developpeur'  },
+        { label: '🚀 Emprendedor / Freelance',     value: 'entrepreneur' },
+        { label: '🎓 Estudiante',                  value: 'etudiant'     },
+        { label: '👤 Otro',                        value: 'autre'        },
+      ]
+    },
+    {
+      id: 'objectif',
+      question: 'Tu objetivo principal con la IA…',
+      options: [
+        { label: '⚡ Ahorrar tiempo',              value: 'temps'     },
+        { label: '✏️ Crear contenido',             value: 'contenu'   },
+        { label: '📚 Aprender',                    value: 'apprendre' },
+        { label: '💰 Generar ingresos',            value: 'revenus'   },
+        { label: '📋 Organizarme',                 value: 'organiser' },
+      ]
+    },
+    {
+      id: 'budget',
+      question: 'Tu presupuesto mensual para una herramienta IA…',
+      options: [
+        { label: '🆓 Solo gratis',                 value: 'free'     },
+        { label: '💳 Menos de 20$/mes',            value: 'freemium' },
+        { label: '💎 Más de 20$/mes',              value: 'paid'     },
+      ]
+    },
+    {
+      id: 'connexion',
+      question: 'Tu conexión a internet es…',
+      options: [
+        { label: '🚀 Rápida y estable',            value: 'rapide'  },
+        { label: '📶 Correcta',                    value: 'moyenne' },
+        { label: '🐢 Lenta o inestable',           value: 'lente'   },
+      ]
+    },
+    {
+      id: 'niveau',
+      question: 'Tu nivel con las herramientas IA…',
+      options: [
+        { label: '🌱 Principiante total',          value: 'debutant'      },
+        { label: '🌿 Algo de experiencia',         value: 'intermediaire' },
+        { label: '🌳 Usuario habitual',            value: 'avance'        },
+      ]
+    }
+  ],
+};
+
+// Retourne les questions du quiz dans la langue courante (repli FR).
+function getQuizQuestions(langue) {
+  return QUIZ_QUESTIONS_I18N[langue] || QUIZ_QUESTIONS_I18N.fr;
+}
+window.getQuizQuestions = getQuizQuestions;
+
+// Alias conservé pour compatibilité : toujours la version FR par défaut,
+// utilisée uniquement en repli si du code externe y fait encore référence.
+const QUIZ_QUESTIONS = QUIZ_QUESTIONS_I18N.fr;
 
 const METIER_CATS = {
   redacteur:    ['Texte', 'Productivité'],
@@ -1158,8 +1289,9 @@ function closeQuiz() {
 }
 
 function renderQuizStep() {
-  const q     = QUIZ_QUESTIONS[quizState.step];
-  const total = QUIZ_QUESTIONS.length;
+  const questions = getQuizQuestions(state.langue);
+  const q     = questions[quizState.step];
+  const total = questions.length;
   const pct   = (quizState.step / total) * 100;
   document.getElementById('quiz-progress-bar').style.width = pct + '%';
   document.getElementById('quiz-step-label').textContent   =
@@ -1172,15 +1304,16 @@ function renderQuizStep() {
 
 function selectQuizOption(questionId, value) {
   quizState.answers[questionId] = value;
+  const questions = getQuizQuestions(state.langue);
   document.querySelectorAll('.quiz-option').forEach(btn => {
     if (btn.textContent.trim() ===
-        QUIZ_QUESTIONS[quizState.step].options.find(o => o.value === value)?.label.trim()) {
+        questions[quizState.step].options.find(o => o.value === value)?.label.trim()) {
       btn.classList.add('selected');
     }
   });
   setTimeout(() => {
     quizState.step++;
-    if (quizState.step < QUIZ_QUESTIONS.length) renderQuizStep();
+    if (quizState.step < questions.length) renderQuizStep();
     else showQuizResults();
   }, 280);
 }
@@ -1221,7 +1354,7 @@ function showQuizResults() {
     if (!selected.find(t => t.id === item.tool.id)) selected.push(item.tool);
   }
 
-  const metierLabel = QUIZ_QUESTIONS[0].options.find(o => o.value === answers.metier)?.label || '';
+  const metierLabel = getQuizQuestions(state.langue)[0].options.find(o => o.value === answers.metier)?.label || '';
   document.getElementById('quiz-results-sub').textContent =
     t('quiz.profileSummary', state.langue)
       .replace('{metier}', metierLabel)
