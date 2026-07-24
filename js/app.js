@@ -2,12 +2,12 @@
    Albexia — app.js
    Fonctionnalités : navigation, JSON,
    collections Firebase, soumission d'outil
+
+   Dépend de /js/i18n.js (chargé avant ce fichier) pour LS_LANG_KEY,
+   LANGUES_SUPPORTEES, detecterLangue(), t(), appliquerTraductionsStatiques().
    ═══════════════════════════════════════ */
 
 'use strict';
-
-// LS_KEY favoris supprimé → remplacé par Firebase collections
-const LS_LANG_KEY = 'albexia_langue';
 
 // ─── SLUG / URL FICHE ────────────────────
 // Identique à la logique de gen-fiches.js — garantit que les URLs
@@ -42,15 +42,13 @@ window.buildToolPageUrl = buildToolPageUrl;
 window.buildBlogPageUrl = buildBlogPageUrl;
 
 // ─── LANGUE ──────────────────────────────
-const LANGUES_SUPPORTEES = ['fr', 'en', 'es'];
-
-function detecterLangue() {
-  const saved = localStorage.getItem(LS_LANG_KEY);
-  if (saved && LANGUES_SUPPORTEES.includes(saved)) return saved;
-  const nav = (navigator.language || 'fr').slice(0, 2).toLowerCase();
-  if (LANGUES_SUPPORTEES.includes(nav)) return nav;
-  return 'fr';
-}
+// Le dictionnaire de traductions (UI_TRANSLATIONS), la fonction t(),
+// appliquerTraductionsStatiques(), detecterLangue(), LS_LANG_KEY et
+// LANGUES_SUPPORTEES vivent maintenant dans /js/i18n.js, partagé par
+// toutes les pages du site (index, soumettre, profil, etc.).
+// Ce fichier doit être chargé AVANT app.js :
+//   <script src="/js/i18n.js"></script>
+//   <script src="/js/app.js"></script>
 
 // Slugs (noms normalisés) des outils actuellement affichés dans le panneau
 // spotlight, si présent. Permet de retrouver la variante linguistique du
@@ -59,269 +57,11 @@ function detecterLangue() {
 // d'une langue à l'autre, comme le fait déjà buildToolPageUrl().
 let _spotlightSlugs = null;
 
-// ─── TRADUCTIONS UI STATIQUE ─────────────
-// Dictionnaire pour tous les textes fixes du HTML (nav, hero, boutons,
-// titres de page, footer, kebab menu, quiz — hors contenu Firestore qui
-// est déjà traduit via le champ "langue" de chaque item).
-const UI_TRANSLATIONS = {
-  fr: {
-    'nav.home': 'Accueil',
-    'nav.tools': 'Outils',
-    'nav.blog': 'Blog',
-    'nav.gallery': 'Galerie',
-    'nav.login': 'Connexion',
-    'nav.submit': 'Soumettre un outil +',
-    'hero.badge': 'Nouvelle plateforme · 2026',
-    'hero.title': "Explorez<br>l'univers de <span class=\"grad\">l'IA</span>",
-    'hero.subtitle': "Outils, articles et œuvres générées par intelligence artificielle — tout en un seul endroit pour le grand public.",
-    'hero.ctaTools': 'Explorer les outils',
-    'hero.ctaGallery': 'Voir la galerie',
-    'hero.quizCta': 'Trouver mon outil IA en 30 secondes',
-    'hero.quizSub': '5 questions · Recommandations personnalisées · Gratuit',
-    'hero.statTools': 'Outils IA',
-    'hero.statArticles': 'Articles',
-    'hero.statWorks': 'Œuvres créatives',
-    'tools.title': 'Outils & logiciels IA',
-    'tools.subtitle': "Découvrez les meilleurs outils d'intelligence artificielle, classés et évalués.",
-    'tools.searchPlaceholder': 'Rechercher un outil, une catégorie, un tag...',
-    'tools.loading': 'Chargement des outils...',
-    'blog.title': 'Blog IA',
-    'blog.subtitle': "Articles, guides et tutoriels sur l'intelligence artificielle pour tous.",
-    'blog.loading': 'Chargement des articles...',
-    'gallery.title': 'Galerie IA',
-    'gallery.subtitle': 'Images, vidéos et musiques générées par intelligence artificielle.',
-    'gallery.loading': 'Chargement de la galerie...',
-    'quiz.title': 'Trouver mon outil IA',
-    'quiz.questionOf': 'Question {n} sur {total}',
-    'quiz.resultsTitle': 'Vos 3 outils recommandés',
-    'quiz.restart': 'Recommencer',
-    'quiz.copyLink': 'Copier le lien',
-    'quiz.linkCopied': 'Lien copié !',
-    'quiz.viewSheet': 'Voir la fiche →',
-    'quiz.profileSummary': 'Profil : {metier} · Budget {budget} · Connexion {connexion}',
-    'footer.newsletterLabel': 'Newsletter hebdomadaire',
-    'footer.subscribe': "S'abonner",
-    'footer.newsletterBadge': '✓ Gratuit · Sans spam · Désabonnement en 1 clic',
-    'footer.navTitle': 'Navigation',
-    'footer.toolsLink': 'Outils IA',
-    'footer.favorites': 'Mes favoris',
-    'footer.submitTool': 'Soumettre un outil',
-    'footer.categoriesTitle': 'Catégories',
-    'footer.catText': 'Texte & Rédaction',
-    'footer.catImage': 'Image & Design',
-    'footer.catVideo': 'Vidéo',
-    'footer.catMusic': 'Musique & Audio',
-    'footer.catCode': 'Code',
-    'footer.catProductivity': 'Productivité',
-    'footer.legalTitle': 'Légal',
-    'footer.legalNotice': 'Mentions légales',
-    'footer.privacyPolicy': 'Politique de confidentialité',
-    'footer.terms': "Conditions d'utilisation",
-    'footer.cookies': 'Gestion des cookies',
-    'footer.contactTitle': 'Contact',
-    'footer.contactUs': 'Nous contacter',
-    'footer.partnerships': 'Partenariats',
-    'footer.copyright': '&copy; 2025-2026 Albexia — Tous droits réservés',
-    'footer.privacy': 'Vie privée',
-    'footer.madeWith': 'Fait avec ❤️ pour la communauté IA',
-    'kebab.mustHave': 'Incontournables',
-    'kebab.glossary': 'Glossaire IA',
-    'kebab.glossarySub': 'Tous les termes en français',
-    'kebab.compare': 'Comparateur',
-    'kebab.compareSub': 'Comparer les outils côte à côte',
-    'kebab.deals': 'Deals & Promos',
-    'kebab.dealsSub': 'Essais gratuits · Offres exclusives',
-    'kebab.hub': 'Voir toutes les sections',
-    'kebab.hubSub': "Carte complète d'Albexia →",
-    'editorial.introTitle': "L'intelligence artificielle, <span class=\"grad\">enfin accessible à tous</span>",
-    'editorial.introLead': "L'IA n'est plus réservée aux ingénieurs et aux grandes entreprises. Un chat, une phrase tapée au clavier suffisent aujourd'hui à générer une image, rédiger un texte ou automatiser une tâche répétitive. Pas besoin de coder, pas besoin de diplôme technique — juste une idée à formuler.",
-    'editorial.block1Title': 'Un annuaire, un blog, une galerie',
-    'editorial.block1P1': "Albexia réunit plus de 120 outils IA classés par catégorie, des articles pour s'y retrouver, et une galerie d'œuvres générées par IA. Chaque outil a une note et un prix clair, mis à jour à mesure que l'écosystème change. L'objectif est simple : rester un guide honnête sur l'IA, sans jargon ni promesse en l'air, pour que chacun puisse en tirer parti dès aujourd'hui.",
-  },
-  en: {
-    'nav.home': 'Home',
-    'nav.tools': 'Tools',
-    'nav.blog': 'Blog',
-    'nav.gallery': 'Gallery',
-    'nav.login': 'Log in',
-    'nav.submit': 'Submit a tool +',
-    'hero.badge': 'New platform · 2026',
-    'hero.title': 'Explore<br>the world of <span class="grad">AI</span>',
-    'hero.subtitle': 'Tools, articles and works generated by artificial intelligence — all in one place for everyone.',
-    'hero.ctaTools': 'Explore tools',
-    'hero.ctaGallery': 'View gallery',
-    'hero.quizCta': 'Find my AI tool in 30 seconds',
-    'hero.quizSub': '5 questions · Personalized recommendations · Free',
-    'hero.statTools': 'AI Tools',
-    'hero.statArticles': 'Articles',
-    'hero.statWorks': 'Creative works',
-    'tools.title': 'AI Tools & Software',
-    'tools.subtitle': 'Discover the best artificial intelligence tools, ranked and reviewed.',
-    'tools.searchPlaceholder': 'Search a tool, category, tag...',
-    'tools.loading': 'Loading tools...',
-    'blog.title': 'AI Blog',
-    'blog.subtitle': 'Articles, guides and tutorials on artificial intelligence for everyone.',
-    'blog.loading': 'Loading articles...',
-    'gallery.title': 'AI Gallery',
-    'gallery.subtitle': 'Images, videos and music generated by artificial intelligence.',
-    'gallery.loading': 'Loading gallery...',
-    'quiz.title': 'Find my AI tool',
-    'quiz.questionOf': 'Question {n} of {total}',
-    'quiz.resultsTitle': 'Your 3 recommended tools',
-    'quiz.restart': 'Restart',
-    'quiz.copyLink': 'Copy link',
-    'quiz.linkCopied': 'Link copied!',
-    'quiz.viewSheet': 'View sheet →',
-    'quiz.profileSummary': 'Profile: {metier} · Budget {budget} · Connection {connexion}',
-    'footer.newsletterLabel': 'Weekly newsletter',
-    'footer.subscribe': 'Subscribe',
-    'footer.newsletterBadge': '✓ Free · No spam · Unsubscribe in 1 click',
-    'footer.navTitle': 'Navigation',
-    'footer.toolsLink': 'AI Tools',
-    'footer.favorites': 'My favorites',
-    'footer.submitTool': 'Submit a tool',
-    'footer.categoriesTitle': 'Categories',
-    'footer.catText': 'Text & Writing',
-    'footer.catImage': 'Image & Design',
-    'footer.catVideo': 'Video',
-    'footer.catMusic': 'Music & Audio',
-    'footer.catCode': 'Code',
-    'footer.catProductivity': 'Productivity',
-    'footer.legalTitle': 'Legal',
-    'footer.legalNotice': 'Legal notice',
-    'footer.privacyPolicy': 'Privacy policy',
-    'footer.terms': 'Terms of use',
-    'footer.cookies': 'Cookie settings',
-    'footer.contactTitle': 'Contact',
-    'footer.contactUs': 'Contact us',
-    'footer.partnerships': 'Partnerships',
-    'footer.copyright': '&copy; 2025-2026 Albexia — All rights reserved',
-    'footer.privacy': 'Privacy',
-    'footer.madeWith': 'Made with ❤️ for the AI community',
-    'kebab.mustHave': 'Must-haves',
-    'kebab.glossary': 'AI Glossary',
-    'kebab.glossarySub': 'All the terms explained',
-    'kebab.compare': 'Comparator',
-    'kebab.compareSub': 'Compare tools side by side',
-    'kebab.deals': 'Deals & Promos',
-    'kebab.dealsSub': 'Free trials · Exclusive offers',
-    'kebab.hub': 'See all sections',
-    'kebab.hubSub': "Albexia's full map →",
-    'editorial.introTitle': "Artificial intelligence, <span class=\"grad\">finally accessible to everyone</span>",
-    'editorial.introLead': "AI is no longer reserved for engineers and big companies. A chat, a sentence typed on a keyboard is enough today to generate an image, write a text or automate a repetitive task. No coding required, no technical degree needed — just an idea to put into words.",
-    'editorial.block1Title': 'A directory, a blog, a gallery',
-    'editorial.block1P1': "Albexia brings together over 120 AI tools sorted by category, articles to help you make sense of it all, and a gallery of AI-generated works. Every tool comes with a rating and a clear price, kept up to date as the landscape changes. The goal is simple: stay an honest guide to AI, with no jargon or empty promises, so everyone can make the most of it today.",
-  },
-  es: {
-    'nav.home': 'Inicio',
-    'nav.tools': 'Herramientas',
-    'nav.blog': 'Blog',
-    'nav.gallery': 'Galería',
-    'nav.login': 'Iniciar sesión',
-    'nav.submit': 'Enviar una herramienta +',
-    'hero.badge': 'Nueva plataforma · 2026',
-    'hero.title': 'Explora<br>el universo de <span class="grad">la IA</span>',
-    'hero.subtitle': 'Herramientas, artículos y obras generadas por inteligencia artificial — todo en un solo lugar para el público general.',
-    'hero.ctaTools': 'Explorar herramientas',
-    'hero.ctaGallery': 'Ver galería',
-    'hero.quizCta': 'Encuentra mi herramienta IA en 30 segundos',
-    'hero.quizSub': '5 preguntas · Recomendaciones personalizadas · Gratis',
-    'hero.statTools': 'Herramientas IA',
-    'hero.statArticles': 'Artículos',
-    'hero.statWorks': 'Obras creativas',
-    'tools.title': 'Herramientas y software IA',
-    'tools.subtitle': 'Descubre las mejores herramientas de inteligencia artificial, clasificadas y evaluadas.',
-    'tools.searchPlaceholder': 'Buscar una herramienta, categoría, etiqueta...',
-    'tools.loading': 'Cargando herramientas...',
-    'blog.title': 'Blog de IA',
-    'blog.subtitle': 'Artículos, guías y tutoriales sobre inteligencia artificial para todos.',
-    'blog.loading': 'Cargando artículos...',
-    'gallery.title': 'Galería IA',
-    'gallery.subtitle': 'Imágenes, vídeos y música generados por inteligencia artificial.',
-    'gallery.loading': 'Cargando galería...',
-    'quiz.title': 'Encontrar mi herramienta IA',
-    'quiz.questionOf': 'Pregunta {n} de {total}',
-    'quiz.resultsTitle': 'Tus 3 herramientas recomendadas',
-    'quiz.restart': 'Reiniciar',
-    'quiz.copyLink': 'Copiar enlace',
-    'quiz.linkCopied': '¡Enlace copiado!',
-    'quiz.viewSheet': 'Ver ficha →',
-    'quiz.profileSummary': 'Perfil: {metier} · Presupuesto {budget} · Conexión {connexion}',
-    'footer.newsletterLabel': 'Boletín semanal',
-    'footer.subscribe': 'Suscribirse',
-    'footer.newsletterBadge': '✓ Gratis · Sin spam · Cancela en 1 clic',
-    'footer.navTitle': 'Navegación',
-    'footer.toolsLink': 'Herramientas IA',
-    'footer.favorites': 'Mis favoritos',
-    'footer.submitTool': 'Enviar una herramienta',
-    'footer.categoriesTitle': 'Categorías',
-    'footer.catText': 'Texto y redacción',
-    'footer.catImage': 'Imagen y diseño',
-    'footer.catVideo': 'Vídeo',
-    'footer.catMusic': 'Música y audio',
-    'footer.catCode': 'Código',
-    'footer.catProductivity': 'Productividad',
-    'footer.legalTitle': 'Legal',
-    'footer.legalNotice': 'Aviso legal',
-    'footer.privacyPolicy': 'Política de privacidad',
-    'footer.terms': 'Condiciones de uso',
-    'footer.cookies': 'Gestión de cookies',
-    'footer.contactTitle': 'Contacto',
-    'footer.contactUs': 'Contáctanos',
-    'footer.partnerships': 'Colaboraciones',
-    'footer.copyright': '&copy; 2025-2026 Albexia — Todos los derechos reservados',
-    'footer.privacy': 'Privacidad',
-    'footer.madeWith': 'Hecho con ❤️ para la comunidad IA',
-    'kebab.mustHave': 'Imprescindibles',
-    'kebab.glossary': 'Glosario IA',
-    'kebab.glossarySub': 'Todos los términos explicados',
-    'kebab.compare': 'Comparador',
-    'kebab.compareSub': 'Compara herramientas lado a lado',
-    'kebab.deals': 'Ofertas y promos',
-    'kebab.dealsSub': 'Pruebas gratis · Ofertas exclusivas',
-    'kebab.hub': 'Ver todas las secciones',
-    'kebab.hubSub': 'Mapa completo de Albexia →',
-    'editorial.introTitle': "La inteligencia artificial, <span class=\"grad\">por fin al alcance de todos</span>",
-    'editorial.introLead': "La IA ya no está reservada a ingenieros y grandes empresas. Un chat, una frase escrita en el teclado bastan hoy para generar una imagen, redactar un texto o automatizar una tarea repetitiva. No hace falta programar, no hace falta un título técnico — solo una idea que formular.",
-    'editorial.block1Title': 'Un directorio, un blog, una galería',
-    'editorial.block1P1': "Albexia reúne más de 120 herramientas de IA clasificadas por categoría, artículos para entender mejor, y una galería de obras generadas por IA. Cada herramienta tiene una valoración y un precio claro, actualizados a medida que cambia el ecosistema. El objetivo es simple: ser una guía honesta sobre la IA, sin jerga ni promesas vacías, para que cada persona pueda aprovecharla desde hoy.",
-  },
-};
-window.UI_TRANSLATIONS = UI_TRANSLATIONS;
-
-// Récupère une clé de traduction pour la langue courante, avec repli sur le
-// français si la clé est absente (évite un texte vide en cas d'oubli).
-function t(key, langue) {
-  const dict = UI_TRANSLATIONS[langue] || UI_TRANSLATIONS.fr;
-  return dict[key] ?? UI_TRANSLATIONS.fr[key] ?? key;
-}
-window.t = t;
 // Alias dédié pour les endroits où le nom "t" est déjà utilisé comme
 // variable locale (ex : .map(t => ...) sur une liste d'outils).
 function translateQuizViewSheet(langue) {
   return t('quiz.viewSheet', langue);
 }
-
-// Applique les traductions statiques à tout le DOM courant : texte simple
-// (data-i18n), HTML avec balises (data-i18n-html) et placeholders
-// d'input (data-i18n-placeholder). Appelée au chargement initial et à
-// chaque changement de langue.
-function appliquerTraductionsStatiques(langue) {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    el.textContent = t(key, langue);
-  });
-  document.querySelectorAll('[data-i18n-html]').forEach(el => {
-    const key = el.getAttribute('data-i18n-html');
-    el.innerHTML = t(key, langue);
-  });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    const key = el.getAttribute('data-i18n-placeholder');
-    el.setAttribute('placeholder', t(key, langue));
-  });
-  document.documentElement.lang = langue;
-}
-window.appliquerTraductionsStatiques = appliquerTraductionsStatiques;
 
 function changerLangue(code) {
   if (!LANGUES_SUPPORTEES.includes(code)) return;
