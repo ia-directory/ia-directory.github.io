@@ -1453,7 +1453,7 @@
       </text>
     </svg>
   </a>
-  <a href="index.html" class="nav-back">← Retour à l'annuaire</a>
+  <a href="index.html" class="nav-back" data-i18n="profil.backToDirectory">← Retour à l'annuaire</a>
 </nav>
 
 <!-- ══════════════════════════════════════════════
@@ -1468,13 +1468,13 @@
 <div id="auth-wall">
   <div class="auth-card">
     <div class="auth-logo">🤖</div>
-    <h2>Accéder à mon profil</h2>
-    <p>Sauvegarde tes outils préférés et retrouve-les partout.</p>
+    <h2 data-i18n="profil.authTitle">Accéder à mon profil</h2>
+    <p data-i18n="profil.authSubtitle">Sauvegarde tes outils préférés et retrouve-les partout.</p>
 
     <!-- Tabs -->
     <div class="auth-tabs">
-      <button class="auth-tab active" onclick="switchAuthTab('login')">Connexion</button>
-      <button class="auth-tab" onclick="switchAuthTab('register')">Créer un compte</button>
+      <button class="auth-tab active" onclick="switchAuthTab('login')" data-i18n="profil.tabLogin">Connexion</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')" data-i18n="profil.tabRegister">Créer un compte</button>
     </div>
 
     <!-- Formulaire connexion -->
@@ -1560,7 +1560,7 @@
         <circle cx="9" cy="9" r="2.5" stroke="currentColor" stroke-width="1.4"/>
         <path d="M9 1v2M9 15v2M1 9h2M15 9h2M3.3 3.3l1.4 1.4M13.3 13.3l1.4 1.4M3.3 14.7l1.4-1.4M13.3 4.7l1.4-1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
       </svg>
-      Params
+      <span data-i18n="profil.navSettingsShort">Params</span>
     </button>
   </div>
 
@@ -1593,7 +1593,7 @@
               <path d="M2 4.5C2 3.67 2.67 3 3.5 3H6.5L8.5 5H14.5C15.33 5 16 5.67 16 6.5V13.5C16 14.33 15.33 15 14.5 15H3.5C2.67 15 2 14.33 2 13.5V4.5Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
             </svg>
           </span>
-          <span class="sidebar-item-label">Collections</span>
+          <span class="sidebar-item-label" data-i18n="profil.navCollections">Collections</span>
           <span class="sidebar-badge" id="col-count">0</span>
         </button>
         <button class="sidebar-item" data-section="quiz" data-tooltip="Quiz" onclick="switchSection('quiz')">
@@ -1604,7 +1604,7 @@
               <path d="M15 6V10" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
             </svg>
           </span>
-          <span class="sidebar-item-label">Historique quiz</span>
+          <span class="sidebar-item-label" data-i18n="profil.navQuiz">Historique quiz</span>
           <span class="sidebar-badge" id="quiz-count">0</span>
         </button>
         <button class="sidebar-item" data-section="avis" data-tooltip="Mes Avis" onclick="switchSection('avis')">
@@ -1613,7 +1613,7 @@
               <path d="M15.5 9C15.5 12.1 12.6 14.5 9 14.5C7.8 14.5 6.7 14.2 5.7 13.7L2.5 14.5L3.5 11.6C2.8 10.9 2.5 10 2.5 9C2.5 5.9 5.4 3.5 9 3.5C12.6 3.5 15.5 5.9 15.5 9Z" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </span>
-          <span class="sidebar-item-label">Mes Avis</span>
+          <span class="sidebar-item-label" data-i18n="profil.navReviews">Mes Avis</span>
           <span class="sidebar-badge" id="avis-count">0</span>
         </button>
         <button class="sidebar-item" data-section="videos" data-tooltip="Vidéos sauvegardées" onclick="switchSection('videos')">
@@ -1623,7 +1623,7 @@
               <path d="M8 6.5L10.5 8L8 9.5V6.5Z" fill="currentColor"/>
             </svg>
           </span>
-          <span class="sidebar-item-label">Vidéos sauvegardées</span>
+          <span class="sidebar-item-label" data-i18n="profil.navVideos">Vidéos sauvegardées</span>
           <span class="sidebar-badge" id="videos-count">0</span>
         </button>
         <button class="sidebar-item" data-section="soumissions" data-tooltip="Mes soumissions" onclick="switchSection('soumissions')">
@@ -1632,14 +1632,14 @@
               <path d="M2.5 9L15.5 2.5L13.5 15L9 12L6.5 14.5V11.5L2.5 9Z" stroke="currentColor" stroke-width="1.4" stroke-linejoin="round"/>
             </svg>
           </span>
-          <span class="sidebar-item-label">Mes soumissions</span>
+          <span class="sidebar-item-label" data-i18n="profil.navSubmissions">Mes soumissions</span>
           <span class="sidebar-badge" id="soum-count">0</span>
         </button>
         <button class="sidebar-item" data-section="profil-public" data-tooltip="Profil public" onclick="switchSection('profil-public')">
           <span class="sidebar-item-icon">
             <svg viewBox="0 0 18 18" fill="none" width="16" height="16" style="display:inline-block;vertical-align:middle"><circle cx="9" cy="6" r="3" stroke="currentColor" stroke-width="1.4"/><path d="M3 15c0-3.3 2.7-6 6-6s6 2.7 6 6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
           </span>
-          <span class="sidebar-item-label">Profil public</span>
+          <span class="sidebar-item-label" data-i18n="profil.navPublicProfile">Profil public</span>
         </button>
         <button class="sidebar-item" data-section="parametres" data-tooltip="Paramètres" onclick="switchSection('parametres')">
           <span class="sidebar-item-icon">
@@ -1648,7 +1648,7 @@
               <path d="M9 1v2M9 15v2M1 9h2M15 9h2M3.3 3.3l1.4 1.4M13.3 13.3l1.4 1.4M3.3 14.7l1.4-1.4M13.3 4.7l1.4-1.4" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
             </svg>
           </span>
-          <span class="sidebar-item-label">Paramètres</span>
+          <span class="sidebar-item-label" data-i18n="profil.navSettings">Paramètres</span>
         </button>
       </nav>
 
@@ -1660,7 +1660,7 @@
               <path d="M6.5 11.5L11.5 6.5M8.5 5.5L6.5 3.5C5.1 2.1 2.9 2.1 1.5 3.5C0.1 4.9 0.1 7.1 1.5 8.5L3.5 10.5M14.5 7.5L16.5 9.5C17.9 10.9 17.9 13.1 16.5 14.5C15.1 15.9 12.9 15.9 11.5 14.5L9.5 12.5" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
             </svg>
           </span>
-          <span class="sidebar-item-label">Partager mon profil</span>
+          <span class="sidebar-item-label" data-i18n="profil.navShare">Partager mon profil</span>
         </button>
         <button class="sidebar-item sidebar-item-logout" data-tooltip="Déconnexion" onclick="handleLogout()">
           <span class="sidebar-item-icon">
@@ -1668,7 +1668,7 @@
               <path d="M7 3H3C2.45 3 2 3.45 2 4V14C2 14.55 2.45 15 3 15H7M11 5L15 9L11 13M15 9H6" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
           </span>
-          <span class="sidebar-item-label">Déconnexion</span>
+          <span class="sidebar-item-label" data-i18n="profil.navLogout">Déconnexion</span>
         </button>
       </div>
 
@@ -1685,11 +1685,11 @@
             <svg viewBox="0 0 20 20" fill="none" width="18" height="18" style="display:inline-block;vertical-align:middle">
               <path d="M2.5 5.5C2.5 4.4 3.4 3.5 4.5 3.5H7.5L9.5 5.5H15.5C16.6 5.5 17.5 6.4 17.5 7.5V14.5C17.5 15.6 16.6 16.5 15.5 16.5H4.5C3.4 16.5 2.5 15.6 2.5 14.5V5.5Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
             </svg>
-            Mes collections
+            <span data-i18n="profil.sectionCollections">Mes collections</span>
           </div>
         </div>
         <div id="collections-container">
-          <div class="loader"><div class="spinner"></div> Chargement…</div>
+          <div class="loader"><div class="spinner"></div> <span data-i18n="profil.loading">Chargement…</span></div>
         </div>
       </div>
 
@@ -1702,12 +1702,12 @@
               <path d="M3.5 9.5V13.5C3.5 13.5 6.5 16.5 10 16.5C13.5 16.5 16.5 13.5 16.5 13.5V9.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M16.5 6.5V11.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
             </svg>
-            Historique quiz
+            <span data-i18n="profil.sectionQuiz">Historique quiz</span>
           </div>
-          <button class="btn-sm btn-outline" onclick="openQuizInProfil()">Faire le quiz →</button>
+          <button class="btn-sm btn-outline" onclick="openQuizInProfil()" data-i18n="profil.takeQuiz">Faire le quiz →</button>
         </div>
         <div id="quiz-history-container">
-          <div class="loader"><div class="spinner"></div> Chargement…</div>
+          <div class="loader"><div class="spinner"></div> <span data-i18n="profil.loading">Chargement…</span></div>
         </div>
       </div>
 
@@ -1718,11 +1718,11 @@
             <svg viewBox="0 0 20 20" fill="none" width="18" height="18" style="display:inline-block;vertical-align:middle">
               <path d="M17.5 10C17.5 13.59 14.14 16.5 10 16.5C8.62 16.5 7.32 16.14 6.2 15.52L2.5 16.5L3.75 13.13C2.96 12.25 2.5 11.17 2.5 10C2.5 6.41 5.86 3.5 10 3.5C14.14 3.5 17.5 6.41 17.5 10Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
-            Mes Avis
+            <span data-i18n="profil.sectionReviews">Mes Avis</span>
           </div>
         </div>
         <div id="avis-container">
-          <div class="loader"><div class="spinner"></div> Chargement…</div>
+          <div class="loader"><div class="spinner"></div> <span data-i18n="profil.loading">Chargement…</span></div>
         </div>
       </div>
 
@@ -1734,11 +1734,11 @@
               <path d="M4.5 3.5H15.5V16.5L10 12.5L4.5 16.5V3.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
               <path d="M9 7L12 9L9 11V7Z" fill="currentColor"/>
             </svg>
-            Vidéos sauvegardées
+            <span data-i18n="profil.sectionVideos">Vidéos sauvegardées</span>
           </div>
         </div>
         <div id="saved-videos-container">
-          <div class="loader"><div class="spinner"></div> Chargement…</div>
+          <div class="loader"><div class="spinner"></div> <span data-i18n="profil.loading">Chargement…</span></div>
         </div>
       </div>
 
@@ -1749,86 +1749,86 @@
             <svg viewBox="0 0 20 20" fill="none" width="18" height="18" style="display:inline-block;vertical-align:middle">
               <path d="M2.7 10L17.3 2.7L15 17.3L10 13.5L7.2 16.3V12.8L2.7 10Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/>
             </svg>
-            Mes soumissions
+            <span data-i18n="profil.sectionSubmissions">Mes soumissions</span>
           </div>
-          <button class="btn-sm btn-outline" id="btn-toggle-soum-form" onclick="toggleSoumForm()">+ Soumettre un outil</button>
+          <button class="btn-sm btn-outline" id="btn-toggle-soum-form" onclick="toggleSoumForm()" data-i18n="profil.submitNewTool">+ Soumettre un outil</button>
         </div>
 
         <div id="soumissions-container">
-          <div class="loader"><div class="spinner"></div> Chargement…</div>
+          <div class="loader"><div class="spinner"></div> <span data-i18n="profil.loading">Chargement…</span></div>
         </div>
 
         <!-- Formulaire compact (masqué par défaut) -->
         <div class="soum-form-wrap" id="soum-form-wrap" style="display:none">
-          <div class="soum-form-title">Nouvel outil</div>
-          <p class="soum-form-note">Votre soumission sera examinée par l'équipe Albexia sous 48h.</p>
+          <div class="soum-form-title" data-i18n="profil.newTool">Nouvel outil</div>
+          <p class="soum-form-note" data-i18n="profil.reviewNote">Votre soumission sera examinée par l'équipe Albexia sous 48h.</p>
           <div class="soum-connected-badge" id="soum-connected-badge">
-            ✓ Connecté en tant que <strong id="soum-connected-email">—</strong> — pas besoin de ressaisir votre email
+            ✓ <span data-i18n="profil.connectedAs">Connecté en tant que</span> <strong id="soum-connected-email">—</strong> — <span data-i18n="profil.noNeedEmail">pas besoin de ressaisir votre email</span>
           </div>
 
           <form id="form-soum-outil">
             <div class="soum-form-grid">
               <div class="form-group">
-                <label for="soum-name">Nom de l'outil <span>*</span></label>
-                <input type="text" id="soum-name" placeholder="ex. ChatGPT, Midjourney…" required>
+                <label for="soum-name"><span data-i18n="submit.labelName">Nom de l'outil</span> <span>*</span></label>
+                <input type="text" id="soum-name" placeholder="ex. ChatGPT, Midjourney…" data-i18n-placeholder="submit.placeholderName" required>
               </div>
               <div class="form-group">
-                <label for="soum-url">URL officielle <span>*</span></label>
+                <label for="soum-url"><span data-i18n="submit.labelUrl">URL officielle</span> <span>*</span></label>
                 <input type="url" id="soum-url" placeholder="https://…" required>
               </div>
               <div class="form-group">
-                <label for="soum-cat">Catégorie <span>*</span></label>
+                <label for="soum-cat"><span data-i18n="submit.labelCat">Catégorie</span> <span>*</span></label>
                 <select id="soum-cat" required>
-                  <option value="" disabled selected>Choisir une catégorie</option>
-                  <option>Rédaction & Contenu</option>
-                  <option>Image & Design</option>
-                  <option>Vidéo & Audio</option>
-                  <option>Code & Développement</option>
-                  <option>Productivité</option>
-                  <option>Marketing & SEO</option>
-                  <option>Éducation</option>
-                  <option>Santé & Bien-être</option>
-                  <option>Finance & Business</option>
-                  <option>Autre</option>
+                  <option value="" disabled selected data-i18n="submit.optChooseCat">Choisir une catégorie</option>
+                  <option data-i18n="submit.catWriting">Rédaction & Contenu</option>
+                  <option data-i18n="submit.catImage">Image & Design</option>
+                  <option data-i18n="submit.catVideo">Vidéo & Audio</option>
+                  <option data-i18n="submit.catCode">Code & Développement</option>
+                  <option data-i18n="submit.catProductivity">Productivité</option>
+                  <option data-i18n="submit.catMarketing">Marketing & SEO</option>
+                  <option data-i18n="submit.catEducation">Éducation</option>
+                  <option data-i18n="submit.catHealth">Santé & Bien-être</option>
+                  <option data-i18n="submit.catFinance">Finance & Business</option>
+                  <option data-i18n="submit.catOther">Autre</option>
                 </select>
               </div>
               <div class="form-group">
-                <label for="soum-price">Modèle de prix</label>
+                <label for="soum-price" data-i18n="submit.labelPrice">Modèle de prix</label>
                 <select id="soum-price">
-                  <option value="" disabled selected>Sélectionner</option>
-                  <option>Gratuit</option>
-                  <option>Freemium</option>
-                  <option>Payant</option>
-                  <option>Essai gratuit</option>
+                  <option value="" disabled selected data-i18n="submit.optSelect">Sélectionner</option>
+                  <option data-i18n="submit.priceFree">Gratuit</option>
+                  <option data-i18n="submit.priceFreemium">Freemium</option>
+                  <option data-i18n="submit.pricePaid">Payant</option>
+                  <option data-i18n="submit.priceTrial">Essai gratuit</option>
                 </select>
               </div>
               <div class="form-group full">
-                <label for="soum-tier">Formule de listing souhaitée <span>*</span></label>
+                <label for="soum-tier"><span data-i18n="submit.labelTier">Formule de listing souhaitée</span> <span>*</span></label>
                 <select id="soum-tier" required>
-                  <option value="gratuit" selected>Gratuit — Standard</option>
-                  <option value="starter">Starter</option>
-                  <option value="featured">Featured — mise en avant éditoriale</option>
+                  <option value="gratuit" selected data-i18n="submit.tierFree">Gratuit — Standard</option>
+                  <option value="starter" data-i18n="submit.tierStarter">Starter</option>
+                  <option value="featured" data-i18n="submit.tierFeatured">Featured — mise en avant éditoriale</option>
                 </select>
               </div>
               <div class="form-group full">
-                <label for="soum-desc">Description courte <span>*</span> <span style="font-weight:300;color:var(--text-dim,#4a4a6a)">(150 mots max)</span></label>
-                <textarea id="soum-desc" placeholder="Décrivez votre outil : à quoi il sert, pour qui, ce qui le rend unique…" maxlength="900" oninput="updateSoumCount(this)" required></textarea>
-                <div class="soum-char-count"><span id="soum-char-count">0</span> / 900 caractères</div>
+                <label for="soum-desc"><span data-i18n="submit.labelDesc">Description courte</span> <span>*</span> <span style="font-weight:300;color:var(--text-dim,#4a4a6a)" data-i18n="submit.descMax">(150 mots max)</span></label>
+                <textarea id="soum-desc" placeholder="Décrivez votre outil : à quoi il sert, pour qui, ce qui le rend unique…" data-i18n-placeholder="submit.placeholderDesc" maxlength="900" oninput="updateSoumCount(this)" required></textarea>
+                <div class="soum-char-count"><span id="soum-char-count">0</span> <span data-i18n="submit.charCount">/ 900 caractères</span></div>
               </div>
               <div class="form-group full">
-                <label for="soum-extras">Informations complémentaires <span style="font-weight:300;color:var(--text-dim,#4a4a6a)">(optionnel)</span></label>
-                <textarea id="soum-extras" placeholder="Lien vers captures d'écran, vidéo de démo, programme d'affiliation…" style="min-height:70px"></textarea>
+                <label for="soum-extras"><span data-i18n="submit.labelExtras">Informations complémentaires</span> <span style="font-weight:300;color:var(--text-dim,#4a4a6a)" data-i18n="submit.optional">(optionnel)</span></label>
+                <textarea id="soum-extras" placeholder="Lien vers captures d'écran, vidéo de démo, programme d'affiliation…" data-i18n-placeholder="submit.placeholderExtras" style="min-height:70px"></textarea>
               </div>
             </div>
             <div class="soum-form-actions">
-              <button type="button" class="btn-sm btn-outline" onclick="toggleSoumForm()">Annuler</button>
-              <button type="submit" class="btn-primary btn-sm" id="btn-submit-soum">Soumettre mon outil</button>
+              <button type="button" class="btn-sm btn-outline" onclick="toggleSoumForm()" data-i18n="profil.cancel">Annuler</button>
+              <button type="submit" class="btn-primary btn-sm" id="btn-submit-soum" data-i18n="submit.submitBtn">Soumettre mon outil</button>
             </div>
           </form>
         </div>
 
         <div class="soum-note-box">
-          💡 Vous pouvez aussi soumettre un outil sans créer de compte via la <a href="/soumettre.html">page dédiée</a> — mais depuis votre profil, vous pouvez suivre le statut de vos soumissions ici.
+          💡 <span data-i18n="profil.soumNoteBox">Vous pouvez aussi soumettre un outil sans créer de compte via la</span> <a href="/soumettre.html" data-i18n="profil.dedicatedPage">page dédiée</a> — <span data-i18n="profil.soumNoteBox2">mais depuis votre profil, vous pouvez suivre le statut de vos soumissions ici.</span>
         </div>
       </div>
 
@@ -1837,13 +1837,13 @@
         <div class="section-header">
           <div class="section-title">
             <svg viewBox="0 0 20 20" fill="none" width="18" height="18" style="display:inline-block;vertical-align:middle"><circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.5"/><path d="M3 17c0-3.9 3.1-7 7-7s7 3.1 7 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
-            Profil public
+            <span data-i18n="profil.navPublicProfile">Profil public</span>
           </div>
           <a href="./profil-public.html" id="see-public-link" target="_blank"
              style="font-size:.8rem;color:var(--accent);text-decoration:none;
                     display:flex;align-items:center;gap:4px;opacity:.8;transition:opacity .15s"
              onmouseover="this.style.opacity=1" onmouseout="this.style.opacity='.8'">
-            Voir mon profil
+            <span data-i18n="profil.viewMyProfile">Voir mon profil</span>
             <svg viewBox="0 0 12 12" fill="none" width="11" height="11"><path d="M2 10L10 2M10 2H5M10 2V7" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
           </a>
         </div>
@@ -1851,22 +1851,22 @@
 
         <!-- Bio + Role -->
         <div class="public-profile-card">
-          <div style="font-size:.8rem;color:var(--muted);margin-bottom:16px;line-height:1.5">
+          <div style="font-size:.8rem;color:var(--muted);margin-bottom:16px;line-height:1.5" data-i18n="profil.publicInfoNote">
             Ces informations apparaîtront sur ton profil public, visible par toute la communauté Albexia.
           </div>
 
           <div class="pub-field">
-            <div class="pub-label">Titre / Rôle</div>
-            <input type="text" id="pub-role" placeholder="Ex : Content Manager Senior · Paris" maxlength="80">
+            <div class="pub-label" data-i18n="profil.titleRole">Titre / Rôle</div>
+            <input type="text" id="pub-role" placeholder="Ex : Content Manager Senior · Paris" data-i18n-placeholder="profil.titleRolePlaceholder" maxlength="80">
           </div>
 
           <div class="pub-field">
-            <div class="pub-label">Bio courte</div>
-            <textarea id="pub-bio" placeholder="Ex : J'aide les marques à scaler leur création de contenu avec l'IA." maxlength="280"></textarea>
+            <div class="pub-label" data-i18n="profil.shortBio">Bio courte</div>
+            <textarea id="pub-bio" placeholder="Ex : J'aide les marques à scaler leur création de contenu avec l'IA." data-i18n-placeholder="profil.shortBioPlaceholder" maxlength="280"></textarea>
           </div>
 
           <div class="pub-field">
-            <div class="pub-label">Liens sociaux</div>
+            <div class="pub-label" data-i18n="profil.socialLinks">Liens sociaux</div>
             <div class="social-fields">
               <input type="url" id="pub-linkedin" placeholder="linkedin.com/in/…">
               <input type="url" id="pub-twitter"  placeholder="x.com/…">
@@ -1874,7 +1874,7 @@
             </div>
           </div>
 
-          <button class="btn-save-pref" onclick="savePublicProfile()">
+          <button class="btn-save-pref" onclick="savePublicProfile()" data-i18n="profil.savePublicProfile">
             Enregistrer le profil public
           </button>
         </div>
@@ -1882,7 +1882,7 @@
         <!-- Badges gagnés -->
         <div style="margin-top:24px">
           <div class="section-title" style="font-size:.95rem;margin-bottom:4px;display:flex;align-items:center;gap:8px">
-            Mes badges
+            <span data-i18n="profil.myBadges">Mes badges</span>
             <span style="position:relative;display:inline-flex" id="badges-info-wrap">
               <button onclick="toggleBadgesInfo()" aria-label="Comment gagner les badges ?"
                 style="width:18px;height:18px;border-radius:50%;border:1px solid var(--border);
@@ -1893,12 +1893,12 @@
                 style="display:none;position:absolute;top:calc(100% + 8px);left:0;z-index:60;
                        background:var(--surface2);border:1px solid var(--border);border-radius:10px;
                        padding:12px 14px;font-size:.78rem;color:var(--muted);line-height:1.5;
-                       width:240px;font-weight:400;box-shadow:0 8px 24px rgba(0,0,0,0.4)">
+                       width:240px;font-weight:400;box-shadow:0 8px 24px rgba(0,0,0,0.4)" data-i18n="profil.badgesInfoTip">
                 Les badges récompensent ta curation, tes avis et ton ancienneté. La plupart se débloquent automatiquement — survole ou clique un badge pour voir sa condition exacte.
               </div>
             </span>
           </div>
-          <div style="font-size:.8rem;color:var(--muted);margin-bottom:16px">
+          <div style="font-size:.8rem;color:var(--muted);margin-bottom:16px" data-i18n="profil.grayedBadges">
             Les badges grisés ne sont pas encore débloqués.
           </div>
           <div class="badges-modal-grid" id="badges-preview-container" style="grid-template-columns:repeat(3,1fr)">
@@ -1911,43 +1911,43 @@
       <!-- 5. PARAMÈTRES -->
       <div class="profile-section" id="section-parametres">
         <div class="section-header">
-          <div class="section-title">⚙️ Paramètres</div>
+          <div class="section-title">⚙️ <span data-i18n="profil.settingsTitle">Paramètres</span></div>
         </div>
         <div class="prefs-grid">
 
           <div class="pref-card">
-            <div class="pref-label">Photo de profil</div>
+            <div class="pref-label" data-i18n="profil.profilePhoto">Photo de profil</div>
             <button class="btn-sm btn-outline" onclick="document.getElementById('avatar-file-input').click()" style="margin-top:4px">
-              📷 Changer la photo
+              📷 <span data-i18n="profil.changePhoto">Changer la photo</span>
             </button>
           </div>
 
           <div class="pref-card">
-            <div class="pref-label">Nom d'affichage</div>
-            <input type="text" id="pref-name" placeholder="Ton prénom ou pseudo">
-            <button class="btn-save-pref" onclick="saveName()">Enregistrer</button>
+            <div class="pref-label" data-i18n="profil.displayName">Nom d'affichage</div>
+            <input type="text" id="pref-name" placeholder="Ton prénom ou pseudo" data-i18n-placeholder="profil.displayNamePlaceholder">
+            <button class="btn-save-pref" onclick="saveName()" data-i18n="profil.save">Enregistrer</button>
           </div>
 
           <div class="pref-card">
-            <div class="pref-label">Langue de l'interface</div>
+            <div class="pref-label" data-i18n="profil.interfaceLanguage">Langue de l'interface</div>
             <select id="pref-langue">
               <option value="fr">🇫🇷 Français</option>
               <option value="en">🇬🇧 English</option>
               <option value="es">🇪🇸 Español</option>
             </select>
-            <button class="btn-save-pref" onclick="saveLangue()">Enregistrer</button>
+            <button class="btn-save-pref" onclick="saveLangue()" data-i18n="profil.save">Enregistrer</button>
           </div>
 
           <div class="pref-card">
-            <div class="pref-label">Newsletter Albexia</div>
+            <div class="pref-label" data-i18n="profil.newsletter">Newsletter Albexia</div>
             <div class="toggle-row">
-              <p>Recevoir les nouveautés par email</p>
+              <p data-i18n="profil.newsletterDesc">Recevoir les nouveautés par email</p>
               <div class="toggle" id="newsletter-toggle" onclick="toggleNewsletter()"></div>
             </div>
           </div>
 
           <div class="pref-card">
-            <div class="pref-label">Membre depuis</div>
+            <div class="pref-label" data-i18n="profil.memberSince">Membre depuis</div>
             <div style="font-size:.9rem;color:var(--muted);margin-top:4px" id="user-since">—</div>
           </div>
 
@@ -2088,6 +2088,7 @@
 <!-- ══════════════════════════════════════════════
      SCRIPTS
 ══════════════════════════════════════════════ -->
+<script src="/js/i18n.js"></script>
 <script type="module">
   import { loginWithGoogle, loginWithEmail, registerWithEmail, logout, watchAuthState }
     from './js/auth.js';
@@ -2602,11 +2603,12 @@
 
   // ─── RENDER HERO ──────────────────────────────
   function renderHero() {
-    const name  = userProfile?.displayName || currentUser.displayName || 'Utilisateur';
+    const langue = window.detecterLangue ? window.detecterLangue() : 'fr';
+    const name  = userProfile?.displayName || currentUser.displayName || t('profil.defaultUserName', langue);
     const email = currentUser.email || '';
     const photo = userProfile?.photoURL || currentUser.photoURL || null;
     const since = userProfile?.createdAt
-      ? new Date(userProfile.createdAt).toLocaleDateString('fr-FR', { month: 'long', year: 'numeric' })
+      ? new Date(userProfile.createdAt).toLocaleDateString(LOCALE_MAP[langue] || 'fr-FR', { month: 'long', year: 'numeric' })
       : '—';
 
     document.getElementById('user-name').textContent  = name;
@@ -2681,14 +2683,14 @@
   function renderCollections() {
     const container = document.getElementById('collections-container');
     document.getElementById('col-count').textContent = collections.length;
+    const langue = window.detecterLangue ? window.detecterLangue() : 'fr';
 
     if (collections.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
           <div class="icon">📁</div>
-          <p>Aucune collection pour l'instant.<br>
-             Depuis une carte outil, clique sur ♥ pour créer ta première collection.</p>
-          <button class="btn-primary btn-sm" onclick="openNewColModal()">+ Créer une collection</button>
+          <p>${t('profil.noCollectionsYet', langue)}</p>
+          <button class="btn-primary btn-sm" onclick="openNewColModal()">+ ${t('profil.createCollection', langue)}</button>
         </div>`;
       return;
     }
@@ -2715,7 +2717,7 @@
               <div class="tool-item-ico">${ico}${emoji}</div>
               <div class="tool-item-name" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${t.name}</div>
             </div>
-            <button class="btn-icon" title="Retirer de la collection"
+            <button class="btn-icon" title="${t('profil.removeFromCollection', langue)}"
                     onclick="handleRemoveTool('${col.id}','${t.id}')"
                     style="opacity:.4;transition:opacity .15s;flex-shrink:0;font-size:.75rem"
                     onmouseenter="this.style.opacity='1'"
@@ -2724,15 +2726,17 @@
       }).join('');
 
       const emptyTools = tools.length === 0
-        ? `<div class="col-empty-tools">Aucun outil pour l'instant</div>`
+        ? `<div class="col-empty-tools">${t('profil.noToolsYet', langue)}</div>`
         : '';
 
       const isPublic   = col.isPublic === true;
-      const toggleTip  = isPublic ? 'Rendre privée' : 'Rendre publique';
+      const toggleTip  = isPublic ? t('profil.makePrivate', langue) : t('profil.makePublic', langue);
       const toggleIcon = isPublic ? '🌐' : '🔒';
       const publicBadge = isPublic
-        ? '<span style="color:var(--accent2);font-size:.75rem">🌐 Publique</span>'
-        : '<span style="color:var(--muted);font-size:.75rem">🔒 Privée</span>';
+        ? `<span style="color:var(--accent2);font-size:.75rem">🌐 ${t('profil.public', langue)}</span>`
+        : `<span style="color:var(--muted);font-size:.75rem">🔒 ${t('profil.private', langue)}</span>`;
+
+      const toolLabel = tools.length > 1 ? t('profil.toolsPlural', langue) : t('profil.toolSingular', langue);
 
       return `
         <div class="collection-card" data-id="${col.id}">
@@ -2740,11 +2744,11 @@
             <div class="collection-name">${col.name}</div>
             <div style="display:flex;gap:4px">
               <button class="btn-icon" onclick="toggleColPublic('${col.id}',${isPublic})" title="${toggleTip}" style="font-size:.9rem">${toggleIcon}</button>
-              <button class="btn-icon" onclick="openRenameModal('${col.id}','${escHtml(col.name)}')" title="Renommer">✏️</button>
-              <button class="btn-icon" onclick="confirmDeleteCol('${col.id}','${escHtml(col.name)}')" title="Supprimer">🗑️</button>
+              <button class="btn-icon" onclick="openRenameModal('${col.id}','${escHtml(col.name)}')" title="${t('profil.rename', langue)}">✏️</button>
+              <button class="btn-icon" onclick="confirmDeleteCol('${col.id}','${escHtml(col.name)}')" title="${t('profil.delete', langue)}">🗑️</button>
             </div>
           </div>
-          <div class="collection-meta">${tools.length} outil${tools.length > 1 ? 's' : ''} · ${publicBadge}</div>
+          <div class="collection-meta">${tools.length} ${toolLabel} · ${publicBadge}</div>
           <div class="collection-tools-list">${toolItems}${emptyTools}</div>
         </div>`;
     }).join('');
@@ -2752,7 +2756,7 @@
     // Bouton "Nouvelle collection"
     const addBtn = document.createElement('button');
     addBtn.className = 'btn-new-col';
-    addBtn.textContent = '+ Nouvelle collection';
+    addBtn.textContent = '+ ' + t('profil.newCollection', langue);
     addBtn.onclick = openNewColModal;
 
     const wrapper = document.createElement('div');
@@ -2772,7 +2776,7 @@
     if (col) col.isPublic = newVal;
     renderCollections();
     refreshBadges();
-    showToast(newVal ? '🌐 Collection rendue publique !' : '🔒 Collection rendue privée.');
+    showToast(newVal ? t('profil.toastCollectionPublic', window.detecterLangue()) : t('profil.toastCollectionPrivate', window.detecterLangue()));
   };
 
   // Recalcule et réaffiche les badges (sidebar + section Profil public)
@@ -2787,9 +2791,10 @@
   window.sharePublicProfile = function() {
     const base = location.origin + location.pathname.replace('profil.html', 'profil-public.html');
     const url  = base + '?id=' + currentUser.uid;
+    const langue = window.detecterLangue ? window.detecterLangue() : 'fr';
     navigator.clipboard.writeText(url)
-      .then(() => showToast('✅ Lien copié !'))
-      .catch(() => showToast('⚠ Impossible de copier.'));
+      .then(() => showToast(t('profil.toastLinkCopied', langue)))
+      .catch(() => showToast(t('profil.toastCopyError', langue)));
   };
 
   window.openNewColModal = function() {
@@ -2806,7 +2811,7 @@
     closeColModal();
     await createCollection(currentUser.uid, name);
     await loadCollections();
-    showToast('✅ Collection créée !');
+    showToast(t('profil.toastCollectionCreated', window.detecterLangue()));
   };
 
   // Renommer
@@ -2826,15 +2831,16 @@
     closeRenameModal();
     await renameCollection(currentUser.uid, renameTargetId, name);
     await loadCollections();
-    showToast('✅ Collection renommée !');
+    showToast(t('profil.toastCollectionRenamed', window.detecterLangue()));
   };
 
   // Supprimer
   window.confirmDeleteCol = function(colId, colName) {
-    if (!confirm(`Supprimer la collection "${colName}" ?`)) return;
+    const langue = window.detecterLangue ? window.detecterLangue() : 'fr';
+    if (!confirm(t('profil.confirmDeleteCollection', langue).replace('{name}', colName))) return;
     deleteCollection(currentUser.uid, colId).then(() => {
       loadCollections();
-      showToast('Collection supprimée.');
+      showToast(t('profil.toastCollectionDeleted', langue));
     });
   };
 
@@ -2843,10 +2849,11 @@
   // ══════════════════════════════════════════════
 
   window.handleRemoveTool = async function(colId, toolId) {
-    if (!confirm('Retirer cet outil de la collection ?')) return;
+    const langue = window.detecterLangue ? window.detecterLangue() : 'fr';
+    if (!confirm(t('profil.confirmRemoveTool', langue))) return;
     await removeToolFromCollection(currentUser.uid, colId, toolId);
     await loadCollections();
-    showToast('Outil retiré de la collection.');
+    showToast(t('profil.toastToolRemoved', langue));
   };
 
   // ══════════════════════════════════════════════
@@ -2886,13 +2893,35 @@
   // QUIZ HISTORY
   // ══════════════════════════════════════════════
 
-  const METIER_LABELS = {
-    redacteur:'✍️ Rédacteur', designer:'🎨 Designer', developpeur:'💻 Développeur',
-    entrepreneur:'🚀 Entrepreneur', etudiant:'🎓 Étudiant', autre:'👤 Autre'
-  };
-  const BUDGET_LABELS    = { free:'🆓 Gratuit', freemium:'💳 <20$/mois', paid:'💎 >20$/mois' };
-  const CONNEXION_LABELS = { rapide:'🚀 Rapide', moyenne:'📶 Correcte', lente:'🐢 Lente' };
-  const NIVEAU_LABELS    = { debutant:'🌱 Débutant', intermediaire:'🌿 Intermédiaire', avance:'🌳 Avancé' };
+  function metierLabels(langue) {
+    return langue === 'en'
+      ? { redacteur:'✍️ Writer', designer:'🎨 Designer', developpeur:'💻 Developer', entrepreneur:'🚀 Entrepreneur', etudiant:'🎓 Student', autre:'👤 Other' }
+      : langue === 'es'
+      ? { redacteur:'✍️ Redactor', designer:'🎨 Diseñador', developpeur:'💻 Desarrollador', entrepreneur:'🚀 Emprendedor', etudiant:'🎓 Estudiante', autre:'👤 Otro' }
+      : { redacteur:'✍️ Rédacteur', designer:'🎨 Designer', developpeur:'💻 Développeur', entrepreneur:'🚀 Entrepreneur', etudiant:'🎓 Étudiant', autre:'👤 Autre' };
+  }
+  function budgetLabels(langue) {
+    return langue === 'en'
+      ? { free:'🆓 Free', freemium:'💳 <$20/mo', paid:'💎 >$20/mo' }
+      : langue === 'es'
+      ? { free:'🆓 Gratis', freemium:'💳 <20$/mes', paid:'💎 >20$/mes' }
+      : { free:'🆓 Gratuit', freemium:'💳 <20$/mois', paid:'💎 >20$/mois' };
+  }
+  function connexionLabels(langue) {
+    return langue === 'en'
+      ? { rapide:'🚀 Fast', moyenne:'📶 Decent', lente:'🐢 Slow' }
+      : langue === 'es'
+      ? { rapide:'🚀 Rápida', moyenne:'📶 Correcta', lente:'🐢 Lenta' }
+      : { rapide:'🚀 Rapide', moyenne:'📶 Correcte', lente:'🐢 Lente' };
+  }
+  function niveauLabels(langue) {
+    return langue === 'en'
+      ? { debutant:'🌱 Beginner', intermediaire:'🌿 Intermediate', avance:'🌳 Advanced' }
+      : langue === 'es'
+      ? { debutant:'🌱 Principiante', intermediaire:'🌿 Intermedio', avance:'🌳 Avanzado' }
+      : { debutant:'🌱 Débutant', intermediaire:'🌿 Intermédiaire', avance:'🌳 Avancé' };
+  }
+  const LOCALE_MAP = { fr: 'fr-FR', en: 'en-US', es: 'es-ES' };
 
   async function loadQuizHistory() {
     quizHistory = await getQuizHistory(currentUser.uid);
@@ -2902,20 +2931,26 @@
   function renderQuizHistory() {
     const container = document.getElementById('quiz-history-container');
     document.getElementById('quiz-count').textContent = quizHistory.length;
+    const langue = window.detecterLangue ? window.detecterLangue() : 'fr';
 
     if (quizHistory.length === 0) {
       container.innerHTML = `
         <div class="empty-state">
           <div class="icon">🧠</div>
-          <p>Aucune session quiz enregistrée.<br>Fais le quiz pour recevoir des recommandations personnalisées.</p>
-          <button class="btn-primary btn-sm" onclick="openQuizInProfil()">Faire le quiz →</button>
+          <p>${t('profil.noQuizSessions', langue)}</p>
+          <button class="btn-primary btn-sm" onclick="openQuizInProfil()">${t('profil.takeQuiz', langue)}</button>
         </div>`;
       return;
     }
 
+    const METIER_LABELS = metierLabels(langue);
+    const BUDGET_LABELS = budgetLabels(langue);
+    const CONNEXION_LABELS = connexionLabels(langue);
+    const NIVEAU_LABELS = niveauLabels(langue);
+
     container.innerHTML = `<div class="quiz-sessions">${quizHistory.map(session => {
       const a    = session.answers || {};
-      const date = new Date(session.createdAt).toLocaleDateString('fr-FR', {
+      const date = new Date(session.createdAt).toLocaleDateString(LOCALE_MAP[langue] || 'fr-FR', {
         day: 'numeric', month: 'long', year: 'numeric'
       });
 
@@ -2924,21 +2959,21 @@
         BUDGET_LABELS[a.budget],
         CONNEXION_LABELS[a.connexion],
         NIVEAU_LABELS[a.niveau],
-      ].filter(Boolean).map(t => `<span class="quiz-tag">${t}</span>`).join('');
+      ].filter(Boolean).map(tag => `<span class="quiz-tag">${tag}</span>`).join('');
 
-      const results = (session.results || []).map(t => {
-        const href = t.page || t.url || '#';
-        const ico  = t.favicon
-          ? `<div class="quiz-result-ico"><img src="${t.favicon}" alt="${t.name}" onerror="this.parentElement.textContent='${t.emoji||'🤖'}'"></div>`
-          : `<div class="quiz-result-ico">${t.emoji || '🤖'}</div>`;
-        return `<a class="quiz-result-pill" href="${href}" target="_blank">${ico}${t.name}</a>`;
+      const results = (session.results || []).map(tool => {
+        const href = tool.page || tool.url || '#';
+        const ico  = tool.favicon
+          ? `<div class="quiz-result-ico"><img src="${tool.favicon}" alt="${tool.name}" onerror="this.parentElement.textContent='${tool.emoji||'🤖'}'"></div>`
+          : `<div class="quiz-result-ico">${tool.emoji || '🤖'}</div>`;
+        return `<a class="quiz-result-pill" href="${href}" target="_blank">${ico}${tool.name}</a>`;
       }).join('');
 
       return `
         <div class="quiz-session-card">
           <div class="quiz-session-header">
             <div class="quiz-session-date">📅 ${date}</div>
-            <button class="btn-icon" onclick="deleteSession('${session.id}')" title="Supprimer cette session">🗑️</button>
+            <button class="btn-icon" onclick="deleteSession('${session.id}')" title="${t('profil.deleteSession', langue)}">🗑️</button>
           </div>
           <div class="quiz-session-tags">${tags}</div>
           <div class="quiz-session-results">${results}</div>
@@ -2947,10 +2982,11 @@
   }
 
   window.deleteSession = async function(sessionId) {
-    if (!confirm('Supprimer cette session quiz ?')) return;
+    const langue = window.detecterLangue ? window.detecterLangue() : 'fr';
+    if (!confirm(t('profil.confirmDeleteSession', langue))) return;
     await deleteQuizSession(currentUser.uid, sessionId);
     await loadQuizHistory();
-    showToast('Session supprimée.');
+    showToast(t('profil.toastSessionDeleted', langue));
   };
 
   // ══════════════════════════════════════════════
@@ -2971,6 +3007,7 @@
   function renderAvis() {
     const container = document.getElementById('avis-container');
     if (!container) return;
+    const langue = window.detecterLangue ? window.detecterLangue() : 'fr';
 
     const countEl = document.getElementById('avis-count');
     if (countEl) countEl.textContent = userAvis.length;
@@ -2979,10 +3016,9 @@
       container.innerHTML = `
         <div class="empty-state">
           <div class="icon">💬</div>
-          <p>Tu n'as encore laissé aucun avis.<br>
-             Ouvre la fiche d'un outil et partage ton expérience !</p>
+          <p>${t('profil.noReviewsYet', langue)}</p>
           <a href="./index.html#tools" class="btn-primary btn-sm"
-             style="display:inline-block;text-decoration:none">Explorer les outils →</a>
+             style="display:inline-block;text-decoration:none">${t('hero.ctaTools', langue)} →</a>
         </div>`;
       return;
     }
@@ -2992,11 +3028,11 @@
       <div class="avis-stats">
         <div class="avis-stat-item">
           <div class="avis-stat-n">${userAvis.length}</div>
-          <div class="avis-stat-l">Avis publiés</div>
+          <div class="avis-stat-l">${t('profil.reviewsPublished', langue)}</div>
         </div>
         <div class="avis-stat-item">
           <div class="avis-stat-n"><span>★</span> ${avgNote}</div>
-          <div class="avis-stat-l">Note moyenne donnée</div>
+          <div class="avis-stat-l">${t('profil.averageRatingGiven', langue)}</div>
         </div>
       </div>`;
 
@@ -3006,7 +3042,7 @@
       ).join('');
 
       const date = r.updatedAt?.seconds
-        ? new Date(r.updatedAt.seconds * 1000).toLocaleDateString('fr-FR', {
+        ? new Date(r.updatedAt.seconds * 1000).toLocaleDateString(LOCALE_MAP[langue] || 'fr-FR', {
             day: 'numeric', month: 'long', year: 'numeric'
           })
         : '';
@@ -3023,20 +3059,20 @@
             <div class="avis-tool-ico">${ico}</div>
             <div class="avis-tool-info">
               <div class="avis-tool-name">${escHtml(r.toolName)}</div>
-              <a class="avis-tool-link" href="${ficheUrl}">Voir la fiche →</a>
+              <a class="avis-tool-link" href="${ficheUrl}">${t('quiz.viewSheet', langue)}</a>
             </div>
             <div class="avis-stars">${stars}</div>
           </div>
           ${r.comment
             ? `<p class="avis-comment">"${escHtml(r.comment)}"</p>`
-            : `<p class="avis-no-comment">Aucun commentaire laissé.</p>`
+            : `<p class="avis-no-comment">${t('profil.noCommentLeft', langue)}</p>`
           }
           <div class="avis-card-foot">
             <span class="avis-date">📅 ${date}</span>
             <div class="avis-actions">
-              <a class="btn-avis-edit" href="${ficheUrl}#avis-utilisateurs">✏️ Modifier</a>
+              <a class="btn-avis-edit" href="${ficheUrl}#avis-utilisateurs">✏️ ${t('profil.editAction', langue)}</a>
               <button class="btn-avis-delete"
-                      onclick="handleDeleteAvis('${r.toolSlug}')">🗑 Supprimer</button>
+                      onclick="handleDeleteAvis('${r.toolSlug}')">🗑 ${t('profil.delete', langue)}</button>
             </div>
           </div>
         </div>`;
@@ -3046,14 +3082,15 @@
   }
 
   window.handleDeleteAvis = async function(toolSlug) {
-    if (!confirm('Supprimer cet avis définitivement ?')) return;
+    const langue = window.detecterLangue ? window.detecterLangue() : 'fr';
+    if (!confirm(t('profil.confirmDeleteReview', langue))) return;
     try {
       await deleteUserReview(currentUser.uid, toolSlug);
       userAvis = userAvis.filter(r => r.toolSlug !== toolSlug);
       renderAvis();
-      showToast('Avis supprimé.');
+      showToast(t('profil.toastReviewDeleted', langue));
     } catch(e) {
-      showToast('⚠ Erreur lors de la suppression.');
+      showToast(t('profil.toastDeleteError', langue));
       console.error(e);
     }
   };
@@ -3063,12 +3100,26 @@
   // ══════════════════════════════════════
   let userSoumissions = [];
 
-  const SOUM_STATUS_LABELS = {
-    pending:    { label: 'En attente',  cls: 'status-pending'  },
-    processing: { label: 'En cours de traitement', cls: 'status-pending' },
-    approved:   { label: 'Approuvé',    cls: 'status-approved' },
-    rejected:   { label: 'Rejeté',      cls: 'status-rejected' },
-  };
+  function soumStatusLabels(langue) {
+    if (langue === 'en') return {
+      pending:    { label: 'Pending',  cls: 'status-pending'  },
+      processing: { label: 'Being reviewed', cls: 'status-pending' },
+      approved:   { label: 'Approved',    cls: 'status-approved' },
+      rejected:   { label: 'Rejected',      cls: 'status-rejected' },
+    };
+    if (langue === 'es') return {
+      pending:    { label: 'Pendiente',  cls: 'status-pending'  },
+      processing: { label: 'En revisión', cls: 'status-pending' },
+      approved:   { label: 'Aprobado',    cls: 'status-approved' },
+      rejected:   { label: 'Rechazado',      cls: 'status-rejected' },
+    };
+    return {
+      pending:    { label: 'En attente',  cls: 'status-pending'  },
+      processing: { label: 'En cours de traitement', cls: 'status-pending' },
+      approved:   { label: 'Approuvé',    cls: 'status-approved' },
+      rejected:   { label: 'Rejeté',      cls: 'status-rejected' },
+    };
+  }
 
   async function loadSoumissions() {
     try {
@@ -3077,11 +3128,12 @@
       userSoumissions = [];
       console.error('[Mes soumissions] Erreur de chargement :', e);
       const container = document.getElementById('soumissions-container');
+      const langue = window.detecterLangue ? window.detecterLangue() : 'fr';
       if (container) {
         container.innerHTML = `
           <div class="empty-state">
             <div class="icon">⚠️</div>
-            <p style="color:#ff4757;">Erreur de chargement des soumissions.<br>
+            <p style="color:#ff4757;">${t('profil.submissionsLoadError', langue)}<br>
             <span style="font-size:.75rem;color:var(--muted)">${escHtml(e.message || String(e))}</span></p>
           </div>`;
       }
@@ -3093,6 +3145,7 @@
   function renderSoumissions() {
     const container = document.getElementById('soumissions-container');
     if (!container) return;
+    const langue = window.detecterLangue ? window.detecterLangue() : 'fr';
 
     const countEl = document.getElementById('soum-count');
     if (countEl) countEl.textContent = userSoumissions.length;
@@ -3101,27 +3154,31 @@
       container.innerHTML = `
         <div class="empty-state">
           <div class="icon">📮</div>
-          <p>Tu n'as encore soumis aucun outil.<br>
-             Propose ton premier outil à l'annuaire !</p>
+          <p>${t('profil.noSubmissionsYet', langue)}</p>
         </div>`;
       return;
     }
 
-    container.innerHTML = `<div class="soum-list">${userSoumissions.map(renderSoumCard).join('')}</div>`;
+    container.innerHTML = `<div class="soum-list">${userSoumissions.map(s => renderSoumCard(s, langue)).join('')}</div>`;
   }
 
-  function renderSoumCard(s) {
-    const st = SOUM_STATUS_LABELS[s.status] || SOUM_STATUS_LABELS.pending;
+  function renderSoumCard(s, langue) {
+    const STATUS_LABELS = soumStatusLabels(langue);
+    const st = STATUS_LABELS[s.status] || STATUS_LABELS.pending;
     const date = s.created_at?.seconds
-      ? new Date(s.created_at.seconds * 1000).toLocaleDateString('fr-FR', {
+      ? new Date(s.created_at.seconds * 1000).toLocaleDateString(LOCALE_MAP[langue] || 'fr-FR', {
           day: 'numeric', month: 'short', year: 'numeric'
         })
       : '';
-    const tierLabels = { gratuit: 'Gratuit', starter: 'Starter', featured: 'Featured' };
+    const tierLabels = langue === 'en'
+      ? { gratuit: 'Free', starter: 'Starter', featured: 'Featured' }
+      : langue === 'es'
+      ? { gratuit: 'Gratis', starter: 'Starter', featured: 'Featured' }
+      : { gratuit: 'Gratuit', starter: 'Starter', featured: 'Featured' };
     const tierLabel = tierLabels[s.tier_demande] || s.tier_demande || '';
 
     const link = (s.status === 'approved' && s.fiche_page)
-      ? `<a href="/${s.fiche_page}" class="soum-link">Voir la fiche →</a>`
+      ? `<a href="/${s.fiche_page}" class="soum-link">${t('quiz.viewSheet', langue)}</a>`
       : '';
 
     return `
@@ -3132,7 +3189,7 @@
           <div class="soum-meta">
             <span class="soum-tier">${escHtml(tierLabel)}</span>
             <span>${escHtml(s.categorie || '')}</span>
-            <span>Soumis le ${date}</span>
+            <span>${t('profil.submittedOn', langue)} ${date}</span>
           </div>
         </div>
         <span class="status-pill ${st.cls}"><span class="status-dot"></span>${st.label}</span>
@@ -3158,10 +3215,11 @@
   document.getElementById('form-soum-outil')?.addEventListener('submit', async function(e) {
     e.preventDefault();
     if (!currentUser) return;
+    const langue = window.detecterLangue ? window.detecterLangue() : 'fr';
     const btn = document.getElementById('btn-submit-soum');
     const originalText = btn.textContent;
     btn.disabled = true;
-    btn.textContent = 'Envoi en cours…';
+    btn.textContent = t('profil.sending', langue);
 
     const data = {
       nom_outil:    document.getElementById('soum-name').value.trim(),
@@ -3178,10 +3236,10 @@
       this.reset();
       document.getElementById('soum-char-count').textContent = '0';
       window.toggleSoumForm();
-      showToast('✓ Soumission envoyée !');
+      showToast(t('profil.toastSubmissionSent', langue));
       await loadSoumissions();
     } catch(err) {
-      showToast('⚠ Erreur lors de l\'envoi.');
+      showToast(t('profil.toastSubmissionError', langue));
       console.error(err);
     } finally {
       btn.disabled = false;
@@ -3205,6 +3263,7 @@
   function renderSavedVideos() {
     const container = document.getElementById('saved-videos-container');
     if (!container) return;
+    const langue = window.detecterLangue ? window.detecterLangue() : 'fr';
 
     const countEl = document.getElementById('videos-count');
     if (countEl) countEl.textContent = savedVideos.length;
@@ -3213,24 +3272,23 @@
       container.innerHTML = `
         <div class="empty-state">
           <div class="icon">🎬</div>
-          <p>Aucune vidéo sauvegardée.<br>
-             Sur une fiche tutoriel, clique sur 🔖 pour retrouver la vidéo ici.</p>
+          <p>${t('profil.noSavedVideos', langue)}</p>
           <a href="./tutoriels.html" class="btn-primary btn-sm"
-             style="display:inline-block;text-decoration:none">Parcourir les tutoriels →</a>
+             style="display:inline-block;text-decoration:none">${t('profil.browseTutorials', langue)} →</a>
         </div>`;
       return;
     }
 
     const cardsHtml = savedVideos.map(v => {
       const savedDate = v.savedAt
-        ? new Date(v.savedAt).toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
+        ? new Date(v.savedAt).toLocaleDateString(LOCALE_MAP[langue] || 'fr-FR', { day: 'numeric', month: 'long', year: 'numeric' })
         : '';
 
       return `
         <div class="saved-video-card">
           <div class="saved-video-thumb"
                onclick="ouvrirPlayerProfil('${escHtml(v.youtubeId)}','${escHtml(v.titre).replace(/'/g,"&#39;")}')"
-               title="Regarder la vidéo">
+               title="${t('profil.watchVideo', langue)}">
             <img src="https://img.youtube.com/vi/${escHtml(v.youtubeId)}/mqdefault.jpg"
                  alt="${escHtml(v.titre)}"
                  loading="lazy"
@@ -3247,13 +3305,13 @@
             </p>
             <p class="saved-video-meta">
               <span>${escHtml(v.canal)}</span>
-              ${v.outilId ? `<a href="tutoriel-outil.html?outil=${escHtml(v.outilId)}" class="saved-video-outil">Voir la vidéothèque →</a>` : ''}
+              ${v.outilId ? `<a href="tutoriel-outil.html?outil=${escHtml(v.outilId)}" class="saved-video-outil">${t('profil.viewVideoLibrary', langue)} →</a>` : ''}
             </p>
             <div class="saved-video-foot">
               <span class="saved-video-date">📅 ${savedDate}</span>
               <button class="btn-unsave-video"
                       onclick="handleUnsaveVideo('${escHtml(v.videoId)}')">
-                🗑 Retirer
+                🗑 ${t('profil.removeAction', langue)}
               </button>
             </div>
           </div>
@@ -3264,14 +3322,15 @@
   }
 
   window.handleUnsaveVideo = async function(videoId) {
-    if (!confirm('Retirer cette vidéo de vos sauvegardes ?')) return;
+    const langue = window.detecterLangue ? window.detecterLangue() : 'fr';
+    if (!confirm(t('profil.confirmRemoveVideo', langue))) return;
     try {
       await unsaveVideo(currentUser.uid, videoId);
       savedVideos = savedVideos.filter(v => v.videoId !== videoId);
       renderSavedVideos();
-      showToast('Vidéo retirée.');
+      showToast(t('profil.toastVideoRemoved', langue));
     } catch(e) {
-      showToast('⚠ Erreur lors de la suppression.');
+      showToast(t('profil.toastDeleteError', langue));
       console.error(e);
     }
   };
@@ -3282,7 +3341,17 @@
 
   function initPrefs(earnedBadges = []) {
     document.getElementById('pref-name').value = userProfile?.displayName || currentUser.displayName || '';
-    document.getElementById('pref-langue').value = userProfile?.langue || 'fr';
+    // La langue affichée par défaut suit celle déjà choisie sur le site
+    // (localStorage partagé, via i18n.js) plutôt que uniquement la valeur
+    // enregistrée sur le compte — évite un décalage si l'utilisateur a
+    // changé de langue sur une autre page sans avoir encore cliqué
+    // "Enregistrer" ici. userProfile.langue reste utilisée si aucune
+    // langue n'est encore choisie localement (nouvel appareil, par ex).
+    const langueActuelle = window.detecterLangue ? window.detecterLangue() : (userProfile?.langue || 'fr');
+    document.getElementById('pref-langue').value = langueActuelle;
+    if (window.appliquerTraductionsStatiques) {
+      window.appliquerTraductionsStatiques(langueActuelle);
+    }
     const toggle = document.getElementById('newsletter-toggle');
     toggle.classList.toggle('on', !!userProfile?.newsletterOk);
 
@@ -3334,7 +3403,10 @@
   window.saveLangue = async function() {
     const langue = document.getElementById('pref-langue').value;
     await updateLangue(currentUser.uid, langue);
-    localStorage.setItem('albexia_langue', langue);
+    // changerLangueGlobale (i18n.js) persiste dans localStorage — partagé
+    // par toutes les pages du site — et réapplique immédiatement les
+    // traductions statiques sur cette page (nav, sidebar, paramètres...).
+    window.changerLangueGlobale(langue);
     showToast('✅ Langue enregistrée !');
   };
 
