@@ -2104,6 +2104,14 @@
   } from './js/firestore.js';
   import { getUserReviews, deleteUserReview } from './js/reviews.js';
 
+  // Table de correspondance langue interne (fr/en/es) → locale BCP-47,
+  // utilisée par toLocaleDateString() dans tout ce fichier. Déclarée tout
+  // en haut (avant toute fonction) car renderHero() et d'autres fonctions
+  // l'utilisent dès le tout premier rendu après connexion — une déclaration
+  // plus bas dans le fichier provoque une ReferenceError (temporal dead
+  // zone) qui bloque silencieusement tout le chargement du profil.
+  const LOCALE_MAP = { fr: 'fr-FR', en: 'en-US', es: 'es-ES' };
+
 
   // ── BADGE DATA ──────────────────────────────────
   const BADGE_IMGS = {
@@ -2921,8 +2929,6 @@
       ? { debutant:'🌱 Principiante', intermediaire:'🌿 Intermedio', avance:'🌳 Avanzado' }
       : { debutant:'🌱 Débutant', intermediaire:'🌿 Intermédiaire', avance:'🌳 Avancé' };
   }
-  const LOCALE_MAP = { fr: 'fr-FR', en: 'en-US', es: 'es-ES' };
-
   async function loadQuizHistory() {
     quizHistory = await getQuizHistory(currentUser.uid);
     renderQuizHistory();
