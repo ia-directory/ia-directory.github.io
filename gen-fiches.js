@@ -116,11 +116,12 @@ function badgePrice(price, langue) {
   return map[price] || '';
 }
 
-function stars(note) {
+function stars(note, langue = 'fr') {
   const n = Math.round(note || 0);
+  const newLabel = { fr: 'Nouveau', en: 'New', es: 'Nuevo' }[langue] || 'Nouveau';
   return Array.from({length:5}, (_,i) =>
     `<span class="star ${i < n ? 'on' : ''}">★</span>`
-  ).join('') + `<span class="star-label">${note ? note+'/5' : 'Nouveau'}</span>`;
+  ).join('') + `<span class="star-label">${note ? note+'/5' : newLabel}</span>`;
 }
 
 // R = chemin absolu vers la racine du site (site servi à la racine du domaine)
@@ -357,7 +358,7 @@ ${navHTML(langue)}
           ${badgePrice(price, langue)}
         </div>
         <h1 class="tool-hero-title">${name}</h1>
-        <div class="tool-hero-stars">${stars(tool.note || tool.rating || 0)}</div>
+        <div class="tool-hero-stars">${stars(tool.note || tool.rating || 0, langue)}</div>
         <p class="tool-hero-desc">${description}</p>
         <div class="tool-hero-actions">
           <a href="${url}" target="_blank" rel="noopener" class="btn-try">${{fr:'Essayer',en:'Try it',es:'Probar'}[langue]||'Essayer'} ${emoji} →</a>
@@ -478,7 +479,7 @@ ${navHTML(langue)}
         </div>
         <h1 class="tool-hero-title">${name}</h1>
         ${tool.maker ? `<p class="tool-hero-maker">par <strong>${tool.maker}</strong></p>` : ''}
-        <div class="tool-hero-stars">${stars(tool.note||tool.rating||0)}</div>
+        <div class="tool-hero-stars">${stars(tool.note||tool.rating||0, langue)}</div>
         <p class="tool-hero-desc">${description}</p>
         <div class="tool-hero-actions">
           <a href="${url}" target="_blank" rel="noopener" class="btn-try">${{fr:'Essayer',en:'Try it',es:'Probar'}[langue]||'Essayer'} →</a>
@@ -654,7 +655,7 @@ ${navHTML(langue)}
         </div>
         <h1 class="tool-hero-title">${name}</h1>
         ${tool.maker ? `<p class="tool-hero-maker">par <strong>${tool.maker}</strong></p>` : ''}
-        <div class="tool-hero-stars">${stars(tool.note||tool.rating||0)}</div>
+        <div class="tool-hero-stars">${stars(tool.note||tool.rating||0, langue)}</div>
         <p class="tool-hero-desc">${description}</p>
         <div class="tool-hero-actions">
           <a href="${url}" target="_blank" rel="noopener" class="btn-try">${{fr:'Essayer',en:'Try it',es:'Probar'}[langue]||'Essayer'} →</a>
