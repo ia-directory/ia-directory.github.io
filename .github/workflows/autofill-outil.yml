@@ -1,0 +1,26 @@
+name: Auto-remplir une fiche outil (IA)
+
+on:
+  workflow_dispatch:
+    inputs:
+      url:
+        description: "URL du site officiel de l'outil à décrire"
+        required: true
+        type: string
+
+jobs:
+  autofill:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du repo
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Lancer autofill-outil.js
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        run: node autofill-outil.js --url="${{ inputs.url }}"
