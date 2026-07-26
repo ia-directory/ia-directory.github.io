@@ -29,6 +29,20 @@ const TOOL_PAGE    = window.location.pathname;
 
 const MAX_VISIBLE = 3;
 
+// ── i18n helper ───────────────────────────────
+// i18n.js expose window.t(key, langue) et window.detecterLangue().
+// On garde un petit wrapper local avec interpolation {placeholder}.
+function tr(key, vars) {
+  const langue = window.detecterLangue ? window.detecterLangue() : 'fr';
+  let str = window.t ? window.t(key, langue) : key;
+  if (vars) {
+    Object.keys(vars).forEach(k => {
+      str = str.replace(new RegExp(`\\{${k}\\}`, 'g'), vars[k]);
+    });
+  }
+  return str;
+}
+
 let currentUser = null;
 let userReview  = null;
 let allReviews  = [];
@@ -53,7 +67,7 @@ async function refreshHeroStars() {
     `<span class="star ${i <= full ? 'on' : ''}">★</span>`
   ).join('');
   starsEl.innerHTML = `${starsHtml}
-    <span class="star-label">${avg}/5 · ${summary.ratingCount} avis</span>`;
+    <span class="star-label">${avg}/5 · ${summary.ratingCount} ${tr('reviews.avgLabel')}</span>`;
 }
 
 // ── Chargement données ────────────────────────
@@ -100,7 +114,7 @@ function buildWidgetHTML() {
   return `
   <section class="rv-section" id="avis-utilisateurs">
     <h2 class="rv-title">
-      Avis utilisateurs
+      ${tr('reviews.title')}
       ${total ? `<span class="rv-count">${total}</span>` : ''}
     </h2>
 
@@ -112,11 +126,11 @@ function buildWidgetHTML() {
       <div class="rv-see-all-wrap">
         <a class="rv-see-all-btn"
            href="/tools/avis-outil.html?tool=${TOOL_SLUG}">
-          Voir tous les avis de ${TOOL_NAME}
-          <span class="rv-see-all-count">${total} avis →</span>
+          ${tr('reviews.seeAllPrefix')} ${TOOL_NAME}
+          <span class="rv-see-all-count">${tr('reviews.seeAllCount', { count: total })}</span>
         </a>
       </div>
-    ` : `<div class="rv-empty">Aucun avis pour le moment. Soyez le premier !</div>`}
+    ` : `<div class="rv-empty">${tr('reviews.empty')}</div>`}
   </section>
 
   <div id="rv-toast" class="rv-toast"></div>`;
@@ -127,8 +141,8 @@ function buildFormHTML() {
   if (!currentUser) {
     return `
       <div class="rv-login-prompt">
-        💬 <span>Connectez-vous pour laisser un avis.
-        <a class="rv-login-link" href="/profil.html">Se connecter →</a></span>
+        💬 <span>${tr('reviews.loginPrompt')}
+        <a class="rv-login-link" href="/profil.html">${tr('reviews.loginLink')}</a></span>
       </div>`;
   }
 
@@ -138,24 +152,24 @@ function buildFormHTML() {
 
   const stars = [1,2,3,4,5].map(i =>
     `<button type="button" class="rv-star-btn ${i <= initRating ? 'on' : ''}"
-             data-value="${i}" aria-label="${i} étoile${i > 1 ? 's' : ''}">★</button>`
+             data-value="${i}" aria-label="${tr(i > 1 ? 'reviews.starLabelPlural' : 'reviews.starLabel', { n: i })}">★</button>`
   ).join('');
 
   return `
     <div class="rv-form-card">
-      <div class="rv-form-title">${editing ? '✏️ Modifier mon avis' : '💬 Donner mon avis'}</div>
+      <div class="rv-form-title">${editing ? tr('reviews.formTitleEdit') : tr('reviews.formTitleNew')}</div>
       <div class="rv-stars-input" id="rv-stars-input" data-selected="${initRating}">
         ${stars}
       </div>
       <textarea class="rv-textarea" id="rv-comment" maxlength="500"
-                placeholder="Votre expérience avec ${TOOL_NAME}… (optionnel)">${initText}</textarea>
+                placeholder="${esc(tr('reviews.commentPlaceholder', { tool: TOOL_NAME }))}">${initText}</textarea>
       <div class="rv-char-count"><span id="rv-char-count">${initText.length}</span> / 500</div>
       <div class="rv-form-footer">
         <span class="rv-error" id="rv-error"></span>
         <div style="display:flex;gap:10px;margin-left:auto">
-          ${editing ? `<button class="rv-delete-btn" id="rv-delete-btn">🗑 Supprimer mon avis</button>` : ''}
+          ${editing ? `<button class="rv-delete-btn" id="rv-delete-btn">${tr('reviews.deleteBtn')}</button>` : ''}
           <button class="rv-submit-btn" id="rv-submit-btn">
-            ${editing ? 'Mettre à jour' : 'Publier mon avis'}
+            ${editing ? tr('reviews.submitBtnEdit') : tr('reviews.submitBtnNew')}
           </button>
         </div>
       </div>
@@ -169,8 +183,10 @@ function buildCardHTML(r) {
     ? `<img src="${r.avatarUrl}" alt="${esc(r.displayName)}" onerror="this.parentElement.textContent='${initial}'">`
     : initial;
 
+  const langue  = window.detecterLangue ? window.detecterLangue() : 'fr';
+  const locales = { fr: 'fr-FR', en: 'en-US', es: 'es-ES' };
   const date = r.updatedAt?.seconds
-    ? new Date(r.updatedAt.seconds * 1000).toLocaleDateString('fr-FR', {
+    ? new Date(r.updatedAt.seconds * 1000).toLocaleDateString(locales[langue] || 'fr-FR', {
         day: 'numeric', month: 'long', year: 'numeric'
       })
     : '';
@@ -204,19 +220,19 @@ function buildCardHTML(r) {
       </div>
       ${r.comment ? `<p class="rv-comment">${esc(r.comment)}</p>` : ''}
       <div class="rv-vote-row">
-        <span class="rv-vote-label">Utile ?</span>
+        <span class="rv-vote-label">${tr('reviews.helpfulLabel')}</span>
         ${!isOwn ? `
           <button class="rv-vote-btn rv-vote-yes ${myVote === 'yes' ? 'voted' : ''}"
                   data-review-id="${r.id}" data-value="yes"
-                  ${!currentUser ? 'title="Connectez-vous pour voter"' : ''}>
+                  ${!currentUser ? `title="${esc(tr('reviews.loginToVoteTitle'))}"` : ''}>
             👍 <span class="rv-vote-num">${yesCount}</span>
           </button>
           <button class="rv-vote-btn rv-vote-no ${myVote === 'no' ? 'voted' : ''}"
                   data-review-id="${r.id}" data-value="no"
-                  ${!currentUser ? 'title="Connectez-vous pour voter"' : ''}>
+                  ${!currentUser ? `title="${esc(tr('reviews.loginToVoteTitle'))}"` : ''}>
             👎 <span class="rv-vote-num">${noCount}</span>
           </button>
-          <button class="rv-report-btn" data-review-id="${r.id}">⚑ Signaler</button>
+          <button class="rv-report-btn" data-review-id="${r.id}">${tr('reviews.reportBtn')}</button>
         ` : `
           <span class="rv-vote-own">👍 ${yesCount} · 👎 ${noCount}</span>
         `}
@@ -269,13 +285,13 @@ async function handleSubmit() {
   const comment = textarea?.value.trim() || '';
 
   if (!rating) {
-    errorEl.textContent = 'Veuillez choisir une note (1 à 5 étoiles).';
+    errorEl.textContent = tr('reviews.errorNoRating');
     errorEl.style.display = 'block';
     return;
   }
 
   submitBtn.disabled    = true;
-  submitBtn.textContent = '…';
+  submitBtn.textContent = tr('reviews.submitBtnPending');
 
   try {
     const profile = window._userProfile || {};
@@ -288,33 +304,33 @@ async function handleSubmit() {
         avatarUrl:   profile.photoURL    || currentUser.photoURL    || '',
       }
     );
-    rvToast('✅ Avis publié, merci !');
+    rvToast(tr('reviews.toastSubmitted'));
     await refreshWidget();
     await refreshHeroStars();
   } catch (err) {
     console.error('reviews-widget: échec submitReview', err);
-    errorEl.textContent = 'Erreur lors de la publication. Réessayez.';
+    errorEl.textContent = tr('reviews.errorSubmit');
     errorEl.style.display = 'block';
     submitBtn.disabled    = false;
-    submitBtn.textContent = userReview ? 'Mettre à jour' : 'Publier mon avis';
+    submitBtn.textContent = userReview ? tr('reviews.submitBtnEdit') : tr('reviews.submitBtnNew');
   }
 }
 
 async function handleDelete() {
-  if (!confirm('Supprimer votre avis définitivement ?')) return;
+  if (!confirm(tr('reviews.confirmDelete'))) return;
   try {
     await deleteUserReview(currentUser.uid, TOOL_SLUG);
     userReview = null;
-    rvToast('Avis supprimé.');
+    rvToast(tr('reviews.toastDeleted'));
     await refreshWidget();
     await refreshHeroStars();
   } catch {
-    rvToast('⚠ Erreur lors de la suppression.');
+    rvToast(tr('reviews.toastDeleteError'));
   }
 }
 
 async function handleVote(btn) {
-  if (!currentUser) { rvToast('Connectez-vous pour voter.'); return; }
+  if (!currentUser) { rvToast(tr('reviews.loginToVote')); return; }
 
   const reviewId = btn.dataset.reviewId;
   const value    = btn.dataset.value;
@@ -369,17 +385,17 @@ async function handleVote(btn) {
 }
 
 async function handleReport(btn) {
-  if (!currentUser) { rvToast('Connectez-vous pour signaler un avis.'); return; }
-  if (!confirm('Signaler cet avis comme inapproprié ?')) return;
+  if (!currentUser) { rvToast(tr('reviews.loginToReport')); return; }
+  if (!confirm(tr('reviews.confirmReport'))) return;
   const reviewId = btn.dataset.reviewId;
   btn.disabled = true;
   try {
     await reportReview(reviewId, currentUser.uid, 'Contenu inapproprié');
-    btn.textContent = '✓ Signalé';
-    rvToast('Avis signalé. Merci.');
+    btn.textContent = tr('reviews.reportBtnDone');
+    rvToast(tr('reviews.toastReported'));
   } catch {
     btn.disabled = false;
-    rvToast('⚠ Erreur lors du signalement.');
+    rvToast(tr('reviews.toastReportError'));
   }
 }
 
