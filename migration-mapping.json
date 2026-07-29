@@ -1,0 +1,56 @@
+[
+  {
+    "jsonId": "chatgpt",
+    "nom": "ChatGPT",
+    "lien": "https://chat.openai.com",
+    "nbVideos": 11,
+    "firestoreId": null,
+    "confiance": "aucune",
+    "raison": "aucune correspondance automatique — à mapper à la main"
+  },
+  {
+    "jsonId": "midjourney",
+    "nom": "Midjourney",
+    "lien": "https://www.midjourney.com",
+    "nbVideos": 10,
+    "firestoreId": null,
+    "confiance": "aucune",
+    "raison": "aucune correspondance automatique — à mapper à la main"
+  },
+  {
+    "jsonId": "claude",
+    "nom": "Claude",
+    "lien": "https://claude.ai",
+    "nbVideos": 10,
+    "firestoreId": null,
+    "confiance": "aucune",
+    "raison": "aucune correspondance automatique — à mapper à la main"
+  },
+  {
+    "jsonId": "make",
+    "nom": "Make (Integromat)",
+    "lien": "https://www.make.com",
+    "nbVideos": 10,
+    "firestoreId": null,
+    "confiance": "aucune",
+    "raison": "aucune correspondance automatique — à mapper à la main"
+  },
+  {
+    "jsonId": "perplexity",
+    "nom": "Perplexity AI",
+    "lien": "https://www.perplexity.ai",
+    "nbVideos": 10,
+    "firestoreId": null,
+    "confiance": "aucune",
+    "raison": "aucune correspondance automatique — à mapper à la main"
+  },
+  {
+    "jsonId": "runway",
+    "nom": "Runway ML",
+    "lien": "https://runwayml.com",
+    "nbVideos": 10,
+    "firestoreId": null,
+    "confiance": "aucune",
+    "raison": "aucune correspondance automatique — à mapper à la main"
+  }
+]
