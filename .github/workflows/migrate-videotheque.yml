@@ -1,0 +1,59 @@
+name: Migration vidéothèque (tutoriels.json → Firestore)
+
+# Usage :
+# 1) Onglet "Actions" de GitHub (accessible depuis le navigateur mobile) →
+#    "Migration vidéothèque" dans la liste à gauche → bouton "Run workflow"
+# 2) Choisir le mode :
+#    - "dry-run" (par défaut) : propose un mapping, écrit migration-mapping.json
+#      dans le repo, NE TOUCHE PAS Firestore
+#    - "apply" : lit migration-mapping.json (relu/corrigé à la main d'abord !)
+#      et écrit videotheque[] sur les docs Firestore mappés
+on:
+  workflow_dispatch:
+    inputs:
+      mode:
+        description: 'Mode de migration'
+        required: true
+        default: 'dry-run'
+        type: choice
+        options:
+          - dry-run
+          - apply
+
+jobs:
+  migrate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v4
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Installer les dépendances
+        run: npm install firebase-admin
+
+      - name: Dry-run — proposer le mapping
+        if: ${{ inputs.mode == 'dry-run' }}
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node migrate-videotheque.js
+
+      - name: Apply — écrire videotheque[] sur Firestore
+        if: ${{ inputs.mode == 'apply' }}
+        env:
+          FIREBASE_SERVICE_ACCOUNT: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+        run: node migrate-videotheque.js --apply
+
+      - name: Commit et push migration-mapping.json (dry-run uniquement)
+        if: ${{ inputs.mode == 'dry-run' }}
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add migration-mapping.json
+          git diff --staged --quiet || git commit -m "🤖 Proposition de mapping vidéothèque (dry-run, à relire)"
+          git push
