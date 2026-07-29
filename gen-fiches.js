@@ -151,6 +151,7 @@ function navHTML(langue) {
     <button class="kebab-btn" id="kebab-btn" aria-label="Menu" aria-expanded="false"><span></span><span></span><span></span></button>
     <div class="kebab-menu" id="kebab-menu" role="menu">
       <a href="${R}glossaire.html" class="kebab-item" role="menuitem"><span class="kebab-ico">📖</span><div><div class="kebab-item-name">Glossaire IA</div></div></a>
+      <a href="${R}tutoriels/index.html" class="kebab-item" role="menuitem"><span class="kebab-ico">🎬</span><div><div class="kebab-item-name">Tutoriels vidéo</div></div></a>
       <a href="${R}comparateur/" class="kebab-item" role="menuitem"><span class="kebab-ico">⚖️</span><div><div class="kebab-item-name">Comparateur</div></div></a>
       <a href="${R}deals/" class="kebab-item" role="menuitem"><span class="kebab-ico">🔥</span><div><div class="kebab-item-name">Deals &amp; Promos</div></div></a>
       <div class="kebab-divider"></div>
@@ -1711,11 +1712,256 @@ ${sharedJS()}
 }
 
 // ════════════════════════════════════════════════════════════
+// VIDÉOTHÈQUE (tutoriels vidéo par outil)
+// ════════════════════════════════════════════════════════════
+// Indépendante des fiches et des plans (Standard/Starter/Featured) —
+// champ Firestore `videotheque` sur le doc outil, structure :
+// { youtube_id, titre, duree, canal }
+// Aucun lien fiche → vidéothèque (voir décision produit) ; seul le lien
+// inverse (vidéothèque → fiche) existe, pour le maillage interne.
+
+// "12:34" ou "1:08:30" → secondes (pour le filtre durée côté client)
+function dureeVersSecondes(duree) {
+  if (!duree) return 0;
+  const parts = String(duree).split(':').map(n => parseInt(n, 10) || 0);
+  if (parts.length === 3) return parts[0] * 3600 + parts[1] * 60 + parts[2];
+  if (parts.length === 2) return parts[0] * 60 + parts[1];
+  return parts[0] || 0;
+}
+
+function toolVideothequeFolder(tool) {
+  const plan   = tool.plan === 'featured' ? 'featured' : tool.plan === 'starter' ? 'starter' : 'standard';
+  const langue = tool.langue || 'fr';
+  const slug   = slugify(tool.name);
+  if (!slug) return null;
+  return { plan, langue, slug, folder: path.join('tools', plan, langue, slug, 'tutoriels') };
+}
+
+// ── Carte outil pour la page vitrine ──────────────────────
+function videothequeCardHTML(tool) {
+  const fav   = `https://www.google.com/s2/favicons?sz=64&domain=${(tool.url||'').replace(/^https?:\/\//,'').split('/')[0]}`;
+  const info  = toolVideothequeFolder(tool);
+  if (!info) return '';
+  const nbVideos = (tool.videotheque || []).length;
+  const href = `${R}tools/${info.plan}/${info.langue}/${info.slug}/tutoriels/`;
+  return `<a href="${href}" class="vt-card">
+  <div class="vt-card-top">
+    <img src="${fav}" alt="${tool.name}" class="vt-card-logo" loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">
+    <span class="vt-card-logo-fallback" style="display:none">${tool.emoji||'🤖'}</span>
+    <div>
+      <div class="vt-card-name">${tool.name}</div>
+      <div class="vt-card-cat">${tool.category||''}</div>
+    </div>
+  </div>
+  <p class="vt-card-desc">${(tool.description||'').slice(0,110)}${(tool.description||'').length>110?'…':''}</p>
+  <span class="vt-card-count">🎬 ${nbVideos} tutoriel${nbVideos>1?'s':''}</span>
+</a>`;
+}
+
+// ── Item vidéo (accordéon, réutilise tutorialJS()) ────────
+function videoItemHTML(v, i, toolName) {
+  const id = `vt-video-${i}`;
+  const secondes = dureeVersSecondes(v.duree);
+  return `<div class="tutorial-item vt-video-item" id="${id}" data-secondes="${secondes}">
+  <div class="tutorial-header" onclick="toggleTutorial('${id}')">
+    <div class="tutorial-thumb">
+      <img src="https://img.youtube.com/vi/${v.youtube_id}/mqdefault.jpg" alt="${v.titre}" loading="lazy">
+      <div class="tutorial-thumb-play"><svg viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></svg></div>
+    </div>
+    <div class="tutorial-meta">
+      <div class="tutorial-title">${v.titre}</div>
+      <div class="vt-video-sub">
+        ${v.canal ? `<span class="vt-video-canal">${v.canal}</span>` : ''}
+        ${v.duree ? `<span class="tutorial-duration">${v.duree}</span>` : ''}
+      </div>
+    </div>
+    <button class="tutorial-toggle">▾</button>
+  </div>
+  <div class="tutorial-video">
+    <div class="tutorial-video-inner">
+      <iframe data-src="https://www.youtube.com/embed/${v.youtube_id}" title="${v.titre} — ${toolName}" frameborder="0" allowfullscreen style="width:100%;aspect-ratio:16/9;border-radius:8px;display:block;"></iframe>
+    </div>
+  </div>
+</div>`;
+}
+
+// ── Script du filtre durée (vanilla JS, pas de dépendance) ─
+function videothequeFiltreJS() {
+  return `<script>
+  (function() {
+    const filtres = [
+      { label: 'Tout',        min: 0,    max: 999999 },
+      { label: '< 10 min',    min: 0,    max: 600 },
+      { label: '10 – 20 min', min: 600,  max: 1200 },
+      { label: '20 – 30 min', min: 1200, max: 1800 },
+      { label: '30 – 45 min', min: 1800, max: 2700 },
+      { label: '45 min – 1h', min: 2700, max: 3600 },
+      { label: '1h+',         min: 3600, max: 999999 },
+    ];
+    const wrap = document.getElementById('vt-filtres');
+    if (!wrap) return;
+    wrap.innerHTML = filtres.map((f, i) =>
+      \`<button class="vt-filtre-btn\${i===0?' actif':''}" data-min="\${f.min}" data-max="\${f.max}">\${f.label}</button>\`
+    ).join('');
+    wrap.addEventListener('click', e => {
+      const btn = e.target.closest('.vt-filtre-btn');
+      if (!btn) return;
+      wrap.querySelectorAll('.vt-filtre-btn').forEach(b => b.classList.remove('actif'));
+      btn.classList.add('actif');
+      const min = Number(btn.dataset.min), max = Number(btn.dataset.max);
+      let visibles = 0;
+      document.querySelectorAll('.vt-video-item').forEach(item => {
+        const s = Number(item.dataset.secondes);
+        const ok = s >= min && s <= max;
+        item.style.display = ok ? '' : 'none';
+        if (ok) visibles++;
+      });
+      const compteur = document.getElementById('vt-compteur');
+      if (compteur) compteur.textContent = visibles + ' tutoriel' + (visibles > 1 ? 's' : '');
+    });
+  })();
+</script>`;
+}
+
+// ── Page dédiée : vidéothèque d'un outil ──────────────────
+function generateVideothequePage(tool, allTools) {
+  const info = toolVideothequeFolder(tool);
+  if (!info) return null;
+  const videos = tool.videotheque || [];
+  if (!videos.length) return null;
+
+  const { plan, langue, slug } = info;
+  const ficheUrl = `${R}tools/${plan}/${langue}/${slug}/`;
+  const canonicalUrl = `${SITE_ORIGIN}/tools/${plan}/${langue}/${slug}/tutoriels/`;
+  const titleTag = `Tutoriels vidéo ${tool.name} : le guide complet | Albexia`;
+  const metaDesc = `${videos.length} tutoriels vidéo pour apprendre et maîtriser ${tool.name}, sélectionnés et classés par durée. Gratuit, en français.`;
+  const fav = `https://www.google.com/s2/favicons?sz=64&domain=${(tool.url||'').replace(/^https?:\/\//,'').split('/')[0]}`;
+
+  const videosHTML = videos.map((v, i) => videoItemHTML(v, i, tool.name)).join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${titleTag}</title>
+  <meta name="description" content="${metaDesc}" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="${canonicalUrl}" />
+  <meta property="og:title"       content="${titleTag}" />
+  <meta property="og:description" content="${metaDesc}" />
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="${canonicalUrl}" />
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    "name": ${JSON.stringify(`Tutoriels vidéo ${tool.name}`)},
+    "itemListElement": [
+${videos.map((v, i) => `      { "@type": "VideoObject", "position": ${i+1}, "name": ${JSON.stringify(v.titre)}, "thumbnailUrl": "https://img.youtube.com/vi/${v.youtube_id}/mqdefault.jpg", "embedUrl": "https://www.youtube.com/embed/${v.youtube_id}" }`).join(',\n')}
+    ]
+  }
+  </script>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="${R}css/style.css" />
+  <link rel="stylesheet" href="${R}css/videotheque.css" />
+</head>
+<body>
+
+${navHTML(langue)}
+
+<div class="container">
+  <a href="${ficheUrl}" class="vt-back">← Voir la fiche complète de ${tool.name}</a>
+
+  <section class="vt-hero">
+    <img src="${fav}" alt="${tool.name}" class="vt-hero-logo" onerror="this.style.display='none'">
+    <div>
+      <span class="vt-hero-badge">🎬 Vidéothèque</span>
+      <h1>Tutoriels vidéo ${tool.name}</h1>
+      <p>${videos.length} tutoriels sélectionnés pour apprendre et maîtriser ${tool.name}, gratuit et en français.</p>
+    </div>
+  </section>
+
+  <div class="vt-filtres-wrap">
+    <div class="vt-filtres" id="vt-filtres"></div>
+    <span class="vt-compteur" id="vt-compteur">${videos.length} tutoriel${videos.length>1?'s':''}</span>
+  </div>
+
+  <div class="vt-grid">
+${videosHTML}
+  </div>
+
+  <div class="vt-cta-wrap">
+    <a href="${R}tutoriels/index.html" class="vt-cta-btn">🎬 Explorer toute la vidéothèque Albexia →</a>
+  </div>
+</div>
+
+${footerHTML()}
+${sharedJS()}
+${tutorialJS()}
+${videothequeFiltreJS()}
+</body>
+</html>`;
+}
+
+// ── Page vitrine : liste tous les outils avec vidéothèque ─
+function generateVideothequeHub(toolsAvecVideos) {
+  const canonicalUrl = `${SITE_ORIGIN}/tutoriels/index.html`;
+  const titleTag = `Tutoriels vidéo IA : apprendre ChatGPT, Midjourney et plus | Albexia`;
+  const metaDesc = `Toute la vidéothèque Albexia : des tutoriels vidéo gratuits, en français, pour apprendre à utiliser les meilleurs outils IA.`;
+  const totalVideos = toolsAvecVideos.reduce((s, t) => s + (t.videotheque||[]).length, 0);
+
+  const cartesHTML = toolsAvecVideos.map(videothequeCardHTML).join('\n');
+
+  return `<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>${titleTag}</title>
+  <meta name="description" content="${metaDesc}" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="${canonicalUrl}" />
+  <meta property="og:title"       content="${titleTag}" />
+  <meta property="og:description" content="${metaDesc}" />
+  <meta property="og:type"        content="website" />
+  <meta property="og:url"         content="${canonicalUrl}" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="${R}css/style.css" />
+  <link rel="stylesheet" href="${R}css/videotheque.css" />
+</head>
+<body>
+
+${navHTML('fr')}
+
+<section class="vt-hub-hero">
+  <span class="vt-hero-badge">🎬 Vidéothèque francophone</span>
+  <h1>Explorez le futur de l'IA avec nos tutoriels vidéo</h1>
+  <p>${toolsAvecVideos.length} outils référencés, ${totalVideos} tutoriels sélectionnés. Gratuit, en français, pour tous les niveaux.</p>
+</section>
+
+<div class="container">
+  <div class="vt-hub-grid">
+${cartesHTML}
+  </div>
+</div>
+
+${footerHTML()}
+${sharedJS()}
+</body>
+</html>`;
+}
+
+// ════════════════════════════════════════════════════════════
 // MAIN
 // ════════════════════════════════════════════════════════════
 async function main() {
   const state = loadState();
-  const newState = { outils: {}, articles: {}, comparaisons: {}, niches: {} };
+  const newState = { outils: {}, articles: {}, comparaisons: {}, niches: {}, videotheques: {} };
 
   console.log('📥 Lecture de Firestore (outils)...');
   const snap  = await db.collection('outils').get();
@@ -1805,6 +2051,79 @@ async function main() {
     }
   }
   console.log(`✓ ${removedTools} dossier(s) outil orphelin(s) supprimé(s).`);
+
+  // ════════════════════════════════════════════════════════════
+  // VIDÉOTHÈQUE (tutoriels vidéo — indépendant des plans)
+  // ════════════════════════════════════════════════════════════
+  console.log(`\n🎬 Génération des pages vidéothèque...`);
+
+  let vtGenerated = 0, vtUnchanged = 0, vtSkipped = 0;
+  const toolsAvecVideos = [];
+
+  for (const tool of tools) {
+    const toolId = String(tool.id || slugify(tool.name));
+    const videos = tool.videotheque || [];
+
+    // État suivi séparément des fiches : une vidéothèque peut changer
+    // (ajout d'une vidéo) sans que le reste du doc outil ne change de
+    // sens éditorial, mais hashDoc(tool) couvre déjà tout le document,
+    // donc changedToolIds détecte aussi les changements de videotheque.
+    if (!videos.length) continue;
+    if (tool.generer_fiche === false) { vtSkipped++; continue; } // pas de fiche = pas de lien retour possible
+
+    const info = toolVideothequeFolder(tool);
+    if (!info) { vtSkipped++; continue; }
+
+    toolsAvecVideos.push(tool);
+    newState.videotheques[toolId] = { hash: hashDoc(tool), updatedAtMs: updatedAtMs(tool) };
+
+    const hasChanged = changedToolIds.has(toolId);
+    const filePath = path.join(info.folder, 'index.html');
+
+    if (!hasChanged && fs.existsSync(filePath)) { vtUnchanged++; continue; }
+
+    const html = generateVideothequePage(tool, tools);
+    if (!html) { vtSkipped++; continue; }
+
+    fs.mkdirSync(info.folder, { recursive: true });
+    fs.writeFileSync(filePath, html, 'utf8');
+    vtGenerated++;
+  }
+
+  console.log(`✅ Vidéothèques outil — ${vtGenerated} régénérée(s), ${vtUnchanged} inchangée(s) (skip), ${vtSkipped} ignorée(s).`);
+  console.log(`  tools/{plan}/{langue}/{slug}/tutoriels/index.html`);
+
+  // ── Page vitrine (hub) — un seul fichier, régénéré à chaque run ──
+  // Coût négligeable (une seule écriture) et évite de suivre un hash
+  // séparé rien que pour la liste agrégée des outils avec vidéothèque.
+  const toolsAvecVideosUniques = deduplicateParNom(toolsAvecVideos)
+    .sort((a, b) => (b.videotheque||[]).length - (a.videotheque||[]).length);
+
+  fs.mkdirSync('tutoriels', { recursive: true });
+  fs.writeFileSync(path.join('tutoriels', 'index.html'), generateVideothequeHub(toolsAvecVideosUniques), 'utf8');
+  console.log(`✅ Page vitrine — tutoriels/index.html (${toolsAvecVideosUniques.length} outils, régénérée à chaque run).`);
+
+  // ── Nettoyage des vidéothèques orphelines (outil supprimé ou vidéos retirées) ──
+  const validVideothequePaths = new Set(toolsAvecVideos.map(t => toolVideothequeFolder(t)?.folder).filter(Boolean));
+  let removedVideotheques = 0;
+  for (const plan of ['featured', 'starter', 'standard']) {
+    const planDir = path.join('tools', plan);
+    if (!fs.existsSync(planDir)) continue;
+    for (const langue of fs.readdirSync(planDir)) {
+      const langueDir = path.join(planDir, langue);
+      if (!fs.statSync(langueDir).isDirectory()) continue;
+      for (const slugDir of fs.readdirSync(langueDir)) {
+        const tutorielsDir = path.join(langueDir, slugDir, 'tutoriels');
+        if (!fs.existsSync(tutorielsDir)) continue;
+        if (!validVideothequePaths.has(tutorielsDir)) {
+          fs.rmSync(tutorielsDir, { recursive: true, force: true });
+          console.log(`  🗑️  Supprimé : ${tutorielsDir}`);
+          removedVideotheques++;
+        }
+      }
+    }
+  }
+  console.log(`✓ ${removedVideotheques} vidéothèque(s) orpheline(s) ou vidée(s) supprimée(s).`);
 
   // ════════════════════════════════════════════════════════════
   // ARTICLES (blog)
